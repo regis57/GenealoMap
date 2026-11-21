@@ -126,6 +126,32 @@ const fam = `0 HEAD
 1 DEAT
 2 DATE 1895
 1 FAMS @F1@
+1 FAMC @FX@
+0 @XP@ INDI
+1 NAME Marc /Dehors/
+1 SEX M
+1 BIRT
+2 DATE 1795
+1 DEAT
+2 DATE 1860
+1 FAMS @FX@
+1 FAMC @FXG@
+0 @XB@ INDI
+1 NAME Remi /Dehors/
+1 SEX M
+1 BIRT
+2 DATE 1830
+1 DEAT
+2 DATE 1890
+1 FAMC @FX@
+0 @XG@ INDI
+1 NAME Yves /Dehors/
+1 SEX M
+1 BIRT
+2 DATE 1765
+1 DEAT
+2 DATE 1830
+1 FAMS @FXG@
 0 @B@ INDI
 1 NAME Rose /Test/
 1 SEX F
@@ -175,6 +201,13 @@ const fam = `0 HEAD
 1 BIRT
 2 DATE 1990
 1 FAMC @F3@
+0 @FX@ FAM
+1 HUSB @XP@
+1 CHIL @X@
+1 CHIL @XB@
+0 @FXG@ FAM
+1 HUSB @XG@
+1 CHIL @XP@
 0 @F0@ FAM
 1 HUSB @G1@
 1 WIFE @G2@
@@ -214,6 +247,14 @@ eq(lab('@G1@', '@X@'), 'belle-fille', 'daughter-in-law');
 eq(lab('@X@', '@B@'), 'belle-sœur', 'sister-in-law');
 eq(lab('@E@', '@H@'), 'grand-oncle', 'great-uncle (half-brother of a grandparent)');
 eq(lab('@X@', '@G3@'), 'sans lien de parenté connu', 'no invented relationship');
+// relatives of the spouse of a blood relative: named through that relative, never left as "no known relationship"
+eq(lab('@G1@', '@X@'), 'belle-fille', 'daughter-in-law');
+eq(lab('@G1@', '@XP@'), 'beau-père de Paul TEST (fils)', 'father of a son\'s wife');
+eq(lab('@G1@', '@XB@'), 'beau-frère de Paul TEST (fils)', 'brother of a son\'s wife');
+eq(lab('@G1@', '@XG@'), 'grand-père de Lise DEHORS (épouse de Paul TEST (fils))', 'grandfather of a son\'s wife');
+eq(T.kin('@G1@', '@XP@').cat, 'ally', 'a relative of a spouse is by marriage, not by blood');
+eq(lab('@H@', '@XP@'), 'beau-père de Paul TEST (demi-frère)', 'father-in-law of a half-brother');
+eq(lab('@XG@', '@G1@'), 'beau-père de Lise DEHORS (petite-fille)', 'the same link seen from the other family');
 const ids = [...T.S.persons.keys()];
 for (const a of ids) for (const b of ids) { if (a === b) continue; const x = T.blood(a, b), y = T.blood(b, a); ok(!x === !y, `blood(${a},${b}) and blood(${b},${a}) disagree`); if (x && y) ok(x.du === y.dx && x.dx === y.du, `generations between ${a} and ${b} are not mirrored`); const k = T.kin(a, b); ok(!x || k.cat === 'direct' || k.cat === 'blood', `${a}/${b}: a blood relationship is shown as "${k.cat}"`); ok(x || k.cat === 'ally' || k.cat === 'none', `${a}/${b}: no common ancestor but shown as "${k.cat}"`); }
 // lines of the reference person E: father's side through C, mother's side through D; G1 is on both

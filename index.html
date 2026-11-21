@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Rsi+b1xl5HqcGa3hDWOQKWmxigkI9U2Yvcl/vhZd44Y='; style-src 'sha256-fwUgMqoPTn83oKRAGRb+3z4G7stPUF6h7n2oKJ0VVU8='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-dtI71rD8v/ZL7kiiT6ZLYSnFgU6kdxp95MQSfhnZMzU='; style-src 'sha256-fwUgMqoPTn83oKRAGRb+3z4G7stPUF6h7n2oKJ0VVU8='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -1014,7 +1014,7 @@ function loadGed(text,name,isSample){
   S.proofRev=null;indexProofs(text);
   S.manual=jget('cg.manual',{});
   for(const [k,v] of Object.entries(S.manual)){const P=S.places.get(k);if(P&&Array.isArray(v)&&isFinite(v[0])&&isFinite(v[1])){P.lat=v[0];P.lon=v[1];P.q='manual'}}
-  computeLives();S.side=null;S.tintN=null;
+  computeLives();S.side=null;S.tintN=null;S.rf=null;
   for(const p of S.persons.values())p.hid=pub.on&&pub.lock&&!!p.alive;
   S.custom=jget('cg.custom.'+name,{});
   const savedRef=store.get('cg.ref.'+name);S.ref=(savedRef&&S.persons.has(savedRef))?savedRef:first;
@@ -1156,6 +1156,16 @@ function kin(ref,x){
         else if(bt.du===1&&bt.dx===1)r={label:K.sibIn(px.sex)};
         else r={label:K.spouseSide(bloodTerm(t2,x,bt),nameOf(P(t2))),full:true};
         r.cat='ally';r.ally=true;break}
+      /* Parenté par alliance à un degré de plus : x est parent par le sang du conjoint (s) d'un parent par le sang (b) de la référence.
+         Exemple : le père de l'épouse d'un petit-fils est « beau-père de [ce petit-fils] (petit-fils) ». On retient le chemin le plus court. */
+      if(!r){
+        if(!S.rf||S.rf.ref!==ref){const list=[];for(const F of S.fams.values()){if(!F.h||!F.w||!P(F.h)||!P(F.w))continue;for(const [b2,s2] of [[F.h,F.w],[F.w,F.h]]){if(b2===ref)continue;const bb=blood(ref,b2);if(bb)list.push([b2,s2,bb])}}S.rf={ref,list}}
+        let best=null;for(const [b2,s2,bb] of S.rf.list){if(s2===x)continue;const bs=blood(s2,x);if(bs&&(!best||bb.s+bs.s<best.n))best={b:b2,s:s2,bb,bs,n:bb.s+bs.s}}
+        if(best){const B=P(best.b),Sp=P(best.s),bs=best.bs,tb=bloodTerm(ref,best.b,best.bb);
+          if(bs.dx===0&&bs.du===1)r={label:K.title(K.parentIn(px.sex),nameOf(B))+' ('+tb+')'};
+          else if(bs.du===1&&bs.dx===1)r={label:K.title(K.sibIn(px.sex),nameOf(B))+' ('+tb+')'};
+          else r={label:K.title(bloodTerm(best.s,x,bs),nameOf(Sp))+' ('+K.spouseOf(Sp.sex,nameOf(B),tb)+')'};
+          r.cat='ally';r.ally=true;r.full=true}}
       if(!r)r={cat:'none',label:K.none,full:true};
     }}
   S.kinCache.set(key,r);return r;

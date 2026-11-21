@@ -105,6 +105,8 @@ The file is read locally and kept only in the visitor's browser; the page blocks
 
 For two people, the program finds their nearest common ancestor and counts the generations on each side. Blood comes first: two people who share grandparents are first cousins whether or not they are married to each other; a marriage is added to the blood relationship ("wife (also first cousin)"), it never replaces or creates one. Relatives of unequal generation are named explicitly: in English with *once/twice removed*, in German and Luxembourgish with *Onkel/Neffe 2. Grades* (*Monni/Neveu 2. Grads*), in French, Italian, Spanish, Portuguese and Dutch by naming the path ("cousin germain du père", "figlia di una cugina di primo grado", "primo hermano de la madre", "zoon van een volle nicht").
 
+Relatives by marriage are named through the blood relative who links them: the wife of a great-grandson is "wife of Jean (great-grandson)", her father is "father-in-law of Jean (great-grandson)", her grandmother "grandmother of Marie (wife of Jean (great-grandson))". The shortest such path is kept. "No known relationship" is shown only when the file holds no path of that kind.
+
 Where a language has one word for two relationships, the title says which: Dutch *neef* is shown as "neef (oomzegger)" for a nephew and "volle neef" for a first cousin; Italian *nipote* as "nipote (di nonno)" or "nipote (di zio)".
 
 ## Add a language
