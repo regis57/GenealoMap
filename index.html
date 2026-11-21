@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ubyA0XAAkFHb4HTRzfEBWhS/YqDROimyWCRBtvz27CM='; style-src 'sha256-n1shQpRw769j2KiBPVoy/glBKdW8Ik7jqKUCH9exAis='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hg33GmOawHgN4Kf9crA6Y8cFxbGYWZY018k3SJbyCR8='; style-src 'sha256-MdBt4ImXTJRDIghrbMws0/yzy7jP34/5ojAm/zNAq0g='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -47,6 +47,7 @@ button{cursor:pointer}
 .bar h1{font-family:var(--f-display);font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em}
 .chip{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip b{color:var(--ink);font-weight:600}
+button.chip{border:0;font-family:inherit;line-height:inherit}button.chip:hover{outline:1px solid var(--direct)}
 .spacer{flex:1 1 0}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 11px;font-weight:500}
 .btn:hover{border-color:var(--direct)}
@@ -172,7 +173,7 @@ html,body{margin:0}[hidden]{display:none!important}
   <header class="bar">
     <h1>GeneanoMap</h1>
     <span class="chip" id="filechip">…</span>
-    <span class="chip" id="refchip">…</span>
+    <button type="button" class="chip" id="refchip">…</button>
     <span class="spacer"></span>
     <div class="search"><input id="q" type="search" autocomplete="off"><div class="results" id="qres" hidden></div></div>
     <label class="btn primary" for="file" tabindex="0" id="filelabel" data-i="open"></label>
@@ -637,14 +638,14 @@ lb:{sRoute:"Gezeechente Wee:",rtNone:"keen",rtPerson:"vun der gewielter Persoun"
  pubNote:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b> Persounen, déi wuel nach liewen, ginn net gewisen.",pubAll:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b>",pubKo:"De publizéierte Fichier „{0}“ konnt net gelies ginn."}};
 for(const k in LZ)Object.assign(L[k],LZ[k]);
 const LT={
-fr:{trTime:"Contemporains de l’année",vTree:"Arbre",vMap:"Carte",trAsc:"Ascendants",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} générations",treeL:"Arbre de {0}",trMore:"Arbre limité à {0} personnes : choisissez une autre personne pour voir la suite."},
-en:{trTime:"Contemporaries of the year",vTree:"Tree",vMap:"Map",trAsc:"Ancestors",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} generations",treeL:"Tree of {0}",trMore:"Tree limited to {0} people: choose another person to see further."},
-de:{trTime:"Zeitgenossen des Jahres",vTree:"Stammbaum",vMap:"Karte",trAsc:"Vorfahren",trDesc:"Nachkommen",trV:"senkrecht",trH:"waagerecht",trGen:"{0} Generationen",treeL:"Stammbaum von {0}",trMore:"Stammbaum auf {0} Personen begrenzt: Wählen Sie eine andere Person, um weiterzusehen."},
-it:{trTime:"Contemporanei dell’anno",vTree:"Albero",vMap:"Mappa",trAsc:"Ascendenti",trDesc:"Discendenti",trV:"verticale",trH:"orizzontale",trGen:"{0} generazioni",treeL:"Albero di {0}",trMore:"Albero limitato a {0} persone: scegli un’altra persona per vedere il seguito."},
-es:{trTime:"Contemporáneos del año",vTree:"Árbol",vMap:"Mapa",trAsc:"Ascendientes",trDesc:"Descendientes",trV:"vertical",trH:"horizontal",trGen:"{0} generaciones",treeL:"Árbol de {0}",trMore:"Árbol limitado a {0} personas: elija otra persona para ver más."},
-pt:{trTime:"Contemporâneos do ano",vTree:"Árvore",vMap:"Mapa",trAsc:"Ascendentes",trDesc:"Descendentes",trV:"vertical",trH:"horizontal",trGen:"{0} gerações",treeL:"Árvore de {0}",trMore:"Árvore limitada a {0} pessoas: escolha outra pessoa para ver mais."},
-nl:{trTime:"Tijdgenoten van het jaar",vTree:"Stamboom",vMap:"Kaart",trAsc:"Voorouders",trDesc:"Nakomelingen",trV:"verticaal",trH:"horizontaal",trGen:"{0} generaties",treeL:"Stamboom van {0}",trMore:"Stamboom beperkt tot {0} personen: kies een andere persoon om verder te kijken."},
-lb:{trTime:"Zäitgenosse vum Joer",vTree:"Stammbam",vMap:"Kaart",trAsc:"Virfaren",trDesc:"Nokommen",trV:"vertikal",trH:"horizontal",trGen:"{0} Generatiounen",treeL:"Stammbam vum {0}",trMore:"Stammbam op {0} Persoune begrenzt: Wielt eng aner Persoun, fir méi ze gesinn."}};
+fr:{refTip:"Revenir à la personne de référence",trTime:"Contemporains de l’année",vTree:"Arbre",vMap:"Carte",trAsc:"Ascendants",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} générations",treeL:"Arbre de {0}",trMore:"Arbre limité à {0} personnes : choisissez une autre personne pour voir la suite."},
+en:{refTip:"Back to the reference person",trTime:"Contemporaries of the year",vTree:"Tree",vMap:"Map",trAsc:"Ancestors",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} generations",treeL:"Tree of {0}",trMore:"Tree limited to {0} people: choose another person to see further."},
+de:{refTip:"Zurück zur Bezugsperson",trTime:"Zeitgenossen des Jahres",vTree:"Stammbaum",vMap:"Karte",trAsc:"Vorfahren",trDesc:"Nachkommen",trV:"senkrecht",trH:"waagerecht",trGen:"{0} Generationen",treeL:"Stammbaum von {0}",trMore:"Stammbaum auf {0} Personen begrenzt: Wählen Sie eine andere Person, um weiterzusehen."},
+it:{refTip:"Torna alla persona di riferimento",trTime:"Contemporanei dell’anno",vTree:"Albero",vMap:"Mappa",trAsc:"Ascendenti",trDesc:"Discendenti",trV:"verticale",trH:"orizzontale",trGen:"{0} generazioni",treeL:"Albero di {0}",trMore:"Albero limitato a {0} persone: scegli un’altra persona per vedere il seguito."},
+es:{refTip:"Volver a la persona de referencia",trTime:"Contemporáneos del año",vTree:"Árbol",vMap:"Mapa",trAsc:"Ascendientes",trDesc:"Descendientes",trV:"vertical",trH:"horizontal",trGen:"{0} generaciones",treeL:"Árbol de {0}",trMore:"Árbol limitado a {0} personas: elija otra persona para ver más."},
+pt:{refTip:"Voltar à pessoa de referência",trTime:"Contemporâneos do ano",vTree:"Árvore",vMap:"Mapa",trAsc:"Ascendentes",trDesc:"Descendentes",trV:"vertical",trH:"horizontal",trGen:"{0} gerações",treeL:"Árvore de {0}",trMore:"Árvore limitada a {0} pessoas: escolha outra pessoa para ver mais."},
+nl:{refTip:"Terug naar de referentiepersoon",trTime:"Tijdgenoten van het jaar",vTree:"Stamboom",vMap:"Kaart",trAsc:"Voorouders",trDesc:"Nakomelingen",trV:"verticaal",trH:"horizontaal",trGen:"{0} generaties",treeL:"Stamboom van {0}",trMore:"Stamboom beperkt tot {0} personen: kies een andere persoon om verder te kijken."},
+lb:{refTip:"Zréck bei d’Referenzpersoun",trTime:"Zäitgenosse vum Joer",vTree:"Stammbam",vMap:"Kaart",trAsc:"Virfaren",trDesc:"Nokommen",trV:"vertikal",trH:"horizontal",trGen:"{0} Generatiounen",treeL:"Stammbam vum {0}",trMore:"Stammbam op {0} Persoune begrenzt: Wielt eng aner Persoun, fir méi ze gesinn."}};
 for(const k in LT)Object.assign(L[k],LT[k]);
 
 /* ---------- Exemple fictif (toute ressemblance serait fortuite) ---------- */
@@ -1565,7 +1566,7 @@ function setPlaying(v){S.playing=v;if(!v)stopRec();$('#play').textContent=v?'❚
 $('#play').onclick=()=>setPlaying(!S.playing);
 $('#dir').onclick=()=>{S.dir*=-1;$('#dir').textContent=S.dir>0?t('dirF'):t('dirB');if(S.sel.type==='chrono')renderPanel()};
 $('#slider').oninput=e=>{setPlaying(false);setYear(+e.target.value,2)};
-document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key===' '){e.preventDefault();setPlaying(!S.playing)}else if(e.key==='ArrowRight')setYear(S.year+1,2);else if(e.key==='ArrowLeft')setYear(S.year-1,2)});
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='Escape')unselect();else if(e.key===' '){e.preventDefault();setPlaying(!S.playing)}else if(e.key==='ArrowRight')setYear(S.year+1,2);else if(e.key==='ArrowLeft')setYear(S.year-1,2)});
 
 /* ---------- Panneau ---------- */
 function ageTxt(p,Y){return (p.bEst?'≈ ':'')+t('age',Y-p.b)}
@@ -1617,6 +1618,10 @@ function renderTree(){
 }
 function setView(on){tree.on=on;tree.root=null;tree.html='';$('#tree').hidden=!on;$('#treebar').hidden=!on;$('#mapwrap').classList.toggle('tmode',on);$('#viewbtn').textContent=t(on?'vMap':'vTree');$('#viewbtn').setAttribute('aria-pressed',String(on));if(on)renderTree();else dirty()}
 $('#viewbtn').onclick=()=>setView(!tree.on);
+/* Le nom de la référence, en haut : un clic quitte la personne ou le lieu choisi et revient à la vue de l'année (l'arbre revient à la référence) ;
+   s'il n'y a rien de choisi, il ouvre la fiche de la référence. Échap fait la même sortie. */
+function unselect(){if(S.sel.type==='year')return false;S.sel={type:'year'};tree.root=null;renderPanel();dirty();return true}
+$('#refchip').onclick=()=>{if(!unselect())selectPerson(S.ref,false)};
 /* Pendant la lecture, les listes sont réécrites plusieurs fois par seconde : le bouton pressé peut avoir été remplacé avant que le doigt se relève,
    et le navigateur n'envoie alors aucun clic. On le rend au bouton qui se trouve maintenant sous le pointeur. */
 let pressed=null;
@@ -1925,7 +1930,7 @@ function applyLang(){
   $('#zin').setAttribute('aria-label',t('zin'));$('#zout').setAttribute('aria-label',t('zout'));$('#zfit').setAttribute('aria-label',t('zfit'));$('#zfit').title=t('zfit');
   $('#mapwrap').setAttribute('aria-label',t('mapL'));$('#panel').setAttribute('aria-label',t('detL'));
   $('#tilesHint').textContent=tiles.ko?t('sTilesKo'):t('sTilesHint');$('#histHint').textContent=hist.ko?t('sHistKo'):t('sHistHint');
-  cv.setAttribute('aria-label',t('mapL'));renderLegend();
+  cv.setAttribute('aria-label',t('mapL'));renderLegend();$('#refchip').title=t('refTip');
   for(const o of $('#trGen').options)o.textContent=t('trGen',o.value);$('#viewbtn').textContent=t(tree.on?'vMap':'vTree');if(share.rec)$('#shVid').textContent=t('shStop');histNote();
   const a=$('#support');if(SUPPORT_URL){a.href=SUPPORT_URL;a.target='_blank';a.rel='noopener noreferrer';a.textContent='🍺 '+t('support');a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.textContent='🍺 '+t('supportSoon');a.setAttribute('aria-disabled','true')}
 }
