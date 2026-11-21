@@ -1,6 +1,8 @@
-# GeneanoMap - rules for anyone (human or AI assistant) changing this repository
+# GenealoMap - rules for anyone (human or AI assistant) changing this repository
 
 ## What it is
+
+The name is **GenealoMap** (repository `regis57/GenealoMap`). It was first written "GeneanoMap" by mistake and renamed on 21 November 2026; do not bring the old spelling back. Browser storage keys (`cg.*`) do not contain the name and were not touched.
 
 A static web page that plays a family tree on a map, year by year. Owner and author: Regis Hennequin (`regis57`). Licence: Apache 2.0 with `NOTICE`.
 
@@ -37,6 +39,6 @@ Page icon: drawn in `tools/icon.svg` and embedded in `index.html` as data addres
 
 ## Publishing
 
-`main` is served by GitHub Pages at https://regis57.github.io/GeneanoMap/. The page keeps `noindex` during the test phase.
+`main` is served by GitHub Pages at https://regis57.github.io/GenealoMap/. The page keeps `noindex` during the test phase.
 
-A second copy runs at https://regis-hennequin.info/geneanomap/ (repository `regis57/regis-hennequin-site`, folder `public/geneanomap/`). That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.
+A second copy runs at https://regis-hennequin.info/geneanomap/ (repository `regis57/regis-hennequin-site`, folder `public/geneanomap/`). That address still carries the first, misspelt name ("Geneano"); it is a real path on another site, so it is written here as it is until that site renames it. That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.

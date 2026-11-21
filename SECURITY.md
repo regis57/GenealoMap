@@ -1,6 +1,6 @@
 # Security
 
-GeneanoMap opens private family files. Its design keeps them on the visitor's device.
+GenealoMap opens private family files. Its design keeps them on the visitor's device.
 
 ## Design rules
 
