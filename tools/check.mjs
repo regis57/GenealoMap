@@ -48,7 +48,7 @@ const banned = [[/\beval\s*\(/, 'eval()'], [/\bnew Function\b/, 'new Function'],
 for (const [re, name] of banned) if (re.test(html)) errors.push(`forbidden: ${name}`);
 const fetches = [...html.matchAll(/\bfetch\(([^)]*)\)/g)].map(m => m[1].trim());
 // Besides the two base files: historical borders (hist/<year>.json) and the finer gazetteer by country (gaz/index.json, gaz/<CC>.json), all in this folder.
-const mayFetch = ["'world.json'", "'gaz.json'", "'hist/'+y+'.json'", "'gaz/index.json'", "'gaz/'+cc+'.json'"];
+const mayFetch = ["'world.json'", "'gaz.json'", "'hist/'+y+'.json'", "'hist/names.json'", "'gaz/index.json'", "'gaz/'+cc+'.json'"];
 for (const f of fetches) if (!mayFetch.includes(f)) errors.push(`fetch() may only load the data files of this folder, found: ${f}`);
 
 // 4. Data files must be valid JSON.

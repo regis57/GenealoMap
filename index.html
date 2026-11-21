@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SGwTOkukQfhHx8dQFwK3FhgB9a7LkuhlxDJl7EMMVc0='; style-src 'sha256-VF4bFHmv926yOOX4iKDbkdc+5U1w5enhQJ4PeeLD2/Q='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hKy2985ev5mK5yghmv80QXswUIEOyAUZB2ZIaxPFIOY='; style-src 'sha256-VF4bFHmv926yOOX4iKDbkdc+5U1w5enhQJ4PeeLD2/Q='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -308,7 +308,7 @@ es:{open:"Abrir un archivo",settings:"Ajustes",search:"Buscar una persona…",sa
  vers:"hacia ",avant:"antes de ",apres:"después de ",living1:"Persona viva",
  ev:{BIRT:"Nacimiento",BAPM:"Bautismo",CHR:"Bautismo",DEAT:"Defunción",BURI:"Entierro",CREM:"Cremación",RESI:"Residencia",OCCU:"Profesión",CENS:"Censo",EMIG:"Emigración",IMMI:"Inmigración",NATU:"Naturalización",GRAD:"Titulación",RETI:"Jubilación",EVEN:"Hecho",MARR:"Matrimonio",DIV:"Divorcio",ENGA:"Compromiso",MARB:"Amonestaciones",MARC:"Capitulaciones matrimoniales",EDUC:"Estudios",CONF:"Confirmación",FCOM:"Primera comunión",WILL:"Testamento",PROB:"Sucesión",TITL:"Título",ADOP:"Adopción",PROP:"Bienes"},
  tooBig:"Archivo demasiado grande (60 MB como máximo).",tplCsv:"Descargar el modelo CSV",noRes:"Sin resultados",yearL:"Año",speedL:"Velocidad",noName:"(sin nombre)",mapL:"Mapa",detL:"Detalles",code:"Código fuente",
- sHist:"Fronteras de época (de 1500 a hoy)",sHistHint:"Trazados aproximados en 20 fechas de referencia, según el proyecto historical-basemaps: el mapa muestra la última fecha de referencia pasada, indicada con «≈». Línea discontinua: frontera incierta. Nombres de época en inglés.",sHistKo:"No disponible: falta la carpeta «hist» en este alojamiento.",histOf:"fronteras ≈ {0}",
+ sHist:"Fronteras de época (de 1500 a hoy)",sHistHint:"Trazados aproximados en 20 fechas de referencia, según el proyecto historical-basemaps: el mapa muestra la última fecha de referencia pasada, indicada con «≈». Línea discontinua: frontera incierta.",sHistKo:"No disponible: falta la carpeta «hist» en este alojamiento.",histOf:"fronteras ≈ {0}",
  sTheme:"Apariencia:",thAuto:"según el dispositivo",thLight:"clara",thDark:"oscura",
  sShare:"Compartir",shLiving:"No mostrar a las personas presuntamente vivas",shImg:"Imagen (PNG)",shVid:"Animación (vídeo)",shStop:"Detener la grabación",shRec:"Grabación en curso: termina al final de la reproducción o al pausar.",shKo:"Este navegador no puede grabar vídeo.",shHidden:"personas presuntamente vivas no mostradas",
  kbT:"Atajos de teclado",kbHelp:"Espacio: reproducir o pausar. Flechas izquierda y derecha: año anterior o siguiente. En el mapa (tecla Tab para llegar a él): flechas para moverlo, + y − para acercar o alejar, 0 para ver toda la familia, Av Pág y Re Pág para pasar de un lugar a otro, Intro para abrirlo, Esc para volver al año.",
@@ -333,7 +333,7 @@ pt:{open:"Abrir um ficheiro",settings:"Definições",search:"Procurar uma pessoa
  vers:"cerca de ",avant:"antes de ",apres:"depois de ",living1:"Pessoa viva",
  ev:{BIRT:"Nascimento",BAPM:"Batismo",CHR:"Batismo",DEAT:"Óbito",BURI:"Sepultamento",CREM:"Cremação",RESI:"Residência",OCCU:"Profissão",CENS:"Recenseamento",EMIG:"Emigração",IMMI:"Imigração",NATU:"Naturalização",GRAD:"Diploma",RETI:"Reforma",EVEN:"Acontecimento",MARR:"Casamento",DIV:"Divórcio",ENGA:"Noivado",MARB:"Proclamas",MARC:"Convenção antenupcial",EDUC:"Estudos",CONF:"Crisma",FCOM:"Primeira comunhão",WILL:"Testamento",PROB:"Sucessão",TITL:"Título",ADOP:"Adoção",PROP:"Bens"},
  tooBig:"Ficheiro demasiado grande (60 MB no máximo).",tplCsv:"Descarregar o modelo CSV",noRes:"Sem resultados",yearL:"Ano",speedL:"Velocidade",noName:"(sem nome)",mapL:"Mapa",detL:"Pormenores",code:"Código-fonte",
- sHist:"Fronteiras de época (de 1500 até hoje)",sHistHint:"Traçados aproximados em 20 datas de referência, segundo o projeto historical-basemaps: o mapa mostra a última data de referência passada, indicada com «≈». Tracejado: fronteira incerta. Nomes de época em inglês.",sHistKo:"Indisponível: falta a pasta «hist» neste alojamento.",histOf:"fronteiras ≈ {0}",
+ sHist:"Fronteiras de época (de 1500 até hoje)",sHistHint:"Traçados aproximados em 20 datas de referência, segundo o projeto historical-basemaps: o mapa mostra a última data de referência passada, indicada com «≈». Tracejado: fronteira incerta.",sHistKo:"Indisponível: falta a pasta «hist» neste alojamento.",histOf:"fronteiras ≈ {0}",
  sTheme:"Aparência:",thAuto:"conforme o dispositivo",thLight:"clara",thDark:"escura",
  sShare:"Partilhar",shLiving:"Não mostrar as pessoas presumivelmente vivas",shImg:"Imagem (PNG)",shVid:"Animação (vídeo)",shStop:"Parar a gravação",shRec:"Gravação em curso: termina no fim da reprodução ou ao pausar.",shKo:"Este navegador não consegue gravar vídeo.",shHidden:"pessoas presumivelmente vivas não mostradas",
  kbT:"Atalhos de teclado",kbHelp:"Espaço: reproduzir ou pausar. Setas esquerda e direita: ano anterior ou seguinte. No mapa (tecla Tab para lá chegar): setas para o deslocar, + e − para aproximar ou afastar, 0 para ver toda a família, Page Down e Page Up para passar de um lugar a outro, Enter para o abrir, Esc para voltar ao ano.",
@@ -358,7 +358,7 @@ nl:{open:"Bestand openen",settings:"Instellingen",search:"Persoon zoeken…",sam
  vers:"rond ",avant:"vóór ",apres:"na ",living1:"Levende persoon",
  ev:{BIRT:"Geboorte",BAPM:"Doop",CHR:"Doop",DEAT:"Overlijden",BURI:"Begrafenis",CREM:"Crematie",RESI:"Woonplaats",OCCU:"Beroep",CENS:"Volkstelling",EMIG:"Emigratie",IMMI:"Immigratie",NATU:"Naturalisatie",GRAD:"Diploma",RETI:"Pensioen",EVEN:"Gebeurtenis",MARR:"Huwelijk",DIV:"Echtscheiding",ENGA:"Verloving",MARB:"Huwelijksafkondiging",MARC:"Huwelijkscontract",EDUC:"Opleiding",CONF:"Vormsel of belijdenis",FCOM:"Eerste communie",WILL:"Testament",PROB:"Nalatenschap",TITL:"Titel",ADOP:"Adoptie",PROP:"Bezit"},
  tooBig:"Bestand te groot (hoogstens 60 MB).",tplCsv:"Het CSV-sjabloon downloaden",noRes:"Geen resultaat",yearL:"Jaar",speedL:"Snelheid",noName:"(zonder naam)",mapL:"Kaart",detL:"Details",code:"Broncode",
- sHist:"Historische grenzen (1500 tot nu)",sHistHint:"Benaderde grenzen op 20 peildata, volgens het project historical-basemaps: de kaart toont de laatste voorbije peildatum, aangeduid met “≈”. Stippellijn: onzekere grens. Historische namen in het Engels.",sHistKo:"Niet beschikbaar: de map “hist” ontbreekt op deze host.",histOf:"grenzen ≈ {0}",
+ sHist:"Historische grenzen (1500 tot nu)",sHistHint:"Benaderde grenzen op 20 peildata, volgens het project historical-basemaps: de kaart toont de laatste voorbije peildatum, aangeduid met “≈”. Stippellijn: onzekere grens.",sHistKo:"Niet beschikbaar: de map “hist” ontbreekt op deze host.",histOf:"grenzen ≈ {0}",
  sTheme:"Weergave:",thAuto:"volgens het apparaat",thLight:"licht",thDark:"donker",
  sShare:"Delen",shLiving:"Vermoedelijk levende personen niet tonen",shImg:"Afbeelding (PNG)",shVid:"Animatie (video)",shStop:"Opname stoppen",shRec:"Opname bezig: ze eindigt aan het einde van het afspelen of bij pauze.",shKo:"Deze browser kan geen video opnemen.",shHidden:"vermoedelijk levende personen niet getoond",
  kbT:"Sneltoetsen",kbHelp:"Spatie: afspelen of pauzeren. Pijl links en rechts: vorig of volgend jaar. Op de kaart (bereikbaar met Tab): pijlen om te verschuiven, + en − om te zoomen, 0 om de hele familie te zien, Page Down en Page Up om van plaats naar plaats te gaan, Enter om ze te openen, Esc om naar het jaar terug te keren.",
@@ -383,7 +383,7 @@ lb:{open:"Fichier opmaachen",settings:"Astellungen",search:"Eng Persoun sichen�
  vers:"ëm ",avant:"virun ",apres:"no ",living1:"Lieweg Persoun",
  ev:{BIRT:"Gebuert",BAPM:"Daf",CHR:"Daf",DEAT:"Doud",BURI:"Begriefnes",CREM:"Verbrennung",RESI:"Wunnuert",OCCU:"Beruff",CENS:"Vollekszielung",EMIG:"Auswanderung",IMMI:"Awanderung",NATU:"Naturalisatioun",GRAD:"Diplom",RETI:"Pensioun",EVEN:"Evenement",MARR:"Hochzäit",DIV:"Scheedung",ENGA:"Verlobung",MARB:"Opgebot",MARC:"Bestietnesvertrag",EDUC:"Ausbildung",CONF:"Firmung",FCOM:"Éischt Kommioun",WILL:"Testament",PROB:"Ierfschaft",TITL:"Titel",ADOP:"Adoptioun",PROP:"Besëtz"},
  tooBig:"Fichier ze grouss (héchstens 60 MB).",tplCsv:"CSV-Virlag eroflueden",noRes:"Kee Resultat",yearL:"Joer",speedL:"Vitess",noName:"(ouni Numm)",mapL:"Kaart",detL:"Detailer",code:"Quellcode",
- sHist:"Historesch Grenzen (1500 bis haut)",sHistHint:"Ongeféier Grenzen op 20 Stéchdatumen, nom Projet historical-basemaps: d’Kaart weist de leschte Stéchdatum, dee scho vergaangen ass, mat „≈“ markéiert. Gestréchelt Linn: onsécher Grenz. Historesch Nimm op Englesch.",sHistKo:"Net disponibel: den Dossier „hist“ feelt op dësem Server.",histOf:"Grenzen ≈ {0}",
+ sHist:"Historesch Grenzen (1500 bis haut)",sHistHint:"Ongeféier Grenzen op 20 Stéchdatumen, nom Projet historical-basemaps: d’Kaart weist de leschte Stéchdatum, dee scho vergaangen ass, mat „≈“ markéiert. Gestréchelt Linn: onsécher Grenz.",sHistKo:"Net disponibel: den Dossier „hist“ feelt op dësem Server.",histOf:"Grenzen ≈ {0}",
  sTheme:"Ausgesinn:",thAuto:"wéi um Apparat",thLight:"hell",thDark:"däischter",
  sShare:"Deelen",shLiving:"Persounen, déi wuel nach liewen, net weisen",shImg:"Bild (PNG)",shVid:"Animatioun (Video)",shStop:"Opnam stoppen",shRec:"Opnam leeft: si hält um Enn vum Ofspillen oder bei der Paus op.",shKo:"Dëse Browser ka kee Video ophuelen.",shHidden:"Persounen, déi wuel nach liewen, net gewisen",
  kbT:"Tastekombinatiounen",kbHelp:"Espace: ofspillen oder Paus. Feiler lénks a riets: Joer virdrun oder duerno. Op der Kaart (mat Tab z’erreechen): Feiler fir se ze réckelen, + an − fir ze zoomen, 0 fir déi ganz Famill ze gesinn, Page Down a Page Up fir vun Uert zu Uert ze goen, Enter fir en opzemaachen, Esc fir bei d’Joer zréckzekommen.",
@@ -535,7 +535,7 @@ function term(du,dx,sex,c){
 const LX={
 fr:{tooBig:"Fichier trop volumineux (60 Mo au plus).",tplCsv:"Télécharger le modèle CSV",noRes:"Aucun résultat",yearL:"Année",speedL:"Vitesse",noName:"(sans nom)",mapL:"Carte",detL:"Détails",code:"Code source",
  drop:"Déposez le fichier ici (GEDCOM, tableur ou CSV)",
- sHist:"Frontières d’époque (1500 à aujourd’hui)",sHistHint:"Tracés approximatifs à 20 dates repères, d’après le projet historical-basemaps : la carte montre la dernière date repère passée, indiquée par « ≈ ». Pointillés : frontière incertaine. Noms d’époque en anglais.",sHistKo:"Indisponible : le dossier « hist » manque sur cet hébergement.",histOf:"frontières ≈ {0}",
+ sHist:"Frontières d’époque (1500 à aujourd’hui)",sHistHint:"Tracés approximatifs à 20 dates repères, d’après le projet historical-basemaps : la carte montre la dernière date repère passée, indiquée par « ≈ ». Pointillés : frontière incertaine.",sHistKo:"Indisponible : le dossier « hist » manque sur cet hébergement.",histOf:"frontières ≈ {0}",
  sTheme:"Apparence :",thAuto:"selon l’appareil",thLight:"claire",thDark:"sombre",
  sShare:"Partager",shLiving:"Ne pas montrer les personnes présumées vivantes",shImg:"Image (PNG)",shVid:"Animation (vidéo)",shStop:"Arrêter l’enregistrement",shRec:"Enregistrement en cours : il se termine à la fin de la lecture ou à la pause.",shKo:"Ce navigateur ne sait pas enregistrer de vidéo.",shHidden:"personnes présumées vivantes non montrées",
  kbT:"Raccourcis clavier",kbHelp:"Espace : lecture ou pause. Flèches gauche et droite : année précédente ou suivante. Sur la carte (touche Tab pour l’atteindre) : flèches pour la déplacer, + et − pour zoomer, 0 pour voir toute la famille, Page suivante et Page précédente pour passer d’un lieu à l’autre, Entrée pour l’ouvrir, Échap pour revenir à l’année.",
@@ -543,7 +543,7 @@ fr:{tooBig:"Fichier trop volumineux (60 Mo au plus).",tplCsv:"Télécharger le m
  badZip:"Ce navigateur n’a pas pu lire le fichier compressé (.gdz, .xlsx, .ods).",histCredit:" Frontières d’époque : historical-basemaps, A. Ourednik (GPL 3.0)."},
 en:{tooBig:"File too large (60 MB at most).",tplCsv:"Download the CSV template",noRes:"No result",yearL:"Year",speedL:"Speed",noName:"(no name)",mapL:"Map",detL:"Details",code:"Source code",
  drop:"Drop the file here (GEDCOM, spreadsheet or CSV)",
- sHist:"Historical borders (1500 to today)",sHistHint:"Approximate outlines at 20 reference dates, from the historical-basemaps project: the map shows the latest reference date already passed, marked “≈”. Dashed line: uncertain border. Period names in English.",sHistKo:"Not available: the “hist” folder is missing on this host.",histOf:"borders ≈ {0}",
+ sHist:"Historical borders (1500 to today)",sHistHint:"Approximate outlines at 20 reference dates, from the historical-basemaps project: the map shows the latest reference date already passed, marked “≈”. Dashed line: uncertain border.",sHistKo:"Not available: the “hist” folder is missing on this host.",histOf:"borders ≈ {0}",
  sTheme:"Appearance:",thAuto:"as on the device",thLight:"light",thDark:"dark",
  sShare:"Share",shLiving:"Leave out people presumed living",shImg:"Image (PNG)",shVid:"Animation (video)",shStop:"Stop recording",shRec:"Recording: it ends when playback finishes or is paused.",shKo:"This browser cannot record video.",shHidden:"people presumed living not shown",
  kbT:"Keyboard shortcuts",kbHelp:"Space: play or pause. Left and right arrows: previous or next year. On the map (reach it with Tab): arrows to move it, + and − to zoom, 0 to show the whole family, Page Down and Page Up to go from place to place, Enter to open one, Esc to return to the year.",
@@ -551,7 +551,7 @@ en:{tooBig:"File too large (60 MB at most).",tplCsv:"Download the CSV template",
  badZip:"This browser could not read the compressed file (.gdz, .xlsx, .ods).",histCredit:" Historical borders: historical-basemaps, A. Ourednik (GPL 3.0)."},
 de:{tooBig:"Datei zu groß (höchstens 60 MB).",tplCsv:"CSV-Vorlage herunterladen",noRes:"Kein Treffer",yearL:"Jahr",speedL:"Geschwindigkeit",noName:"(ohne Namen)",mapL:"Karte",detL:"Details",code:"Quellcode",
  drop:"Datei hier ablegen (GEDCOM, Tabelle oder CSV)",
- sHist:"Historische Grenzen (1500 bis heute)",sHistHint:"Ungefähre Grenzverläufe zu 20 Stichjahren, nach dem Projekt historical-basemaps: Die Karte zeigt das letzte bereits erreichte Stichjahr, gekennzeichnet mit „≈“. Gestrichelt: unsichere Grenze. Historische Namen auf Englisch.",sHistKo:"Nicht verfügbar: Der Ordner „hist“ fehlt auf diesem Server.",histOf:"Grenzen ≈ {0}",
+ sHist:"Historische Grenzen (1500 bis heute)",sHistHint:"Ungefähre Grenzverläufe zu 20 Stichjahren, nach dem Projekt historical-basemaps: Die Karte zeigt das letzte bereits erreichte Stichjahr, gekennzeichnet mit „≈“. Gestrichelt: unsichere Grenze.",sHistKo:"Nicht verfügbar: Der Ordner „hist“ fehlt auf diesem Server.",histOf:"Grenzen ≈ {0}",
  sTheme:"Darstellung:",thAuto:"wie am Gerät",thLight:"hell",thDark:"dunkel",
  sShare:"Teilen",shLiving:"Vermutlich lebende Personen nicht zeigen",shImg:"Bild (PNG)",shVid:"Animation (Video)",shStop:"Aufnahme beenden",shRec:"Aufnahme läuft: Sie endet am Ende der Wiedergabe oder bei Pause.",shKo:"Dieser Browser kann kein Video aufnehmen.",shHidden:"vermutlich lebende Personen nicht gezeigt",
  kbT:"Tastaturkürzel",kbHelp:"Leertaste: Abspielen oder Pause. Pfeil links und rechts: voriges oder nächstes Jahr. Auf der Karte (mit Tab erreichbar): Pfeile zum Verschieben, + und − zum Zoomen, 0 für die ganze Familie, Bild ab und Bild auf von Ort zu Ort, Eingabe zum Öffnen, Esc zurück zum Jahr.",
@@ -559,7 +559,7 @@ de:{tooBig:"Datei zu groß (höchstens 60 MB).",tplCsv:"CSV-Vorlage herunterlade
  badZip:"Dieser Browser konnte die komprimierte Datei (.gdz, .xlsx, .ods) nicht lesen.",histCredit:" Historische Grenzen: historical-basemaps, A. Ourednik (GPL 3.0)."},
 it:{tooBig:"File troppo grande (60 MB al massimo).",tplCsv:"Scarica il modello CSV",noRes:"Nessun risultato",yearL:"Anno",speedL:"Velocità",noName:"(senza nome)",mapL:"Mappa",detL:"Dettagli",code:"Codice sorgente",
  drop:"Rilascia qui il file (GEDCOM, foglio di calcolo o CSV)",
- sHist:"Confini d’epoca (dal 1500 a oggi)",sHistHint:"Tracciati approssimativi a 20 date di riferimento, dal progetto historical-basemaps: la mappa mostra l’ultima data di riferimento già trascorsa, indicata con «≈». Tratteggio: confine incerto. Nomi d’epoca in inglese.",sHistKo:"Non disponibile: su questo host manca la cartella «hist».",histOf:"confini ≈ {0}",
+ sHist:"Confini d’epoca (dal 1500 a oggi)",sHistHint:"Tracciati approssimativi a 20 date di riferimento, dal progetto historical-basemaps: la mappa mostra l’ultima data di riferimento già trascorsa, indicata con «≈». Tratteggio: confine incerto.",sHistKo:"Non disponibile: su questo host manca la cartella «hist».",histOf:"confini ≈ {0}",
  sTheme:"Aspetto:",thAuto:"come sul dispositivo",thLight:"chiaro",thDark:"scuro",
  sShare:"Condividi",shLiving:"Non mostrare le persone presumibilmente viventi",shImg:"Immagine (PNG)",shVid:"Animazione (video)",shStop:"Ferma la registrazione",shRec:"Registrazione in corso: termina alla fine della riproduzione o alla pausa.",shKo:"Questo browser non può registrare video.",shHidden:"persone presumibilmente viventi non mostrate",
  kbT:"Scorciatoie da tastiera",kbHelp:"Spazio: riproduci o pausa. Frecce sinistra e destra: anno precedente o successivo. Sulla mappa (raggiungibile con Tab): frecce per spostarla, + e − per lo zoom, 0 per vedere tutta la famiglia, Pag giù e Pag su per passare da un luogo all’altro, Invio per aprirlo, Esc per tornare all’anno.",
@@ -1207,7 +1207,7 @@ function buildWorldPath(){const p=new Path2D();for(const c of S.world)ringsPath(
    la dernière date repère passée ; après la plus récente, les frontières actuelles de world.json. Les tracés sont approximatifs : la date
    repère est toujours affichée avec « ≈ », et les frontières que la source dit incertaines sont en pointillé. */
 const HIST=[1500,1530,1600,1650,1700,1715,1783,1800,1815,1880,1900,1914,1920,1930,1938,1945,1960,1994,2000,2010];
-const hist={on:true,ko:false,snap:new Map(),last:null,names:null};
+const hist={on:true,ko:false,snap:new Map(),last:null,names:null,dict:null};
 const histYear=Y=>{if(Y>HIST[HIST.length-1])return 0;let r=HIST[0];for(const y of HIST)if(y<=Y)r=y;return r};
 function histSnap(y){
   if(!y||!hist.on||hist.ko)return null;let s=hist.snap.get(y);if(s)return s.ok?s:null;
@@ -1223,11 +1223,24 @@ function histSnap(y){
 /* Carte d'époque à afficher pour l'année Y : celle de la date repère, ou en attendant son chargement la dernière affichée. */
 function histFor(Y){const y=histYear(Y);if(!y||!hist.on||hist.ko){hist.last=null;return null}const s=histSnap(y);if(s)hist.last=s;return hist.last}
 function histNote(){const s=histFor(S.year);$('#histnote').textContent=s?t('histOf',s.y):''}
-/* Les noms viennent de la source, en anglais ; ceux qui sont aussi des pays actuels sont affichés dans la langue de l'interface. */
+/* Les noms viennent de la source, en anglais. hist/names.json donne la forme usuelle des États dans les autres langues ; les pays actuels passent
+   par le navigateur (Intl) ; « X (Y) » est traduit morceau par morceau ; les noms de peuples, noms propres, restent tels quels. */
+const regionNames=l=>{let u='en';try{u=Intl.DisplayNames.supportedLocalesOf([l]).length?l:l==='lb'?'de':'en'}catch(e){}return new Intl.DisplayNames([u],{type:'region'})};
+function histNames(){
+  if(hist.dict)return;hist.dict={langs:[],n:{}};
+  fetch('hist/names.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{if(d&&Array.isArray(d.langs)&&d.n){hist.dict=d;hist.names=null;dirty()}}).catch(()=>{});
+}
 function histName(n){
-  try{if(S.world&&(!hist.names||hist.names.lang!==LANG)){const en=new Intl.DisplayNames(['en'],{type:'region'}),m=new Map();for(const c of S.world)if(c.c){const v=en.of(c.c);if(v)m.set(v,c.c)}hist.names={lang:LANG,m,dn:new Intl.DisplayNames([LANG],{type:'region'})}}
-    const c=hist.names&&hist.names.m.get(n);if(c)return hist.names.dn.of(c)||n}catch(e){}
-  return n;
+  histNames();
+  try{if(!hist.names||hist.names.lang!==LANG||hist.names.world!==S.world){const m=new Map();if(S.world){const en=new Intl.DisplayNames(['en'],{type:'region'});for(const c of S.world)if(c.c){const v=en.of(c.c);if(v)m.set(v,c.c)}}
+      hist.names={lang:LANG,world:S.world,m,dn:regionNames(LANG),done:new Map()}}
+    const H=hist.names;let r=H.done.get(n);if(r)return r;
+    const row=hist.dict.n[n],i=hist.dict.langs.indexOf(LANG),par=/^(.+?)\s*\(([^()]+)\)$/.exec(n);
+    if(typeof row==='string')r=H.dn.of(row.slice(1));
+    else if(Array.isArray(row))r=i>=0&&typeof row[i]==='string'?row[i]:n;
+    else if(H.m.has(n))r=H.dn.of(H.m.get(n));
+    else if(par)r=histName(par[1])+' ('+histName(par[2])+')';
+    r=r||n;H.done.set(n,r);return r}catch(e){return n}
 }
 function drawHistLabels(s){
   const sc=scale();ctx.font='500 11px Inter,system-ui,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='center';ctx.globalAlpha=.8;const placed=[],seen=new Set();
@@ -1269,7 +1282,7 @@ function paint(){
     ctx.restore();
     if(!osm&&S.cam.z<6.5){
       if(hs)drawHistLabels(hs);
-      else{ctx.font='500 11px Inter,system-ui,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='center';ctx.globalAlpha=.75;let dn=null;try{dn=new Intl.DisplayNames([LANG],{type:'region'})}catch(e){}
+      else{ctx.font='500 11px Inter,system-ui,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='center';ctx.globalAlpha=.75;let dn=null;try{dn=regionNames(LANG)}catch(e){}
         for(const c of S.world){if(!c.k)continue;const X=sx(mx(c.k[0])),Y=sy(my(c.k[1]));if(X<0||X>W||Y<0||Y>H)continue;const big=c.p.reduce((a,r)=>Math.max(a,r.length),0);if(S.cam.z<3.2&&big<300)continue;if(S.cam.z<4.6&&big<90)continue;let n=c.n;if(dn&&c.c){try{n=dn.of(c.c)||n}catch(e){}}ctx.fillText(n.toUpperCase(),X,Y)}ctx.globalAlpha=1}}}
   if(!osm&&S.cam.z>=6.2){if(S.gazGrid)drawTowns();else ensureGaz().then(dirty)}
   drawMarkers();drawScale();

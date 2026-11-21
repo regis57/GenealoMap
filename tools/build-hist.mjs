@@ -2,6 +2,7 @@
 // No dependency. Usage:
 //   node tools/build-hist.mjs            downloads the snapshots listed below
 //   node tools/build-hist.mjs <folder>   reads world_<year>.geojson from a local folder
+//   node tools/build-hist.mjs --names    only rebuilds hist/names.json from tools/hist-names.txt
 // Output format, one file per snapshot - same ring encoding as world.json:
 //   {"y":1815,"f":[{"n":"France","s":"France","b":3,"k":[lon,lat],"p":[[x0,y0,dx,dy,...],...]},...]}
 //   n name (absent: land without a recorded polity), s power it was subject to (only when different from n),
@@ -34,6 +35,19 @@ function labelPoint(r) {
   for (let i = 0; i + 1 < xs.length; i += 2) if (!best || xs[i + 1] - xs[i] > best[1] - best[0]) best = [xs[i], xs[i + 1]];
   return best ? [(best[0] + best[1]) / 2, c[1]] : c;
 }
+
+// Names in the other languages: tools/hist-names.txt -> hist/names.json  ({"langs":[...],"n":{"English name":["fr",...] or "@CC"}})
+const langs = ['fr', 'de', 'it', 'es', 'pt', 'nl', 'lb'], names = {};
+for (const line of readFileSync(new URL('hist-names.txt', import.meta.url), 'utf8').split('\n')) {
+  if (!line.trim() || line.startsWith('#')) continue;
+  const c = line.split('|').map(x => x.trim());
+  if (c.length === 2 && /^@[A-Z]{2}$/.test(c[1])) names[c[0]] = c[1];
+  else if (c.length === langs.length + 1 && c.every(Boolean)) names[c[0]] = c.slice(1);
+  else throw new Error('hist-names.txt: bad line: ' + line);
+}
+writeFileSync(new URL('names.json', out), JSON.stringify({langs, n: names}));
+console.log(`names.json: ${Object.keys(names).length} names`);
+if (dir === '--names') process.exit(0);
 
 let total = 0;
 for (const y of YEARS) {

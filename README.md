@@ -10,7 +10,7 @@ Everything runs in the browser. The family file is never uploaded.
 
 - **Timeline with a play button**: past to present or present to past, at 2 to 40 years per second, with a histogram of people alive.
 - **Map of the world**: each place shows who lives there that year; the camera can follow the family as it moves.
-- **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. Can be switched off.
+- **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 300 former states (Holy Roman Empire, Austria-Hungary, Two Sicilies, ...) are shown in the interface language. Can be switched off.
 - **Reference person**: choose anyone; every other person gets a title relative to them (grandmother, great-uncle, first cousin once removed, uncle by marriage, ...), their Sosa/Ahnentafel number, and the nearest common ancestor. Titles can be renamed by hand.
 - **Living relatives for any person and year**, with their ages: spouse, parents, children, siblings, grandparents, uncles and aunts, nephews and nieces, cousins.
 - **Proofs and links**: links found in the file (scans on Google Drive, online profile, sources) are one click away from each person and event.
@@ -42,7 +42,7 @@ gaz.json      world gazetteer used to locate places without coordinates
 Two folders are optional; the page works without them and loads from them only what a tree needs:
 
 ```
-hist/         borders of the time, one file per reference date (GPL-3.0 data, see hist/README.md)
+hist/         borders of the time, one file per reference date, and names.json (GPL-3.0 data, see hist/README.md)
 gaz/          finer gazetteer by country: hamlets and vanished villages (see below)
 ```
 
@@ -112,7 +112,7 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
 - **Review of the newer languages** by native speakers, Luxembourgish first.
-- **Historical borders**: names of former states in every language (they are in English today), and more reference dates.
+- **Historical borders**: more reference dates; names of smaller former states still shown as the source writes them (add them to `tools/hist-names.txt`).
 - **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
 - **Larger trees**: keep playback smooth with tens of thousands of people.
