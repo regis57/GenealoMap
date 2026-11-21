@@ -8,7 +8,7 @@ A static web page that plays a family tree on a map, year by year. Owner and aut
 
 1. **Privacy first.** A visitor's file never leaves the browser. No analytics, no remote font, no CDN, no cookie, no third-party request by default. Do not weaken the Content-Security-Policy in `index.html`.
 2. **Three run-time files only**: `index.html`, `world.json`, `gaz.json`. No framework, no bundler, no npm dependency at run time. It must keep working when the three files are copied to any web folder.
-3. **File content is untrusted.** Everything coming from a GEDCOM/CSV goes through `esc()` before reaching `innerHTML`; links go through `safeUrl()` or the `https?://` patterns. Never `eval`, never inline event attributes.
+3. **File content is untrusted.** Everything coming from a GEDCOM/CSV goes through `esc()` before reaching `innerHTML`; links go through `safeUrl()` or the `https?://` patterns. Never `eval`, never inline event attributes, never `style="…"` attributes (use a class): the policy allows one script and one style block, each by fingerprint.
 4. **After any change to the script**, run `node tools/check.mjs --fix`, then `node tools/check.mjs`. CI runs the same check and must be green.
 5. **Authorship.** Commits, pull requests and releases are authored by Regis Hennequin only. No "Co-Authored-By", "Generated with" or other AI/tool attribution in commit messages, PR descriptions or files.
 6. **Never commit real family data.** The only people in the repository are the fictional Vernhet family (`SAMPLE` in `index.html`, `template.csv`). No real GEDCOM, no screenshot showing living people.
@@ -26,3 +26,5 @@ Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.tpl
 ## Publishing
 
 `main` is served by GitHub Pages at https://regis57.github.io/GeneanoMap/. The page keeps `noindex` during the test phase.
+
+A second copy runs at https://regis-hennequin.info/geneanomap/ (repository `regis57/regis-hennequin-site`, folder `public/geneanomap/`). That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.

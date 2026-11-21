@@ -5,7 +5,7 @@ GeneanoMap opens private family files. Its design keeps them on the visitor's de
 ## Design rules
 
 - **Static only.** Three files (`index.html`, `world.json`, `gaz.json`). No server code, no build step, no dependency loaded at run time, no cookie.
-- **The page cannot talk to another site.** The Content-Security-Policy in `index.html` starts from `default-src 'none'`; connections are limited to the page's own folder, forms are forbidden, and the only script allowed to run is the one whose SHA-256 fingerprint is written in the policy. Injected or modified script does not run.
+- **The page cannot talk to another site.** The Content-Security-Policy in `index.html` starts from `default-src 'none'`; connections are limited to the page's own folder, forms are forbidden, and the only script and the only style sheet allowed are the ones whose SHA-256 fingerprints are written in the policy. Injected or modified code does not run; inline handlers and style attributes are refused.
 - **File content is treated as text, never as code.** Everything read from a GEDCOM or CSV file is escaped before display. Only addresses starting with `http://` or `https://` become links, opened with `rel="noopener noreferrer"`. Files above 60 MB are refused.
 - **Opt-in for anything external.** OpenStreetMap tiles are off by default.
 - **Checked on every change.** `tools/check.mjs` (run by GitHub Actions on each push and pull request) fails if the fingerprint is stale, if an unexpected address appears, or if a forbidden construct (`eval`, inline handlers, other network APIs, iframes, forms, cookies) is introduced.
