@@ -9,9 +9,9 @@ A static web page that plays a family tree on a map, year by year. Owner and aut
 1. **Privacy first.** A visitor's file never leaves the browser. No analytics, no remote font, no CDN, no cookie, no third-party request by default. Do not weaken the Content-Security-Policy in `index.html`.
 2. **Three run-time files only**: `index.html`, `world.json`, `gaz.json`. No framework, no bundler, no npm dependency at run time. It must keep working when the three files are copied to any web folder. Two folders of data are optional and loaded on demand; the page must degrade quietly without them: `hist/` (borders of the time, GPL-3.0 data built by `tools/build-hist.mjs`) and `gaz/` (finer gazetteer by country, built by `tools/build-gaz.mjs`). `fetch()` may only name these files; `tools/check.mjs` holds the list.
 3. **File content is untrusted.** Everything coming from a GEDCOM/CSV goes through `esc()` before reaching `innerHTML`; links go through `safeUrl()` or the `https?://` patterns. Never `eval`, never inline event attributes, never `style="…"` attributes (use a class): the policy allows one script and one style block, each by fingerprint.
-4. **After any change to the script**, run `node tools/check.mjs --fix`, then `node tools/check.mjs`. CI runs the same check and must be green.
+4. **After any change to the script**, run `node tools/check.mjs --fix`, then `node tools/check.mjs` and `node tools/test.mjs`. CI runs both and must be green. If a kinship title changes on purpose, review the difference and run `node tools/test.mjs --update`; never update the expected table to silence a failure you do not understand.
 5. **Authorship.** Commits, pull requests and releases are authored by Regis Hennequin only. No "Co-Authored-By", "Generated with" or other AI/tool attribution in commit messages, PR descriptions or files.
-6. **Never commit real family data.** The only people in the repository are the fictional Vernhet family (`SAMPLE` in `index.html`, `template.csv`). No real GEDCOM, no screenshot showing living people.
+6. **Never commit real family data.** A published tree (`?file=`) belongs on the owner's own host, never in this repository. The only people in the repository are the fictional Vernhet family (`SAMPLE` in `index.html`, `template.csv`). No real GEDCOM, no screenshot showing living people.
 7. **Kinship must be true.** Blood relationship comes from the nearest common ancestor and generation counts; marriage is added to it, never substituted. No folk approximations ("à la mode de Bretagne"). Every term must exist in all languages of `KIN`. Where a language uses one word for two relationships (Dutch `neef`), the term says which.
 8. **Every visible text is translated.** New interface text goes into `L` for every language of `LANGS` (`fr`, `en`, `de`, `it`, `es`, `pt`, `nl`, `lb`); no hard-coded string in the code. Names of historical states come from the data, in English; their translations live in `tools/hist-names.txt` (one line per name, all languages), turned into `hist/names.json` by `node tools/build-hist.mjs --names`. Names of peoples stay as written.
 9. **Honest display.** Estimated dates carry `≈`, approximate positions are flagged, historical borders show their reference date with `≈` and uncertain ones are dashed. An exported image that leaves living people out says so. Never invent a person, a date or a place.
@@ -21,9 +21,11 @@ A static web page that plays a family tree on a map, year by year. Owner and aut
 
 Sections, in order: i18n (`LANGS`, `L`, `KIN`, `term`) · fictional sample · state `S` · GEDCOM parser (`parseGed`, `loadGed`) · proofs and links · lives and locations (`computeLives`, `locAt`) · kinship (`blood`, `kin`, `titleOf`) · geocoding (`resolvePlaces`, `finerGaz`) · year view (`setYear`, `evLine`) · map drawing (`frame`, `paint`) with historical borders (`HIST`, `histSnap`, `histFor`, `histName`) and the shareable view (`share`, `paintShare`) · map keyboard · timeline · panel (`renderPanel`, `personHtml`, `chronoHtml`) · search, file (`fileText`, `unzip`, `xlsxRows`, `odsRows`), settings · table import (`rowsToGed`, `csvToGed`) · language and support (`applyLang`, `SUPPORT_URL`) · `boot`.
 
-Page address options (`ARGS`): `lang`, `ref`, `year`, `theme`, `hist`, `play`; they are not stored.
+Page address options (`ARGS`): `lang`, `ref`, `year`, `theme`, `hist`, `play`, `file`, `living`; they are not stored. `file` is a tree published by the site (`pub`): bare file name in the same folder, living people hidden (`p.hid`) unless `living=1`; use `nameOf()` / `dispName()` whenever a person's name is displayed.
 
-Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
+Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`). OpenStreetMap tiles need `referrerPolicy='origin'` (they are refused without a referrer).
+
+Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
 
 ## Working method
 

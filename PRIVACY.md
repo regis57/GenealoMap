@@ -13,7 +13,7 @@ You can check this yourself: open the browser's developer tools, "Network" tab, 
 ## What is relative, and why
 
 - **Local memory.** So that you find your tree again on your next visit, the file and your settings are kept in this browser's local storage, on your device only. "Forget my file" in the settings erases them. On a shared computer, use that button or a private window.
-- **Optional detailed map.** If you tick "Detailed OpenStreetMap background", your browser downloads map images from `tile.openstreetmap.org`. OpenStreetMap then sees your IP address and the area you look at - not your tree. It is off by default.
+- **Optional detailed map.** If you tick "Detailed OpenStreetMap background", your browser downloads map images from `tile.openstreetmap.org`. OpenStreetMap then sees your IP address, the area you look at and the name of the site showing the map (for example `regis57.github.io`; OpenStreetMap refuses requests that do not say where they come from) - not the page address, not your tree. It is off by default.
 - **Links you click.** Proofs and profile links inside your file open the site they point to (Google Drive, Filae, ...), under that site's own rules.
 - **The host.** Like any website, the server that hosts the page (GitHub Pages or yours) sees your IP address and the requests for the files above. It never receives your family file. Two of these requests say a little about what you look at: the reference date of the historical borders on screen (`hist/1815.json`), and the country of places the main gazetteer could not find (`gaz/FR.json`). Untick "Historical borders" to avoid the first; the second only exists on copies that ship the `gaz/` folder.
 - **Images and videos you export.** "Share" draws the picture or records the video inside your browser and saves it on your device; nothing is sent. People presumed living are left out unless you untick the box, and the picture then carries the mention. A person is presumed living when the file records no death and the birth is less than 100 years ago: check before you publish.
@@ -21,6 +21,8 @@ You can check this yourself: open the browser's developer tools, "Network" tab, 
 - **Other people's data.** A family tree describes living people too. If you show your screen or share screenshots, the option "Hide the names of people presumed living" helps; you remain responsible for what you share.
 
 ## For people who host a copy
+
+If you publish your own tree with `?file=...`, you become the publisher of that data. The page hides people presumed living, but the file itself stays downloadable by anyone who knows its name: remove living people from the file before you put it online, and ask the people concerned before using `living=1`.
 
 Keep the Content-Security-Policy line in `index.html`, serve the files from the same folder over HTTPS, and do not add analytics scripts if you want to repeat the guarantee above to your visitors. If you embed the page in an `<iframe>`, visitors' files stay inside that frame.
 
