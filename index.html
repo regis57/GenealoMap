@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-nOaZ+sQ47jzOVOumeEOJSlAarJIBcQ9xYZUzdIuUWiM='; style-src 'sha256-htV4CmOi4BbYvvwTEReCN4EVdwC88efgc41P1VmduhE='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Rsi+b1xl5HqcGa3hDWOQKWmxigkI9U2Yvcl/vhZd44Y='; style-src 'sha256-fwUgMqoPTn83oKRAGRb+3z4G7stPUF6h7n2oKJ0VVU8='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -66,6 +66,33 @@ main{flex:1 1 0;min-height:0;display:flex}
 #histnote{color:var(--muted);font-size:11px}
 .sech{display:block;margin-top:14px}
 .cl{font-size:13px;padding:2px 6px;overflow-wrap:anywhere}
+/* Vue en arbre : listes imbriquées, traits de liaison en CSS. .tv = de haut en bas, .tv.up = ascendants au-dessus, .th = de gauche à droite. */
+#tree{position:absolute;inset:192px 0 0;overflow:auto;background:var(--bg);padding:12px 12px 60px;border-top:1px solid var(--line)}
+.tmode{background:var(--bg)!important}.tmode #map{visibility:hidden}
+#time,#ticker{z-index:3}
+#treebar{position:absolute;z-index:3;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 460px)}
+.tmode #zoomctl,.tmode #legend{display:none}
+.tr{display:inline-block;min-width:100%}
+.tr ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}
+.tr li{display:flex;align-items:center;position:relative}
+.tv li{flex-direction:column;padding:16px 5px 0}.tv ul ul{padding-top:16px}
+.tv li::before,.tv li::after{content:"";position:absolute;top:0;width:50%;height:16px;border-top:1px solid var(--border)}
+.tv li::before{right:50%}.tv li::after{left:50%;border-left:1px solid var(--border)}
+.tv li:first-child::before,.tv li:last-child::after{border-top:0}
+.tv ul ul::before{content:"";position:absolute;top:0;left:50%;height:16px;border-left:1px solid var(--border)}
+.tv>ul>li{padding-top:0}.tv>ul>li::before,.tv>ul>li::after{display:none}
+.tv.up li{flex-direction:column-reverse;padding:0 5px 16px}.tv.up ul ul{padding-top:0;padding-bottom:16px}
+.tv.up li::before,.tv.up li::after{top:auto;bottom:0;border-top:0;border-bottom:1px solid var(--border)}
+.tv.up li:first-child::before,.tv.up li:last-child::after{border-bottom:0}
+.tv.up ul ul::before{top:auto;bottom:0}.tv.up>ul>li{padding-bottom:0}
+.th ul{flex-direction:column}.th li{flex-direction:row;padding:4px 0 4px 18px}.th ul ul{padding-left:18px}
+.th li::before,.th li::after{content:"";position:absolute;left:0;height:50%;width:18px;border-left:1px solid var(--border)}
+.th li::before{bottom:50%}.th li::after{top:50%;border-top:1px solid var(--border)}
+.th li:first-child::before,.th li:last-child::after{border-left:0}
+.th ul ul::before{content:"";position:absolute;left:0;top:50%;width:18px;border-top:1px solid var(--border)}
+.th>ul>li{padding-left:0}.th>ul>li::before,.th>ul>li::after{display:none}
+.nd{display:flex;flex-direction:column;align-items:flex-start;gap:1px;flex:none;width:168px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 8px;text-align:left;font-size:12.5px;overflow-wrap:anywhere}
+.nd:hover{border-color:var(--direct)}.nd.off{opacity:.55}.nd.root{border-color:var(--focus);border-width:2px}.nd small{color:var(--muted);font-size:11px}.nd:disabled{cursor:default}
 #time{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));width:min(430px,calc(100% - 20px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .trow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 #play{width:42px;height:42px;border-radius:50%;border:0;background:var(--direct);color:var(--panel);font-size:17px;flex:none}
@@ -126,6 +153,7 @@ html,body{margin:0}[hidden]{display:none!important}
 .plist td{padding:3px 4px;border-bottom:1px dashed var(--line);vertical-align:top;overflow-wrap:anywhere}
 @media (max-width:1180px){#legend{display:none}}
 @media (max-width:760px){
+  .tmode #ticker{display:none}#tree{inset:190px 0 0;padding:8px 8px 50px}#treebar{top:150px;left:8px;right:auto;max-width:none;justify-content:flex-start}.nd{width:138px;font-size:12px}
   main{flex-direction:column}
   .bar{gap:6px 8px;padding-block:6px}.bar h1{font-size:15px}#filechip,.bar .spacer{display:none}.search{flex:1 1 120px}
   #time{padding:8px 10px;gap:4px}#histo,.ticks{display:none}#play{width:36px;height:36px}
@@ -149,6 +177,7 @@ html,body{margin:0}[hidden]{display:none!important}
     <div class="search"><input id="q" type="search" autocomplete="off"><div class="results" id="qres" hidden></div></div>
     <label class="btn primary" for="file" tabindex="0" id="filelabel" data-i="open"></label>
     <input id="file" type="file" accept=".ged,.gedcom,.gdz,.csv,.tsv,.txt,.xlsx,.ods,text/plain,text/csv" hidden>
+    <button type="button" class="btn" id="viewbtn" aria-pressed="false"></button>
     <select class="mini" id="lang" aria-label="Language / Langue / Sprache / Lingua / Idioma / Taal / Sprooch"></select>
     <button type="button" class="btn" id="setbtn" aria-expanded="false" data-i="settings">Settings</button>
   </header>
@@ -167,6 +196,12 @@ html,body{margin:0}[hidden]{display:none!important}
         <input id="slider" type="range" min="1500" max="2026" step="1" value="1900">
         <div class="ticks"><span id="tmin"></span><span id="tmid"></span><span id="tmax"></span></div>
       </div>
+      <div id="treebar" hidden>
+        <select class="mini" id="trMode"><option value="a" data-i="trAsc"></option><option value="d" data-i="trDesc"></option></select>
+        <select class="mini" id="trDir"><option value="v" data-i="trV"></option><option value="h" data-i="trH"></option></select>
+        <select class="mini" id="trGen"><option value="3"></option><option value="4" selected></option><option value="5"></option><option value="6"></option><option value="8"></option></select>
+      </div>
+      <div id="tree" hidden><div id="treebody"></div></div>
       <div id="ticker" aria-live="off"></div>
       <div id="sr" class="sr" aria-live="polite"></div>
       <div id="legend"></div>
@@ -601,6 +636,16 @@ lb:{sRoute:"Gezeechente Wee:",rtNone:"keen",rtPerson:"vun der gewielter Persoun"
  sTint:"Faarwen:",tnKin:"no der Verwandtschaft",tnBranch:"Linn vum Papp a Linn vun der Mamm",tnName:"Familljennumm vun der Referenzpersoun",lgPat:"Linn vum Papp",lgMat:"Linn vun der Mamm",lgBoth:"béid Linnen",lgOther:"aner oder ugehuerot",lgName:"huet den Numm {0}",lgNotName:"aneren Numm",
  pubNote:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b> Persounen, déi wuel nach liewen, ginn net gewisen.",pubAll:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b>",pubKo:"De publizéierte Fichier „{0}“ konnt net gelies ginn."}};
 for(const k in LZ)Object.assign(L[k],LZ[k]);
+const LT={
+fr:{vTree:"Arbre",vMap:"Carte",trAsc:"Ascendants",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} générations",treeL:"Arbre de {0}",trMore:"Arbre limité à {0} personnes : choisissez une autre personne pour voir la suite."},
+en:{vTree:"Tree",vMap:"Map",trAsc:"Ancestors",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} generations",treeL:"Tree of {0}",trMore:"Tree limited to {0} people: choose another person to see further."},
+de:{vTree:"Stammbaum",vMap:"Karte",trAsc:"Vorfahren",trDesc:"Nachkommen",trV:"senkrecht",trH:"waagerecht",trGen:"{0} Generationen",treeL:"Stammbaum von {0}",trMore:"Stammbaum auf {0} Personen begrenzt: Wählen Sie eine andere Person, um weiterzusehen."},
+it:{vTree:"Albero",vMap:"Mappa",trAsc:"Ascendenti",trDesc:"Discendenti",trV:"verticale",trH:"orizzontale",trGen:"{0} generazioni",treeL:"Albero di {0}",trMore:"Albero limitato a {0} persone: scegli un’altra persona per vedere il seguito."},
+es:{vTree:"Árbol",vMap:"Mapa",trAsc:"Ascendientes",trDesc:"Descendientes",trV:"vertical",trH:"horizontal",trGen:"{0} generaciones",treeL:"Árbol de {0}",trMore:"Árbol limitado a {0} personas: elija otra persona para ver más."},
+pt:{vTree:"Árvore",vMap:"Mapa",trAsc:"Ascendentes",trDesc:"Descendentes",trV:"vertical",trH:"horizontal",trGen:"{0} gerações",treeL:"Árvore de {0}",trMore:"Árvore limitada a {0} pessoas: escolha outra pessoa para ver mais."},
+nl:{vTree:"Stamboom",vMap:"Kaart",trAsc:"Voorouders",trDesc:"Nakomelingen",trV:"verticaal",trH:"horizontaal",trGen:"{0} generaties",treeL:"Stamboom van {0}",trMore:"Stamboom beperkt tot {0} personen: kies een andere persoon om verder te kijken."},
+lb:{vTree:"Stammbam",vMap:"Kaart",trAsc:"Virfaren",trDesc:"Nokommen",trV:"vertikal",trH:"horizontal",trGen:"{0} Generatiounen",treeL:"Stammbam vum {0}",trMore:"Stammbam op {0} Persoune begrenzt: Wielt eng aner Persoun, fir méi ze gesinn."}};
+for(const k in LT)Object.assign(L[k],LT[k]);
 
 /* ---------- Exemple fictif (toute ressemblance serait fortuite) ---------- */
 const SAMPLE=`0 HEAD
@@ -1518,7 +1563,34 @@ function rowHtml(p,Y,extra){const t=titleOf(p.id);return '<button type="button" 
 function lifeTxt(p){return (p.b!=null?(p.bEst?'≈ ':'')+p.b:'?')+' – '+(p.alive?'':(p.eEst?'≈ ':'')+(p.e!=null?p.e:'?'))}
 function placeBlock(G,Y){const ppl=G.people.slice().sort((a,b)=>tintRank(tint(b.id))-tintRank(tint(a.id))||a.b-b.b);
   return '<button type="button" class="place-h" data-k="'+esc(G.k)+'"><span>'+esc(G.Q.name.split(',').slice(0,2).join(', '))+(G.Q.q==='approx'?' <span class="sub">'+t('approxPos')+'</span>':'')+'</span><span>'+ppl.length+'</span></button><div class="rows">'+ppl.map(p=>rowHtml(p,Y)).join('')+'</div>'}
+/* ---------- Vue en arbre ----------
+   Ascendants ou descendants de la personne choisie (à défaut, de la référence), à la place de la carte. Chaque case porte le titre de parenté
+   par rapport à la référence et la couleur du réglage « Couleurs » ; les personnes qui ne sont pas en vie l'année affichée sont estompées. */
+const tree={on:false,root:null,max:300};
+function treeNode(p,root,extra){
+  const alive=p.b!=null&&S.year>=p.b&&S.year<=p.e;
+  return '<button type="button" class="nd'+(alive?'':' off')+(root?' root':'')+'"'+(p.hid?' disabled':' data-p="'+esc(p.id)+'"')+'><span><i class="dot d-'+tint(p.id)+'"></i><b>'+esc(dispName(p))+'</b></span>'
+    +(p.hid?'':'<small>'+lifeTxt(p)+'</small><small>'+esc(titleOf(p.id).text)+'</small>')+(extra||'')+'</button>';
+}
+function treeHtml(id,g,down,n,root){
+  const p=P(id);if(!p||n.c>=tree.max){n.cut=true;return ''}n.c++;let sub='',extra='';
+  if(down){const sp=spousesOf(id);if(sp.length)extra='<small>⚭ '+esc(sp.map(s=>dispName(P(s))).join(', '))+'</small>'}
+  if(g>1)for(const k of (down?[...new Set(childrenOf(id))]:parentsOf(id).slice(0,2)))sub+=treeHtml(k,g-1,down,n,false);
+  return '<li>'+treeNode(p,root,extra)+(sub?'<ul>'+sub+'</ul>':'')+'</li>';
+}
+function renderTree(){
+  const sp=S.sel.type==='person'?P(S.sel.id):null,p=(sp&&!sp.hid?sp:P(S.ref));const el=$('#treebody');if(!p){el.innerHTML='';return}
+  const down=$('#trMode').value==='d',hz=$('#trDir').value==='h',n={c:0,cut:false},key=p.id+'|'+down+'|'+hz;
+  el.innerHTML='<div class="tr '+(hz?'th':down?'tv':'tv up')+'"><ul>'+treeHtml(p.id,+$('#trGen').value,down,n,true)+'</ul></div>'+(n.cut?'<p class="note">'+t('trMore',tree.max)+'</p>':'');
+  $('#tree').setAttribute('aria-label',t('treeL',dispName(p)));
+  if(tree.root!==key){tree.root=key;const r=el.querySelector('.root');if(r&&r.scrollIntoView)r.scrollIntoView({block:'center',inline:'center'})}
+}
+function setView(on){tree.on=on;tree.root=null;$('#tree').hidden=!on;$('#treebar').hidden=!on;$('#mapwrap').classList.toggle('tmode',on);$('#viewbtn').textContent=t(on?'vMap':'vTree');$('#viewbtn').setAttribute('aria-pressed',String(on));if(on)renderTree();else dirty()}
+$('#viewbtn').onclick=()=>setView(!tree.on);
+$('#treebody').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.p)selectPerson(b.dataset.p,false)});
+for(const s of ['#trMode','#trDir','#trGen'])$(s).onchange=()=>{store.set('cg.tree',[$('#trMode').value,$('#trDir').value,$('#trGen').value].join(','));tree.root=null;renderTree()};
 function renderPanel(){
+  if(tree.on)renderTree();
   const el=$('#panel'),Y=S.year,d=yearData(Y);let h='';const keep=el.scrollTop,sameSel=el.dataset.sel===JSON.stringify(S.sel);
   const ck=S.sel.type==='chrono'?[S.fileName,S.persons.size,LANG,S.dir,$('#anon').checked].join('|'):'';
   if(ck&&sameSel&&el.dataset.ck===ck)return;el.dataset.ck=ck;
@@ -1626,7 +1698,7 @@ $('#panel').addEventListener('click',e=>{
 });
 function selectPerson(id,jump){const p=P(id);if(!p||p.hid)return;S.sel={type:'person',id};if(jump&&p.b!=null&&(S.year<p.b||S.year>p.e)){setPlaying(false);setYear(Math.min(p.e,p.b+30),2)}
   renderPanel();const l=(S.year>=p.b&&S.year<=p.e)?locAt(p,S.year):null;if(l){const Q=S.places.get(l.k);const X=sx(mx(Q.lon)),Y2=sy(my(Q.lat));if(X<40||X>W-40||Y2<40||Y2>H-40)S.target={x:mx(Q.lon),y:my(Q.lat),z:S.cam.z}}dirty()}
-function setRef(id){S.ref=id;S.kinCache.clear();store.set('cg.ref.'+S.fileName,id);renderChips();renderLegend();renderPanel();drawHisto();dirty()}
+function setRef(id){S.ref=id;S.kinCache.clear();tree.root=null;store.set('cg.ref.'+S.fileName,id);renderChips();renderLegend();renderPanel();drawHisto();dirty()}
 function renderChips(){const r=P(S.ref);$('#filechip').innerHTML=(S.isSample?t('sample'):'<b>'+esc(S.fileName)+'</b>')+' · '+t('persons',S.persons.size);
   let gen=0;if(r){gen=Math.max(...upMap(S.ref).values())+1}
   $('#refchip').innerHTML=r?t('ref')+' : <b>'+esc(nameOf(r))+'</b>'+(gen>1?' · '+t('gens',gen):''):'';}
@@ -1817,7 +1889,8 @@ function applyLang(){
   $('#zin').setAttribute('aria-label',t('zin'));$('#zout').setAttribute('aria-label',t('zout'));$('#zfit').setAttribute('aria-label',t('zfit'));$('#zfit').title=t('zfit');
   $('#mapwrap').setAttribute('aria-label',t('mapL'));$('#panel').setAttribute('aria-label',t('detL'));
   $('#tilesHint').textContent=tiles.ko?t('sTilesKo'):t('sTilesHint');$('#histHint').textContent=hist.ko?t('sHistKo'):t('sHistHint');
-  cv.setAttribute('aria-label',t('mapL'));renderLegend();if(share.rec)$('#shVid').textContent=t('shStop');histNote();
+  cv.setAttribute('aria-label',t('mapL'));renderLegend();
+  for(const o of $('#trGen').options)o.textContent=t('trGen',o.value);$('#viewbtn').textContent=t(tree.on?'vMap':'vTree');if(share.rec)$('#shVid').textContent=t('shStop');histNote();
   const a=$('#support');if(SUPPORT_URL){a.href=SUPPORT_URL;a.target='_blank';a.rel='noopener noreferrer';a.textContent='🍺 '+t('support');a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.textContent='🍺 '+t('supportSoon');a.setAttribute('aria-disabled','true')}
 }
 function setLang(l){LANG=LANGS[l]?l:'en';store.set('cg.lang',LANG);$('#lang').value=LANG;S.kinCache.clear();applyLang();if(S.persons.size){renderChips();setYear(S.year,true)}}
@@ -1830,6 +1903,7 @@ $('#csvtpl').onclick=()=>download(new Blob(['﻿'+CSV_TEMPLATE],{type:'text/csv'
 function boot(){
   {const av=(ARGS.get('lang')||'').toLowerCase(),sv=store.get('cg.lang'),nv=(navigator.language||'en').slice(0,2).toLowerCase();LANG=LANGS[av]?av:LANGS[sv]?sv:LANGS[nv]?nv:'en';$('#lang').value=LANG;
     if(ARGS.get('hist')==='0'||store.get('cg.hist')==='0'){hist.on=false;$('#histOpt').checked=false}
+    {const tv=(store.get('cg.tree')||'').split(',');if(/^[ad]$/.test(tv[0]))$('#trMode').value=tv[0];if(/^[vh]$/.test(tv[1]))$('#trDir').value=tv[1];else if(window.innerWidth<760)$('#trDir').value='h';if(/^[34568]$/.test(tv[2]))$('#trGen').value=tv[2]}
     {const rt=store.get('cg.route'),tn=store.get('cg.tint');if(rt)$('#route').value=rt==='none'?'':rt;if(tn)$('#tint').value=tn}
     setTheme(ARGS.get('theme')||store.get('cg.theme'));applyLang()}
   if(store.get('cg.tiles')){$('#tilesOpt').checked=true;probeTiles()}
@@ -1841,6 +1915,7 @@ function boot(){
     fetch(pubFile).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>{if(b.byteLength>MAX_FILE)throw 0;return fileText(b)})
       .then(txt=>{if(!isGed(txt))throw 0;pub.on=true;loadGed(txt,pub.name,false);go()}).catch(()=>{pub.on=false;pub.ko=true;renderPanel();go()})}
   else go();
+  if(ARGS.get('view')==='tree')setView(true);
   fetch('world.json').then(r=>r.json()).then(w=>{S.world=w;buildWorldPath();ccNames=null;if(S.gazIndex){resolvePlaces();afterPlaces(false)}dirty()}).catch(()=>{});
 }
 boot();

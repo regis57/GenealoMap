@@ -23,9 +23,9 @@ Sections, in order: i18n (`LANGS`, `L`, `KIN`, `term`) · fictional sample · st
 
 Page address options (`ARGS`): `lang`, `ref`, `year`, `theme`, `hist`, `play`, `file`, `living`; they are not stored. `file` is a tree published by the site (`pub`): bare file name in the same folder, living people hidden (`p.hid`) unless `living=1`; use `nameOf()` / `dispName()` whenever a person's name is displayed.
 
-Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`). OpenStreetMap tiles need `referrerPolicy='origin'` (they are refused without a referrer).
+Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`), tree view (`renderTree`, `treeHtml`, `setView`; nested lists drawn with CSS only, since no style attribute is allowed; address option `view=tree`). OpenStreetMap tiles need `referrerPolicy='origin'` (they are refused without a referrer).
 
-Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
+Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tree`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
 
 ## Working method
 
