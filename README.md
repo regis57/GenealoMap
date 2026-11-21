@@ -11,6 +11,7 @@ Everything runs in the browser. The family file is never uploaded.
 - **Timeline with a play button**: past to present or present to past, at 2 to 40 years per second, with a histogram of people alive.
 - **Map of the world**: each place shows who lives there that year; the camera can follow the family as it moves.
 - **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 300 former states (Holy Roman Empire, Austria-Hungary, Two Sicilies, ...) are shown in the interface language. Can be switched off.
+- **Tree view**: one button swaps the map for a chart of the selected person's ancestors or descendants, vertical or horizontal, 3 to 8 generations. Each box carries the title relative to the reference person and the colour in use; people not alive in the year shown are faded, so the timeline plays on the tree too. Click a box to move the tree to that person.
 - **Routes**: select a person and the map draws where they went, stop by stop with the years - or the route of their paternal or maternal line from the oldest known ancestor. The same route is listed as text.
 - **Lines in colour**: colour people by kinship, by paternal and maternal line of the reference person, or by who bears their surname - on the map, in the lists and as curves on the timeline.
 - **Reference person**: choose anyone; every other person gets a title relative to them (grandmother, great-uncle, first cousin once removed, uncle by marriage, ...), their Sosa/Ahnentafel number, and the nearest common ancestor. Titles can be renamed by hand.
@@ -64,6 +65,7 @@ The page address can set how an embedded copy starts - after `?` or, to keep it 
 | `theme=dark` | `light` or `dark` instead of the device setting |
 | `hist=0` | current borders only |
 | `play=1` | start playing at once |
+| `view=tree` | open on the tree view instead of the map |
 | `file=tree.ged` | show a tree you publish: a file placed in the same folder as the page (see below) |
 | `living=1` | with `file`: also show people presumed living |
 
@@ -129,11 +131,11 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view.
 
 Next, for people who use it:
 
-- **Tree views** next to the map: ancestors and descendants as a chart (top-down or left-to-right), always titled relative to the reference person, usable on a phone.
+- **Tree view**: hourglass (ancestors and descendants together), fan chart, and printing.
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
 - **More input formats**: Gramps XML and GeneWeb (`.gw`) files.
 - **Use without a connection**: install the page on a phone or computer and keep it working offline.
