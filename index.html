@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hg33GmOawHgN4Kf9crA6Y8cFxbGYWZY018k3SJbyCR8='; style-src 'sha256-MdBt4ImXTJRDIghrbMws0/yzy7jP34/5ojAm/zNAq0g='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-POXtgk0aLnhgd9iUwubSDgobwv155f1GTNOndMFj364='; style-src 'sha256-MdBt4ImXTJRDIghrbMws0/yzy7jP34/5ojAm/zNAq0g='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -1519,6 +1519,7 @@ function clickMap(x,y){
   if(placing){const sc=scale();const wx=S.cam.x+(x-W/2)/sc,wy=S.cam.y+(y-H/2)/sc;const lon=wx*360-180,lat=Math.atan(Math.sinh(Math.PI*(1-2*wy)))*180/Math.PI;const Q=S.places.get(placing);
     if(Q){Q.lat=+lat.toFixed(4);Q.lon=+lon.toFixed(4);Q.q='manual';S.manual[placing]=[Q.lat,Q.lon];store.set('cg.manual',JSON.stringify(S.manual))}placing=null;cv.style.cursor='';afterPlaces(false);S.sel={type:'places'};renderPanel();return}
   let hit=null;for(const c of S.clusters){if(Math.hypot(c.x-x,c.y-y)<=c.r+5){hit=c;break}}
+  if(hit&&S.playing)setPlaying(false);
   if(!hit){if(S.sel.type!=='year'){S.sel={type:'year'};renderPanel();dirty()}return}
   if(hit.items.length>1){const t=bboxCam(hit.items.map(it=>[it.G.Q.lon,it.G.Q.lat]),140);if(t){t.z=Math.min(t.z,S.cam.z+3);S.target=t;dirty()}S.sel={type:'cluster',keys:hit.items.map(it=>it.G.k)}}
   else S.sel={type:'place',id:hit.items[0].G.k};
@@ -1628,7 +1629,7 @@ let pressed=null;
 document.addEventListener('pointerdown',e=>{pressed={t:e.target,x:e.clientX,y:e.clientY}},true);
 document.addEventListener('pointerup',e=>{const d=pressed;pressed=null;if(!d||d.t.isConnected||Math.hypot(e.clientX-d.x,e.clientY-d.y)>8)return;
   const el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest&&el.closest('#panel button,#treebody button');if(b&&!b.disabled)b.click()},true);
-$('#treebody').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.p)selectPerson(b.dataset.p,false)});
+$('#treebody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!b.dataset.p)return;if(S.sel.type==='person'&&S.sel.id===b.dataset.p)unselect();else selectPerson(b.dataset.p,false)});
 for(const s of ['#trMode','#trDir','#trGen'])$(s).onchange=()=>{store.set('cg.tree',[$('#trMode').value,$('#trDir').value,$('#trGen').value,2].join(','));tree.root=null;renderTree()};
 function renderPanel(){
   if(tree.on)renderTree();
@@ -1723,7 +1724,7 @@ function placesHtml(){
 $('#panel').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const ds=b.dataset;
   if(ds.p){selectPerson(ds.p,false)}
-  else if(ds.k){S.sel={type:'place',id:ds.k};renderPanel();dirty()}
+  else if(ds.k){if(S.playing)setPlaying(false);S.sel={type:'place',id:ds.k};renderPanel();dirty()}
   else if(ds.back){S.sel={type:'year'};renderPanel();dirty()}
   else if(ds.y){setPlaying(false);setYear(+ds.y,2)}
   else if(ds.ref){setRef(ds.ref)}
@@ -1737,7 +1738,8 @@ $('#panel').addEventListener('click',e=>{
   else if(b.id==='copymap'){const lines=[...S.places.values()].filter(Q=>!isNaN(Q.lat)).map(Q=>'2 PLAC '+Q.name+'\n3 MAP\n4 LATI '+(Q.lat>=0?'N':'S')+Math.abs(Q.lat).toFixed(4)+'\n4 LONG '+(Q.lon>=0?'E':'W')+Math.abs(Q.lon).toFixed(4)).join('\n');
     const ok=()=>{$('#copymsg').textContent=t('copied',S.places.size)};const ko=()=>{$('#copymsg').textContent=t('copyKo')};try{navigator.clipboard.writeText(lines).then(ok,ko)}catch(err){ko()}}
 });
-function selectPerson(id,jump){const p=P(id);if(!p||p.hid)return;S.sel={type:'person',id};if(jump&&p.b!=null&&(S.year<p.b||S.year>p.e)){setPlaying(false);setYear(Math.min(p.e,p.b+30),2)}
+/* Choisir une personne ou un lieu met la lecture en pause (on veut lire la fiche) ; quitter la sélection ne l'interrompt pas. */
+function selectPerson(id,jump){const p=P(id);if(!p||p.hid)return;if(S.playing)setPlaying(false);S.sel={type:'person',id};if(jump&&p.b!=null&&(S.year<p.b||S.year>p.e)){setPlaying(false);setYear(Math.min(p.e,p.b+30),2)}
   renderPanel();const l=(S.year>=p.b&&S.year<=p.e)?locAt(p,S.year):null;if(l){const Q=S.places.get(l.k);const X=sx(mx(Q.lon)),Y2=sy(my(Q.lat));if(X<40||X>W-40||Y2<40||Y2>H-40)S.target={x:mx(Q.lon),y:my(Q.lat),z:S.cam.z}}dirty()}
 function setRef(id){S.ref=id;S.kinCache.clear();tree.root=null;store.set('cg.ref.'+S.fileName,id);renderChips();renderLegend();renderPanel();drawHisto();dirty()}
 function renderChips(){const r=P(S.ref);$('#filechip').innerHTML=(S.isSample?t('sample'):'<b>'+esc(S.fileName)+'</b>')+' · '+t('persons',S.persons.size);

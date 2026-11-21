@@ -8,6 +8,7 @@ Everything runs in the browser. The family file is never uploaded.
 
 ## What it does
 
+- **Playback pauses when you open a person or a place**, so you can read; leaving the selection (name at the top, Esc, or a second click on the box in the tree) does not stop it. Space plays and pauses.
 - **Timeline with a play button**: past to present or present to past, at 2 to 40 years per second, with a histogram of people alive.
 - **Map of the world**: each place shows who lives there that year; the camera can follow the family as it moves.
 - **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 300 former states (Holy Roman Empire, Austria-Hungary, Two Sicilies, ...) are shown in the interface language. Can be switched off.
