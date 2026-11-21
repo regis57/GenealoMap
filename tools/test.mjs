@@ -31,7 +31,7 @@ function sandbox(search) {
   ctx.globalThis = ctx;
   el('#anon').checked = false; el('#tint').value = ''; el('#route').value = 'person'; el('#tpl').value = ''; el('#speed').value = '6'; el('#speed').options = [];
   el('#follow').checked = false; el('#lines').checked = false; el('#shLiving').checked = true;
-  vm.runInNewContext(script + '\n;globalThis.T={S,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
+  vm.runInNewContext(script + '\n;globalThis.T={S,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
   return ctx.T;
 }
 
@@ -274,6 +274,11 @@ T.loadGed(T.SAMPLE, 'sample', true);
 const r = T.routeOf('@I7@', 'person').map(s => s.y + ' ' + s.k.split(',')[0]).join(' > ');
 eq(r, '1871 Florac > 1898 Alès', 'route of a person follows dated, located events');
 ok(T.routeOf('@I2@', 'pat')[0].k.startsWith('Florac'), 'route of a paternal line starts with the oldest ancestor');
+// tree of contemporaries: follows the year
+const era = y => { T.S.year = y; const n = {c: 0}; const h = T.treeEra(T.P('@I1@'), 6, n); return [...h.matchAll(/data-p="([^"]+)"/g)].map(m => m[1]).join(' '); };
+eq(era(1936), '@I7@ @I4@ @I6@ @I2@', 'in 1936 the tree starts from the oldest living ancestor and holds the living family only');
+eq(era(1880), '@I12@ @I10@ @I7@ @I14@', 'in 1880 it has moved up: a dead parent appears only to link the living brother and sister');
+eq(era(2000), '@I4@ @I6@ @I2@ @I1@', 'in 2000 the reference person appears with her living father and aunt');
 ok(T.yearData(2000).living.some(p => p.id === '@I1@'), 'a living person is shown in an ordinary tree');
 const P2 = sandbox('?file=tree.ged'); P2.pub.on = true; P2.loadGed(P2.SAMPLE, 'tree.ged', false);
 ok(P2.P('@I1@').hid === true && !P2.P('@I7@').hid, 'published tree: people presumed living are marked hidden');

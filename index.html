@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-dtI71rD8v/ZL7kiiT6ZLYSnFgU6kdxp95MQSfhnZMzU='; style-src 'sha256-fwUgMqoPTn83oKRAGRb+3z4G7stPUF6h7n2oKJ0VVU8='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-E6s6XGBQw3+TUngM6zifpCHYmAyFoX7uKSnsKzawSZQ='; style-src 'sha256-n1shQpRw769j2KiBPVoy/glBKdW8Ik7jqKUCH9exAis='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -73,7 +73,7 @@ main{flex:1 1 0;min-height:0;display:flex}
 #treebar{position:absolute;z-index:3;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 460px)}
 .tmode #zoomctl,.tmode #legend{display:none}
 .tr{display:inline-block;min-width:100%}
-.tr ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}
+.tr ul{display:flex;justify-content:center;list-style:none;margin:0;padding:0;position:relative}.tr>ul{gap:18px;align-items:flex-start}
 .tr li{display:flex;align-items:center;position:relative}
 .tv li{flex-direction:column;padding:16px 5px 0}.tv ul ul{padding-top:16px}
 .tv li::before,.tv li::after{content:"";position:absolute;top:0;width:50%;height:16px;border-top:1px solid var(--border)}
@@ -197,7 +197,7 @@ html,body{margin:0}[hidden]{display:none!important}
         <div class="ticks"><span id="tmin"></span><span id="tmid"></span><span id="tmax"></span></div>
       </div>
       <div id="treebar" hidden>
-        <select class="mini" id="trMode"><option value="a" data-i="trAsc"></option><option value="d" data-i="trDesc"></option></select>
+        <select class="mini" id="trMode"><option value="t" data-i="trTime"></option><option value="a" data-i="trAsc"></option><option value="d" data-i="trDesc"></option></select>
         <select class="mini" id="trDir"><option value="v" data-i="trV"></option><option value="h" data-i="trH"></option></select>
         <select class="mini" id="trGen"><option value="3"></option><option value="4" selected></option><option value="5"></option><option value="6"></option><option value="8"></option></select>
       </div>
@@ -637,14 +637,14 @@ lb:{sRoute:"Gezeechente Wee:",rtNone:"keen",rtPerson:"vun der gewielter Persoun"
  pubNote:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b> Persounen, déi wuel nach liewen, ginn net gewisen.",pubAll:"<b>Stammbam, dee vun dësem Site publizéiert gouf.</b>",pubKo:"De publizéierte Fichier „{0}“ konnt net gelies ginn."}};
 for(const k in LZ)Object.assign(L[k],LZ[k]);
 const LT={
-fr:{vTree:"Arbre",vMap:"Carte",trAsc:"Ascendants",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} générations",treeL:"Arbre de {0}",trMore:"Arbre limité à {0} personnes : choisissez une autre personne pour voir la suite."},
-en:{vTree:"Tree",vMap:"Map",trAsc:"Ancestors",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} generations",treeL:"Tree of {0}",trMore:"Tree limited to {0} people: choose another person to see further."},
-de:{vTree:"Stammbaum",vMap:"Karte",trAsc:"Vorfahren",trDesc:"Nachkommen",trV:"senkrecht",trH:"waagerecht",trGen:"{0} Generationen",treeL:"Stammbaum von {0}",trMore:"Stammbaum auf {0} Personen begrenzt: Wählen Sie eine andere Person, um weiterzusehen."},
-it:{vTree:"Albero",vMap:"Mappa",trAsc:"Ascendenti",trDesc:"Discendenti",trV:"verticale",trH:"orizzontale",trGen:"{0} generazioni",treeL:"Albero di {0}",trMore:"Albero limitato a {0} persone: scegli un’altra persona per vedere il seguito."},
-es:{vTree:"Árbol",vMap:"Mapa",trAsc:"Ascendientes",trDesc:"Descendientes",trV:"vertical",trH:"horizontal",trGen:"{0} generaciones",treeL:"Árbol de {0}",trMore:"Árbol limitado a {0} personas: elija otra persona para ver más."},
-pt:{vTree:"Árvore",vMap:"Mapa",trAsc:"Ascendentes",trDesc:"Descendentes",trV:"vertical",trH:"horizontal",trGen:"{0} gerações",treeL:"Árvore de {0}",trMore:"Árvore limitada a {0} pessoas: escolha outra pessoa para ver mais."},
-nl:{vTree:"Stamboom",vMap:"Kaart",trAsc:"Voorouders",trDesc:"Nakomelingen",trV:"verticaal",trH:"horizontaal",trGen:"{0} generaties",treeL:"Stamboom van {0}",trMore:"Stamboom beperkt tot {0} personen: kies een andere persoon om verder te kijken."},
-lb:{vTree:"Stammbam",vMap:"Kaart",trAsc:"Virfaren",trDesc:"Nokommen",trV:"vertikal",trH:"horizontal",trGen:"{0} Generatiounen",treeL:"Stammbam vum {0}",trMore:"Stammbam op {0} Persoune begrenzt: Wielt eng aner Persoun, fir méi ze gesinn."}};
+fr:{trTime:"Contemporains de l’année",vTree:"Arbre",vMap:"Carte",trAsc:"Ascendants",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} générations",treeL:"Arbre de {0}",trMore:"Arbre limité à {0} personnes : choisissez une autre personne pour voir la suite."},
+en:{trTime:"Contemporaries of the year",vTree:"Tree",vMap:"Map",trAsc:"Ancestors",trDesc:"Descendants",trV:"vertical",trH:"horizontal",trGen:"{0} generations",treeL:"Tree of {0}",trMore:"Tree limited to {0} people: choose another person to see further."},
+de:{trTime:"Zeitgenossen des Jahres",vTree:"Stammbaum",vMap:"Karte",trAsc:"Vorfahren",trDesc:"Nachkommen",trV:"senkrecht",trH:"waagerecht",trGen:"{0} Generationen",treeL:"Stammbaum von {0}",trMore:"Stammbaum auf {0} Personen begrenzt: Wählen Sie eine andere Person, um weiterzusehen."},
+it:{trTime:"Contemporanei dell’anno",vTree:"Albero",vMap:"Mappa",trAsc:"Ascendenti",trDesc:"Discendenti",trV:"verticale",trH:"orizzontale",trGen:"{0} generazioni",treeL:"Albero di {0}",trMore:"Albero limitato a {0} persone: scegli un’altra persona per vedere il seguito."},
+es:{trTime:"Contemporáneos del año",vTree:"Árbol",vMap:"Mapa",trAsc:"Ascendientes",trDesc:"Descendientes",trV:"vertical",trH:"horizontal",trGen:"{0} generaciones",treeL:"Árbol de {0}",trMore:"Árbol limitado a {0} personas: elija otra persona para ver más."},
+pt:{trTime:"Contemporâneos do ano",vTree:"Árvore",vMap:"Mapa",trAsc:"Ascendentes",trDesc:"Descendentes",trV:"vertical",trH:"horizontal",trGen:"{0} gerações",treeL:"Árvore de {0}",trMore:"Árvore limitada a {0} pessoas: escolha outra pessoa para ver mais."},
+nl:{trTime:"Tijdgenoten van het jaar",vTree:"Stamboom",vMap:"Kaart",trAsc:"Voorouders",trDesc:"Nakomelingen",trV:"verticaal",trH:"horizontaal",trGen:"{0} generaties",treeL:"Stamboom van {0}",trMore:"Stamboom beperkt tot {0} personen: kies een andere persoon om verder te kijken."},
+lb:{trTime:"Zäitgenosse vum Joer",vTree:"Stammbam",vMap:"Kaart",trAsc:"Virfaren",trDesc:"Nokommen",trV:"vertikal",trH:"horizontal",trGen:"{0} Generatiounen",treeL:"Stammbam vum {0}",trMore:"Stammbam op {0} Persoune begrenzt: Wielt eng aner Persoun, fir méi ze gesinn."}};
 for(const k in LT)Object.assign(L[k],LT[k]);
 
 /* ---------- Exemple fictif (toute ressemblance serait fortuite) ---------- */
@@ -1588,10 +1588,29 @@ function treeHtml(id,g,down,n,root){
   if(g>1)for(const k of (down?[...new Set(childrenOf(id))]:parentsOf(id).slice(0,2)))sub+=treeHtml(k,g-1,down,n,false);
   return '<li>'+treeNode(p,root,extra)+(sub?'<ul>'+sub+'</ul>':'')+'</li>';
 }
+/* Arbre « contemporains » : il suit la frise. Pour l'année affichée, on part des ascendants de la personne choisie qui sont en vie
+   (les plus anciens d'entre eux), et on descend vers tous leurs descendants en vie cette année-là : la parentèle vivante autour d'elle.
+   Un défunt n'apparaît, estompé, que s'il relie deux vivants. Une personne déjà placée n'est pas développée une seconde fois. */
+function treeEra(p,g,n){
+  const Y=S.year,al=q=>!!q&&q.b!=null&&Y>=q.b&&Y<=q.e,up=upMap(p.id);let tops=[];
+  for(const id of up.keys())if(al(P(id))&&!parentsOf(id).some(a=>al(P(a))))tops.push(id);
+  if(!tops.length){if(p.b!=null&&Y>p.e)tops=[p.id];else{let d=Infinity;for(const [id,dep] of up){const q=P(id);if(q&&q.b!=null&&q.b<=Y&&dep<d)d=dep}for(const [id,dep] of up)if(dep===d&&P(id)&&P(id).b<=Y)tops.push(id)}}
+  const memo=new Map(),live=(id,d)=>{let v=memo.get(id);if(v!==undefined)return v;memo.set(id,false);v=al(P(id))||(d<14&&childrenOf(id).some(c=>live(c,d+1)));memo.set(id,v);return v};
+  /* frères et sœurs en vie du plus ancien ascendant vivant : on remonte d'un cran, jusqu'au parent défunt qui les relie */
+  tops=[...new Set(tops.map(id=>{for(const q of parentsOf(id))if(new Set(childrenOf(q)).size>1&&[...new Set(childrenOf(q))].filter(c=>P(c).b!=null&&P(c).b<=Y&&live(c,0)).length>1)return q;return id}))];
+  const drop=new Set();tops=tops.filter(id=>{if(drop.has(id))return false;const sp=spousesOf(id);if(sp.some(s=>up.has(s)&&al(P(s))&&!tops.includes(s)))return false;for(const s of sp)drop.add(s);return true});
+  const seen=new Set(),node=(id,gl)=>{
+    const q=P(id);if(!q)return '';if(n.c>=tree.max){n.cut=true;return ''}n.c++;const dup=seen.has(id);seen.add(id);let sub='';
+    const sp=spousesOf(id).filter(s=>al(P(s))),extra=sp.length?'<small>⚭ '+esc(sp.map(s=>dispName(P(s))).join(', '))+'</small>':'';
+    if(!dup&&gl>1)for(const k of new Set(childrenOf(id))){const c=P(k);if(c&&c.b!=null&&c.b<=Y&&live(k,0))sub+=node(k,gl-1)}
+    return '<li>'+treeNode(q,id===p.id,extra)+(sub?'<ul>'+sub+'</ul>':'')+'</li>'};
+  return tops.map(id=>node(id,g)).join('');
+}
 function renderTree(){
   const sp=S.sel.type==='person'?P(S.sel.id):null,p=(sp&&!sp.hid?sp:P(S.ref));const el=$('#treebody');if(!p){el.innerHTML='';return}
-  const down=$('#trMode').value==='d',hz=$('#trDir').value==='h',n={c:0,cut:false},key=p.id+'|'+down+'|'+hz;
-  el.innerHTML='<div class="tr '+(hz?'th':down?'tv':'tv up')+'"><ul>'+treeHtml(p.id,+$('#trGen').value,down,n,true)+'</ul></div>'+(n.cut?'<p class="note">'+t('trMore',tree.max)+'</p>':'');
+  const md=$('#trMode').value,down=md!=='a',hz=$('#trDir').value==='h',n={c:0,cut:false},key=p.id+'|'+md+'|'+hz;
+  const body=md==='t'?treeEra(p,+$('#trGen').value,n):treeHtml(p.id,+$('#trGen').value,down,n,true);
+  el.innerHTML=(body?'<div class="tr '+(hz?'th':down?'tv':'tv up')+'"><ul>'+body+'</ul></div>':'<p class="note">'+t('noRel')+'</p>')+(n.cut?'<p class="note">'+t('trMore',tree.max)+'</p>':'');
   $('#tree').setAttribute('aria-label',t('treeL',dispName(p)));
   if(tree.root!==key){tree.root=key;const r=el.querySelector('.root');if(r&&r.scrollIntoView)r.scrollIntoView({block:'center',inline:'center'})}
 }
@@ -1913,7 +1932,7 @@ $('#csvtpl').onclick=()=>download(new Blob(['﻿'+CSV_TEMPLATE],{type:'text/csv'
 function boot(){
   {const av=(ARGS.get('lang')||'').toLowerCase(),sv=store.get('cg.lang'),nv=(navigator.language||'en').slice(0,2).toLowerCase();LANG=LANGS[av]?av:LANGS[sv]?sv:LANGS[nv]?nv:'en';$('#lang').value=LANG;
     if(ARGS.get('hist')==='0'||store.get('cg.hist')==='0'){hist.on=false;$('#histOpt').checked=false}
-    {const tv=(store.get('cg.tree')||'').split(',');if(/^[ad]$/.test(tv[0]))$('#trMode').value=tv[0];if(/^[vh]$/.test(tv[1]))$('#trDir').value=tv[1];else if(window.innerWidth<760)$('#trDir').value='h';if(/^[34568]$/.test(tv[2]))$('#trGen').value=tv[2]}
+    {const tv=(store.get('cg.tree')||'').split(',');if(/^[adt]$/.test(tv[0]))$('#trMode').value=tv[0];if(/^[vh]$/.test(tv[1]))$('#trDir').value=tv[1];else if(window.innerWidth<760)$('#trDir').value='h';if(/^[34568]$/.test(tv[2]))$('#trGen').value=tv[2]}
     {const rt=store.get('cg.route'),tn=store.get('cg.tint');if(rt)$('#route').value=rt==='none'?'':rt;if(tn)$('#tint').value=tn}
     setTheme(ARGS.get('theme')||store.get('cg.theme'));applyLang()}
   if(store.get('cg.tiles')){$('#tilesOpt').checked=true;probeTiles()}
