@@ -1,5 +1,5 @@
 // Guard for index.html. No dependency: `node tools/check.mjs` (add --fix to refresh the script fingerprint).
-import {readFileSync, writeFileSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync, readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 
 const file = new URL('../index.html', import.meta.url);
@@ -47,12 +47,24 @@ const banned = [[/\beval\s*\(/, 'eval()'], [/\bnew Function\b/, 'new Function'],
   [/\son[a-z]+\s*=\s*["']/i, 'inline event handler attribute'], [/<(iframe|object|embed|form)\b/i, 'iframe/object/embed/form element'], [/document\.cookie/, 'cookies'], [/\sstyle\s*=\s*["']/i, 'style attribute (use a class)']];
 for (const [re, name] of banned) if (re.test(html)) errors.push(`forbidden: ${name}`);
 const fetches = [...html.matchAll(/\bfetch\(([^)]*)\)/g)].map(m => m[1].trim());
-for (const f of fetches) if (!["'world.json'", "'gaz.json'"].includes(f)) errors.push(`fetch() may only load world.json and gaz.json, found: ${f}`);
+// Besides the two base files: historical borders (hist/<year>.json) and the finer gazetteer by country (gaz/index.json, gaz/<CC>.json), all in this folder.
+const mayFetch = ["'world.json'", "'gaz.json'", "'hist/'+y+'.json'", "'hist/names.json'", "'gaz/index.json'", "'gaz/'+cc+'.json'"];
+for (const f of fetches) if (!mayFetch.includes(f)) errors.push(`fetch() may only load the data files of this folder, found: ${f}`);
 
 // 4. Data files must be valid JSON.
-for (const f of ['world.json', 'gaz.json']) {
+const data = ['world.json', 'gaz.json'];
+for (const d of ['hist', 'gaz']) if (existsSync(new URL('../' + d, import.meta.url))) for (const f of readdirSync(new URL('../' + d, import.meta.url))) if (f.endsWith('.json')) data.push(d + '/' + f);
+for (const f of data) {
   try { JSON.parse(readFileSync(new URL('../' + f, import.meta.url), 'utf8')); } catch (e) { errors.push(`${f} is not valid JSON`); }
 }
+// Every snapshot the script may ask for must exist, and the list of fine gazetteers must match the files present.
+const years = (/const HIST=\[([\d,]+)\]/.exec(html) || [])[1];
+if (!years) errors.push('HIST list of snapshot years not found in the script');
+else for (const y of years.split(',')) if (!data.includes(`hist/${y}.json`)) errors.push(`hist/${y}.json is missing (run node tools/build-hist.mjs)`);
+try {
+  const idx = JSON.parse(readFileSync(new URL('../gaz/index.json', import.meta.url), 'utf8'));
+  for (const cc of idx) if (!data.includes(`gaz/${cc}.json`)) errors.push(`gaz/index.json lists ${cc} but gaz/${cc}.json is missing`);
+} catch (e) { errors.push('gaz/index.json is missing or invalid'); }
 
 if (errors.length) { console.error(errors.map(e => '✗ ' + e).join('\n')); process.exit(1); }
 console.log(`index.html OK (${Math.round(html.length / 1024)} KB, script sha256-${hash})`);
