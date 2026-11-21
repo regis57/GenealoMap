@@ -1,6 +1,6 @@
 # GeneanoMap
 
-**A family tree played on a map, year by year.** Open a GEDCOM file, press play, and watch who lived where from the oldest ancestor to today - or backwards.
+**A family tree played on a map, year by year, inside the borders of the time.** Open a GEDCOM file or a spreadsheet, press play, and watch who lived where from the oldest ancestor to today - or backwards.
 
 Everything runs in the browser. The family file is never uploaded.
 
@@ -85,11 +85,13 @@ The file is read locally and kept only in the visitor's browser; the page blocks
 
 ## How kinship titles are computed
 
-For two people, the program finds their nearest common ancestor and counts the generations on each side. Blood comes first: two people who share grandparents are first cousins whether or not they are married to each other; a marriage is added to the blood relationship ("wife (also first cousin)"), it never replaces or creates one. Relatives of unequal generation are named explicitly: in English with *once/twice removed*, in German with *Onkel/Neffe 2. Grades*, in French and Italian by naming the path ("cousin germain du père", "figlia di una cugina di primo grado").
+For two people, the program finds their nearest common ancestor and counts the generations on each side. Blood comes first: two people who share grandparents are first cousins whether or not they are married to each other; a marriage is added to the blood relationship ("wife (also first cousin)"), it never replaces or creates one. Relatives of unequal generation are named explicitly: in English with *once/twice removed*, in German and Luxembourgish with *Onkel/Neffe 2. Grades* (*Monni/Neveu 2. Grads*), in French, Italian, Spanish, Portuguese and Dutch by naming the path ("cousin germain du père", "figlia di una cugina di primo grado", "primo hermano de la madre", "zoon van een volle nicht").
+
+Where a language has one word for two relationships, the title says which: Dutch *neef* is shown as "neef (oomzegger)" for a nephew and "volle neef" for a first cousin; Italian *nipote* as "nipote (di nonno)" or "nipote (di zio)".
 
 ## Add a language
 
-In `index.html`, two objects hold everything: `L` (interface texts) and `KIN` (kinship vocabulary). Copy the `en` entry of each under a new code, translate it, and add the language to `LANGS`.
+In `index.html`, two objects hold everything: `L` (interface texts) and `KIN` (kinship vocabulary). Copy the `en` entry of each under a new code, translate it, and add the language to `LANGS`. Names of former states are in `tools/hist-names.txt`, one line per name with a column per language: add a column, then run `node tools/build-hist.mjs --names`.
 
 ## Security
 
@@ -111,9 +113,22 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-- **Review of the newer languages** by native speakers, Luxembourgish first.
-- **Historical borders**: more reference dates; names of smaller former states still shown as the source writes them (add them to `tools/hist-names.txt`).
-- **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice.
+
+Next, for people who use it:
+
+- **Show a published tree**: let a site owner put their own file next to the page and name it in the address, so visitors see that tree instead of the fictional example. Living people hidden by default.
+- **Migration paths**: draw the route of a person or of a whole line across the years (birth, moves, death), not only where people are in a given year.
+- **Branches in colour**: paternal and maternal lines, or one surname, picked out on the map and the timeline.
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
+- **More input formats**: Gramps XML and GeneWeb (`.gw`) files.
+- **Use without a connection**: install the page on a phone or computer and keep it working offline.
+
+Next, for quality:
+
+- **Review of the newer languages** by native speakers, Luxembourgish first.
+- **Historical borders**: more reference dates, regions inside states (provinces, Alsace-Lorraine, ...), and the smaller former states still named as the source writes them.
+- **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
 - **Larger trees**: keep playback smooth with tens of thousands of people.
-- **Embed a published tree**: let a site owner show their own file, chosen from the page address.
+- **Automatic tests**: a table of expected kinship titles in every language, and a browser run of the page, checked on each change.
+- **End of the test phase**: remove `noindex` once the above has settled.
