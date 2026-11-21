@@ -40,6 +40,8 @@ Then link to that folder, or embed it in a page:
 <iframe src="/geneanomap/" title="GeneanoMap" style="width:100%;height:85vh;border:0" loading="lazy"></iframe>
 ```
 
+If you change the script, run `node tools/check.mjs --fix` so the security policy accepts it.
+
 `index.html` currently contains `<meta name="robots" content="noindex,nofollow">` because the project is in test; remove that line when you want search engines to list your copy.
 
 ## Privacy
@@ -54,9 +56,13 @@ For two people, the program finds their nearest common ancestor and counts the g
 
 In `index.html`, two objects hold everything: `L` (interface texts) and `KIN` (kinship vocabulary). Copy the `en` entry of each under a new code, translate it, and add the language to `LANGS`.
 
+## Security
+
+Design rules, the automatic check run on every change, and how to report a problem: [SECURITY.md](SECURITY.md).
+
 ## Support
 
-A "buy me a beer" link will be added here and in the settings panel. Placeholder: [`.github/FUNDING.yml`](.github/FUNDING.yml) and `SUPPORT_URL` in `index.html`.
+If GeneanoMap is useful to you: [buy me a beer](https://buymeacoffee.com/regis57). The same link is in the settings panel.
 
 ## Licence and credit
 
@@ -65,3 +71,17 @@ A "buy me a beer" link will be added here and in the settings panel. Placeholder
 > Based on GeneanoMap by Regis Hennequin - https://github.com/regis57/GeneanoMap
 
 Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © OpenStreetMap contributors.
+
+## Roadmap
+
+Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
+
+- **More languages**: Spanish, Dutch, Portuguese, Luxembourgish - interface and kinship vocabulary.
+- **Historical borders**: show the map as it was (1500 to today) instead of current borders only.
+- **Smaller places**: a finer gazetteer for hamlets and vanished villages, loaded by country on demand.
+- **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
+- **Larger trees**: keep playback smooth with tens of thousands of people.
+- **Shareable view**: export a still image or a short animation with living people hidden.
+- **Embed options**: start language, reference person and year from the page address.
+- **GEDCOM 7 packages** (`.gdz`) and direct spreadsheet files (`.xlsx`, `.ods`).
+- **Accessibility**: full keyboard navigation of the map and a text alternative to the animation.

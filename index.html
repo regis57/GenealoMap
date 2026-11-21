@@ -13,8 +13,9 @@
 <!-- Test phase: keeps search engines away. Remove this line when you want the page to be indexed. -->
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
+     Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-L8wq2NNC8uE1Lf+2M9f9x4AmNNA3Lrq0Awzx/BaHj/M='; style-src 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>html,body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -183,7 +184,10 @@ a{color:var(--direct)}
 const $=s=>document.querySelector(s);
 const NOW=new Date().getFullYear();
 /* Lien de soutien (« offrir une bière ») : laisser vide tant qu'il n'existe pas. */
-const SUPPORT_URL='';
+const SUPPORT_URL='https://buymeacoffee.com/regis57';
+/* Seules les adresses http(s) issues du fichier deviennent des liens. */
+const safeUrl=u=>/^https?:\/\/[^\s"<>]+$/i.test(u||'')?u:'';
+const MAX_FILE=60e6;
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const jget=(k,d)=>{try{const v=store.get(k);return v?JSON.parse(v):d}catch(e){return d}};
@@ -347,7 +351,7 @@ function term(du,dx,sex,c){
   return du>dx?K.older(du,dx,sex,c):K.younger(du,dx,sex,c);
 }
 
-const LX={"fr": {"tplCsv": "Télécharger le modèle CSV", "noRes": "Aucun résultat", "yearL": "Année", "speedL": "Vitesse", "noName": "(sans nom)", "mapL": "Carte", "detL": "Détails", "code": "Code source"}, "en": {"tplCsv": "Download the CSV template", "noRes": "No result", "yearL": "Year", "speedL": "Speed", "noName": "(no name)", "mapL": "Map", "detL": "Details", "code": "Source code"}, "de": {"tplCsv": "CSV-Vorlage herunterladen", "noRes": "Kein Treffer", "yearL": "Jahr", "speedL": "Geschwindigkeit", "noName": "(ohne Namen)", "mapL": "Karte", "detL": "Details", "code": "Quellcode"}, "it": {"tplCsv": "Scarica il modello CSV", "noRes": "Nessun risultato", "yearL": "Anno", "speedL": "Velocità", "noName": "(senza nome)", "mapL": "Mappa", "detL": "Dettagli", "code": "Codice sorgente"}};for(const k in LX)Object.assign(L[k],LX[k]);
+const LX={"fr": {"tooBig": "Fichier trop volumineux (60 Mo au plus).", "tplCsv": "Télécharger le modèle CSV", "noRes": "Aucun résultat", "yearL": "Année", "speedL": "Vitesse", "noName": "(sans nom)", "mapL": "Carte", "detL": "Détails", "code": "Code source"}, "en": {"tooBig": "File too large (60 MB at most).", "tplCsv": "Download the CSV template", "noRes": "No result", "yearL": "Year", "speedL": "Speed", "noName": "(no name)", "mapL": "Map", "detL": "Details", "code": "Source code"}, "de": {"tooBig": "Datei zu groß (höchstens 60 MB).", "tplCsv": "CSV-Vorlage herunterladen", "noRes": "Kein Treffer", "yearL": "Jahr", "speedL": "Geschwindigkeit", "noName": "(ohne Namen)", "mapL": "Karte", "detL": "Details", "code": "Quellcode"}, "it": {"tooBig": "File troppo grande (60 MB al massimo).", "tplCsv": "Scarica il modello CSV", "noRes": "Nessun risultato", "yearL": "Anno", "speedL": "Velocità", "noName": "(senza nome)", "mapL": "Mappa", "detL": "Dettagli", "code": "Codice sorgente"}};for(const k in LX)Object.assign(L[k],LX[k]);
 
 /* ---------- Exemple fictif (toute ressemblance serait fortuite) ---------- */
 const SAMPLE=`0 HEAD
@@ -715,7 +719,7 @@ function loadGed(text,name,isSample){
   for(const f of S.fams.values()){for(const s of [f.h,f.w]){const p=S.persons.get(s);if(p&&!p.fams.includes(f.id))p.fams.push(f.id)}for(const c of f.ch){const p=S.persons.get(c);if(p&&!p.famc.includes(f.id))p.famc.push(f.id)}}
   S.proofRev=null;indexProofs(text);
   S.manual=jget('cg.manual',{});
-  for(const [k,v] of Object.entries(S.manual)){const P=S.places.get(k);if(P){P.lat=v[0];P.lon=v[1];P.q='manual'}}
+  for(const [k,v] of Object.entries(S.manual)){const P=S.places.get(k);if(P&&Array.isArray(v)&&isFinite(v[0])&&isFinite(v[1])){P.lat=v[0];P.lon=v[1];P.q='manual'}}
   computeLives();
   S.custom=jget('cg.custom.'+name,{});
   const savedRef=store.get('cg.ref.'+name);S.ref=(savedRef&&S.persons.has(savedRef))?savedRef:first;
@@ -1109,8 +1113,8 @@ function personHtml(p,Y,d){
   h+='<div class="note">'+(alive?'<b>'+tr('inYear',Y)+'</b> : '+ageTxt(p,Y)+(loc?', '+tr('at')+' '+esc(loc.k.split(',').slice(0,2).join(', '))+(loc.sure?'':' '+tr('supposed')):', '+tr('unknownPlace')):'<b>'+tr('inYear',Y)+'</b> : '+(Y<p.b?tg('notBorn',p.sex):tg('deceased',p.sex))+'. <button class="linkbtn" data-y="'+Math.min(p.e,p.b+30)+'">'+tr('goTo',Math.min(p.e,p.b+30))+'</button>')+'</div>';
   // preuves et fiche
   let text=p.text;for(const f of p.fams){const F=S.fams.get(f);if(F)text+='\n'+F.text}
-  const pr=proofsOf(text);const fiche=p.www||($('#tpl').value.trim()?$('#tpl').value.trim().replace('{id}',encodeURIComponent(p.id.replace(/@/g,''))).replace('{nom}',encodeURIComponent(p.name)):'');
-  h+='<h3>'+tr('proofs')+'</h3>';
+  const pr=proofsOf(text);let fiche=p.www||($('#tpl').value.trim()?$('#tpl').value.trim().replace('{id}',encodeURIComponent(p.id.replace(/@/g,''))).replace('{nom}',encodeURIComponent(p.name)):'');
+  fiche=safeUrl(fiche);h+='<h3>'+tr('proofs')+'</h3>';
   if(pr.list.length||pr.other.length||fiche){h+='<div class="proofs">'+(fiche?'<a href="'+esc(fiche)+'" target="_blank" rel="noopener noreferrer">'+tr('profile')+'</a>':'')+pr.list.map(([id,u])=>'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+tr('proof',esc(id))+'</a>').join('')+pr.other.slice(0,12).map((u,i)=>{let host=tr('link');try{host=new URL(u).hostname.replace(/^www\./,'')}catch(e){}return '<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(host)+' '+(i+1)+'</a>'}).join('')+'</div>'}
   else h+='<div class="sub">'+tr('noLinks')+'</div>';
   // proches en vie
@@ -1176,7 +1180,7 @@ $('#qres').addEventListener('click',e=>{const b=e.target.closest('button');if(b&
 document.addEventListener('click',e=>{if(!e.target.closest('.search'))$('#qres').hidden=true;if(!e.target.closest('#settings')&&!e.target.closest('#setbtn')){$('#settings').hidden=true;$('#setbtn').setAttribute('aria-expanded','false')}});
 $('#setbtn').onclick=()=>{const s=$('#settings');s.hidden=!s.hidden;$('#setbtn').setAttribute('aria-expanded',String(!s.hidden))};
 $('#filelabel').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#file').click()}});
-function readFile(f){const fr=new FileReader();fr.onload=()=>{let buf=fr.result,txt=new TextDecoder('utf-8').decode(buf);
+function readFile(f){if(f.size>MAX_FILE){$('#panel').innerHTML='<h2>'+t('badTitle')+'</h2><p class=note>'+t('tooBig')+'</p>';return}const fr=new FileReader();fr.onload=()=>{let buf=fr.result,txt=new TextDecoder('utf-8').decode(buf);
   if(/1 CHAR (ANSI|ANSEL|IBMPC|WINDOWS)/i.test(txt.slice(0,3000))||(txt.match(/\uFFFD/g)||[]).length>5)txt=new TextDecoder('windows-1252').decode(buf);
   if(!/0 @[^@]+@ INDI/.test(txt)){const conv=csvToGed(txt);if(conv)txt=conv;else{$('#panel').innerHTML='<h2>'+t('badTitle')+'</h2><p class="note">'+t('badText')+'</p>';return}}
   store.set('cg.ged',txt)||store.del('cg.ged');store.set('cg.name',f.name);setPlaying(false);loadGed(txt,f.name,false)};fr.readAsArrayBuffer(f)}
