@@ -15,7 +15,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in).
      Only the script below may run: its fingerprint is in the policy. After any change to the script, run: node tools/check.mjs --fix -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Fe8bA+exorxvJO8GsqfMtw8r8/yChvSJjfgc6Sk0P7Y='; style-src 'sha256-VF4bFHmv926yOOX4iKDbkdc+5U1w5enhQJ4PeeLD2/Q='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SGwTOkukQfhHx8dQFwK3FhgB9a7LkuhlxDJl7EMMVc0='; style-src 'sha256-VF4bFHmv926yOOX4iKDbkdc+5U1w5enhQJ4PeeLD2/Q='; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
 <style>
 /* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
 :root{
@@ -1136,6 +1136,7 @@ function resolvePlaces(){
       const vars=[parts[i]];const pm=/^(.*?)\s*\((.*?)\)\s*$/.exec(parts[i]);if(pm){vars.push(pm[1],pm[2])}
       let found=[];for(const v of vars){let n=norm(v);for(const key of [n,EXO[n]].filter(Boolean)){const a=S.gazIndex.get(key);if(a)found=found.concat(a)}}
       if(cc)found=found.filter(ix=>S.gaz[ix][1]===cc);
+      if(i>0)found=found.filter(ix=>S.gaz[ix][4]>0); /* un hameau homonyme d'une région ne situe pas la région */
       if(found.length){cands=[...new Set(found)];level=i;break}
     }
     info.set(Q,{parts,cc,suffix,cands,level});
@@ -1150,7 +1151,7 @@ function resolvePlaces(){
     if(Q.q==='gedcom'||Q.q==='manual')continue;
     const ce=I.suffix?centOf(I.suffix):null;let pick=null,amb=false; /* amb : plusieurs hameaux homonymes sans rien pour les départager */
     if(I.cands){const cs=I.cands.map(ix=>S.gaz[ix]);
-      if(ce){cs.sort((a,b)=>km(a[2],a[3],ce[0],ce[1])-km(b[2],b[3],ce[0],ce[1]));pick=cs[0];if(I.level===0&&ce[2]>=3&&km(pick[2],pick[3],ce[0],ce[1])>150)pick=null}
+      if(ce){cs.sort((a,b)=>km(a[2],a[3],ce[0],ce[1])-km(b[2],b[3],ce[0],ce[1]));pick=cs[0];const far=km(pick[2],pick[3],ce[0],ce[1]);if((I.level===0&&ce[2]>=3&&far>150)||(I.level>0&&far>100))pick=null}
       else{cs.sort((a,b)=>b[4]-a[4]);pick=cs[0];if(cs.length>1&&!pick[4])amb=true}}
     if(pick){Q.lat=pick[2];Q.lon=pick[3];Q.cc=pick[1];Q.q=I.level===0&&!amb?'exact':'approx'}
     else if(ce){Q.lat=ce[0];Q.lon=ce[1];Q.q='approx'}

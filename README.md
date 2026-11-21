@@ -18,6 +18,7 @@ Everything runs in the browser. The family file is never uploaded.
 - **Shareable view**: save the map as an image or record the playback as a short video. People presumed living are left out by default (a tick box), and the picture says so.
 - **Keyboard and screen readers**: the map can be moved, zoomed and browsed place by place from the keyboard, and a text version lists what the animation shows.
 - **Light or dark**: follows the device, or choose in the settings.
+- **Hamlets and vanished villages**: a finer gazetteer for fifteen countries, fetched country by country only when a tree needs it.
 - **Works from the file alone**: tested on a tree of 12 generations and about 400 people.
 
 ## Use it
@@ -68,13 +69,13 @@ If you change the script, run `node tools/check.mjs --fix` so the security polic
 
 ### Finer gazetteer
 
-`gaz.json` knows towns above about 1,000 inhabitants. For hamlets, small villages and places that no longer exist, build a file per country from GeoNames:
+`gaz.json` knows towns above about 1,000 inhabitants. Hamlets, small villages and places that no longer exist are in one file per country in `gaz/`. Fifteen countries are provided: Austria, Belgium, Canada, Czechia, France, Germany, Ireland, Italy, Luxembourg, the Netherlands, Poland, Portugal, Spain, Switzerland and the United Kingdom (14 MB in all, 0.02 to 2.6 MB each). To add or refresh a country from GeoNames:
 
 ```
-node tools/build-gaz.mjs FR LU BE DE
+node tools/build-gaz.mjs US AR
 ```
 
-This writes `gaz/FR.json`, ... and `gaz/index.json`. A visitor's browser fetches a country file only when the tree has places in that country that the main gazetteer could not find. When several hamlets share a name and nothing in the tree tells them apart, the position stays flagged "approximate".
+This writes `gaz/US.json`, ... and updates `gaz/index.json`. A visitor's browser fetches a country file only when the tree has places in that country that the main gazetteer could not find. When several hamlets share a name and nothing in the tree tells them apart, the position stays flagged "approximate".
 
 `index.html` currently contains `<meta name="robots" content="noindex,nofollow">` because the project is in test; remove that line when you want search engines to list your copy.
 
@@ -112,7 +113,7 @@ Ideas under consideration, in no promised order. Suggestions are welcome in the 
 
 - **Review of the newer languages** by native speakers, Luxembourgish first.
 - **Historical borders**: names of former states in every language (they are in English today), and more reference dates.
-- **Smaller places**: publish ready-made country files for the finer gazetteer (today they are built with `tools/build-gaz.mjs`).
+- **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
 - **Larger trees**: keep playback smooth with tens of thousands of people.
 - **Embed a published tree**: let a site owner show their own file, chosen from the page address.
