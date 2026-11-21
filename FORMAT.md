@@ -1,6 +1,6 @@
 # Input formats
 
-GeneanoMap reads one file, in the browser. Two families of formats are accepted: GEDCOM, and a table of people.
+GenealoMap reads one file, in the browser. Two families of formats are accepted: GEDCOM, and a table of people.
 
 ## 1. GEDCOM (recommended)
 

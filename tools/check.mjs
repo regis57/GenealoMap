@@ -38,7 +38,7 @@ else {
 }
 
 // 2. No address outside the short list below may appear anywhere in the page.
-const allowed = ['https://github.com/regis57/GeneanoMap', 'https://tile.openstreetmap.org', 'https://example.org/', 'https://buymeacoffee.com/regis57'];
+const allowed = ['https://github.com/regis57/GenealoMap', 'https://tile.openstreetmap.org', 'https://example.org/', 'https://buymeacoffee.com/regis57'];
 for (const [url] of html.matchAll(/https?:\/\/[^\s"'<>)\\]+/g))
   if (!allowed.some(a => url.startsWith(a))) errors.push(`unexpected address: ${url}`);
 

@@ -1,10 +1,10 @@
-# GeneanoMap
+# GenealoMap
 
 **A family tree played on a map, year by year, inside the borders of the time.** Open a GEDCOM file or a spreadsheet, press play, and watch who lived where from the oldest ancestor to today - or backwards.
 
 Everything runs in the browser. The family file is never uploaded.
 
-> Test phase. Live copy: https://regis57.github.io/GeneanoMap/
+> Test phase. Live copy: https://regis57.github.io/GenealoMap/
 
 ## What it does
 
@@ -53,7 +53,7 @@ gaz/          finer gazetteer by country: hamlets and vanished villages (see bel
 Then link to that folder, or embed it in a page:
 
 ```html
-<iframe src="/geneanomap/" title="GeneanoMap" style="width:100%;height:85vh;border:0" loading="lazy"></iframe>
+<iframe src="/genealomap/" title="GenealoMap" style="width:100%;height:85vh;border:0" loading="lazy"></iframe>
 ```
 
 The page address can set how an embedded copy starts - after `?` or, to keep it out of the server's logs, after `#`:
@@ -70,14 +70,14 @@ The page address can set how an embedded copy starts - after `?` or, to keep it 
 | `file=tree.ged` | show a tree you publish: a file placed in the same folder as the page (see below) |
 | `living=1` | with `file`: also show people presumed living |
 
-Example: `/geneanomap/#lang=de&year=1870&theme=dark`. Without `file`, the tree shown is the one the visitor opened (or the fictional example).
+Example: `/genealomap/#lang=de&year=1870&theme=dark`. Without `file`, the tree shown is the one the visitor opened (or the fictional example).
 
 ### Publish your own tree
 
 Put your file (`.ged`, `.gdz`, `.csv`, `.xlsx` or `.ods`) in the same folder as `index.html` and name it in the address:
 
 ```
-https://your-site.example/geneanomap/?file=tree.ged&ref=I12&lang=fr
+https://your-site.example/genealomap/?file=tree.ged&ref=I12&lang=fr
 ```
 
 Visitors then see your tree instead of the fictional example. People presumed living (no death recorded, born less than 100 years ago) are not shown: not on the map, not in lists, searches or titles. Add `living=1` only if everyone concerned agrees.
@@ -120,13 +120,13 @@ Design rules, the automatic check run on every change, and how to report a probl
 
 ## Support
 
-If GeneanoMap is useful to you: [buy me a beer](https://buymeacoffee.com/regis57). The same link is in the settings panel.
+If GenealoMap is useful to you: [buy me a beer](https://buymeacoffee.com/regis57). The same link is in the settings panel.
 
 ## Licence and credit
 
-[Apache License 2.0](LICENSE). You may use, modify and redistribute GeneanoMap, including commercially, provided you keep the licence and the [NOTICE](NOTICE) file and say where it comes from, for example:
+[Apache License 2.0](LICENSE). You may use, modify and redistribute GenealoMap, including commercially, provided you keep the licence and the [NOTICE](NOTICE) file and say where it comes from, for example:
 
-> Based on GeneanoMap by Regis Hennequin - https://github.com/regis57/GeneanoMap
+> Based on GenealoMap by Regis Hennequin - https://github.com/regis57/GenealoMap
 
 Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © OpenStreetMap contributors. The historical borders in `hist/` come from [historical-basemaps](https://github.com/aourednik/historical-basemaps) by André Ourednik and stay under their own licence, GPL-3.0; they are data read by the program, and the folder can be left out.
 

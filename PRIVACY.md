@@ -1,6 +1,6 @@
 # Privacy
 
-GeneanoMap is a static page. There is no account, no server-side code, no database, no analytics, no cookie and no advertising.
+GenealoMap is a static page. There is no account, no server-side code, no database, no analytics, no cookie and no advertising.
 
 ## What is guaranteed
 
