@@ -1,0 +1,22 @@
+GeneanoMap
+Copyright 2026 Regis Hennequin
+https://github.com/regis57/GeneanoMap
+
+This product is licensed under the Apache License, Version 2.0.
+If you reuse or adapt it, keep this NOTICE file with your copy and keep
+a visible credit such as:
+
+    Based on GeneanoMap by Regis Hennequin - https://github.com/regis57/GeneanoMap
+
+Third-party data shipped with this project:
+
+  world.json  Country outlines derived from Natural Earth (public domain),
+              via the world-atlas package (ISC licence, Mike Bostock).
+  gaz.json    Place names and coordinates derived from GeoNames
+              (https://www.geonames.org), Creative Commons Attribution 4.0,
+              via the all-the-cities package.
+
+Optional, only if the visitor turns it on in the settings:
+
+  Map tiles (c) OpenStreetMap contributors, Open Database License,
+  served by tile.openstreetmap.org under its tile usage policy.

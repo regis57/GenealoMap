@@ -1,0 +1,7 @@
+id,given,surname,sex,birth_date,birth_place,death_date,death_place,father_id,mother_id,spouse_ids,marriage_date,marriage_place,residences,occupation,profile_url,links,notes
+P1,Camille,Vernhet,F,1968-03-14,"Montréal, Québec, Canada @45.508,-73.588",,,P2,P3,,,,,,,,Fictional example: replace these rows with your own family
+P2,Julien,Vernhet,M,1936-02-02,"Marseille, Bouches-du-Rhône, France",2011-11-09,"Montréal, Québec, Canada @45.508,-73.588",P4,P5,P3,1965,"Montréal, Québec, Canada @45.508,-73.588","1961=Montréal, Québec, Canada @45.508,-73.588",,,,
+P3,Hélène,Roux,F,1940-07-30,"Alger, Algérie",,,,,P2,,,,,,,
+P4,Augustin,Vernhet,M,1902-10-11,"Alès, Gard, France",1975-01-03,"Marseille, Bouches-du-Rhône, France",,,P5,1931,"Marseille, Bouches-du-Rhône, France","1930=Marseille, Bouches-du-Rhône, France",docker,,,
+P5,Rose,Malaval,F,1907-05-05,"Mende, Lozère, France",1989,"Marseille, Bouches-du-Rhône, France",,,P4,,,,,,,
+P6,Marthe,Vernhet,F,~1933,"Marseille, Bouches-du-Rhône, France",,,P4,P5,,,,,,,,

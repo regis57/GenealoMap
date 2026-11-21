@@ -1,0 +1,1309 @@
+<!doctype html>
+<!--
+  GeneanoMap - a family tree played on a map, year by year.
+  Copyright 2026 Regis Hennequin - Apache License 2.0 - https://github.com/regis57/GeneanoMap
+  Self-contained: copy index.html, world.json and gaz.json to any web folder. No server code, no tracker, no upload.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GeneanoMap</title>
+<meta name="description" content="Play a family tree on a map, year by year. Open a GEDCOM or CSV file: it is read in your browser and never uploaded.">
+<!-- Test phase: keeps search engines away. Remove this line when you want the page to be indexed. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<!-- The browser itself blocks any transfer of data to another site: connections are limited to this folder (plus OpenStreetMap images if the visitor opts in). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<style>html,body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+/* Layout : application plein écran — carte au centre, frise temporelle flottante en haut à gauche, fiche à droite (en bas sur téléphone). */
+:root{
+  --sea:#dbe5ea; --land:#f5f6f1; --border:#9fb0b8; --bg:#eef2f4; --panel:#ffffff; --line:#d5dde2;
+  --ink:#17232e; --muted:#566673; --direct:#0b6b8a; --blood:#c07a06; --ally:#7b8894; --focus:#b3261e;
+  --chip:#e7eef2; --shadow:0 2px 10px rgba(20,40,60,.14);
+  --f-display:"Space Grotesk","Segoe UI",system-ui,sans-serif; --f-body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --sea:#0e1820; --land:#1a2731; --border:#40525f; --bg:#0b1218; --panel:#141e26; --line:#273641;
+  --ink:#e7eef3; --muted:#94a5b1; --direct:#55bfe0; --blood:#eeae3f; --ally:#8a99a5; --focus:#ff7a70;
+  --chip:#1f2c36; --shadow:0 2px 12px rgba(0,0,0,.5); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --sea:#0e1820; --land:#1a2731; --border:#40525f; --bg:#0b1218; --panel:#141e26; --line:#273641;
+  --ink:#e7eef3; --muted:#94a5b1; --direct:#55bfe0; --blood:#eeae3f; --ally:#8a99a5; --focus:#ff7a70;
+  --chip:#1f2c36; --shadow:0 2px 12px rgba(0,0,0,.5); color-scheme:dark }
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;overflow:hidden}
+*{box-sizing:border-box}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--direct);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.bar h1{font-family:var(--f-display);font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em}
+.chip{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip b{color:var(--ink);font-weight:600}
+.spacer{flex:1 1 0}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 11px;font-weight:500}
+.btn:hover{border-color:var(--direct)}
+.btn.primary{background:var(--direct);border-color:var(--direct);color:var(--panel)}
+.search{position:relative;flex:1 1 180px;max-width:300px;min-width:0}
+.search input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px}
+.results{position:absolute;z-index:30;top:calc(100% + 4px);left:0;right:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:300px;overflow:auto}
+.results button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px}
+.results button:hover,.results button:focus{background:var(--chip)}
+.results small{color:var(--muted)}
+main{flex:1 1 0;min-height:0;display:flex}
+#mapwrap{position:relative;flex:1 1 0;min-width:0;background:var(--sea);overflow:hidden;touch-action:none}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+#map.drag{cursor:grabbing}
+#time{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));width:min(430px,calc(100% - 20px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.trow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#play{width:42px;height:42px;border-radius:50%;border:0;background:var(--direct);color:var(--panel);font-size:17px;flex:none}
+#year{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;min-width:86px}
+#living{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+#dir{white-space:nowrap}
+.mini{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:4px 8px;font-size:12px}
+#histo{width:100%;height:34px;display:block}
+#slider{width:100%;margin:0;accent-color:var(--direct)}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+#zoomctl{position:absolute;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px}
+#zoomctl button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-size:16px;box-shadow:var(--shadow)}
+#ticker{position:absolute;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:min(430px,calc(100% - 64px));display:flex;flex-direction:column;gap:4px;pointer-events:none}
+#ticker div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:12px;box-shadow:var(--shadow)}
+#ticker b{font-variant-numeric:tabular-nums}
+#legend{position:absolute;right:10px;top:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;max-width:260px;flex-direction:column;gap:3px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.d-direct{background:var(--direct)}.d-blood{background:var(--blood)}.d-ally{background:var(--ally)}.d-self{background:var(--focus)}
+#panel{flex:0 0 370px;max-width:42%;background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#panel h2{font-family:var(--f-display);font-size:18px;margin:0 0 2px;text-wrap:balance}
+#panel h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 6px;font-weight:600}
+.sub{color:var(--muted);font-size:13px}
+.note{background:var(--chip);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--muted);margin:10px 0}
+.note b{color:var(--ink)}
+.rows{display:flex;flex-direction:column;gap:2px}
+.row{display:grid;grid-template-columns:12px 1fr auto;gap:2px 8px;align-items:baseline;text-align:left;border:0;background:none;border-radius:7px;padding:5px 6px;width:100%}
+.row:hover{background:var(--chip)}
+.row .nm{font-weight:500;min-width:0;overflow-wrap:anywhere}
+.row .ag{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.row .tt{grid-column:2 / 4;font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.place-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border:0;background:none;width:100%;text-align:left;padding:6px 6px 2px;font-weight:600;border-top:1px solid var(--line);margin-top:6px}
+.place-h span:last-child{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.title-line{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:600;background:var(--chip)}
+.badge.direct{color:var(--direct)}.badge.blood{color:var(--blood)}.badge.self{color:var(--focus)}
+.linkbtn{border:0;background:none;color:var(--direct);padding:0;text-decoration:underline;font-size:12.5px}
+.ev{display:grid;grid-template-columns:92px 1fr;gap:2px 8px;padding:4px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.ev .d{font-variant-numeric:tabular-nums;color:var(--muted)}
+.ev details{grid-column:2}
+.ev summary{cursor:pointer;color:var(--muted);font-size:12px}
+.ev p{margin:4px 0;font-size:12.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.proofs{display:flex;flex-wrap:wrap;gap:5px}
+.proofs a{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12.5px;color:var(--direct);text-decoration:none;font-variant-numeric:tabular-nums}
+.proofs a:hover{border-color:var(--direct);background:var(--chip)}
+a{color:var(--direct)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#settings{position:absolute;z-index:40;top:52px;right:max(12px,env(safe-area-inset-right,0px));width:min(340px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px;max-height:calc(100% - 64px);overflow:auto}
+#settings summary{cursor:pointer;font-size:13px;margin-top:10px}
+#settings a.btn{text-decoration:none;display:inline-block;color:var(--ink)}
+#settings a.btn[aria-disabled=true]{opacity:.6;cursor:default}
+#lang{padding:6px 8px}
+#settings label{display:block;margin:8px 0;font-size:13px}
+#settings input[type=text]{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;margin-top:3px}
+#drop{position:absolute;inset:0;z-index:50;background:color-mix(in srgb,var(--direct) 22%,transparent);display:grid;place-items:center;font-family:var(--f-display);font-size:22px;pointer-events:none}
+.plist{font-size:12.5px;width:100%;border-collapse:collapse}
+.plist td{padding:3px 4px;border-bottom:1px dashed var(--line);vertical-align:top;overflow-wrap:anywhere}
+@media (max-width:1180px){#legend{display:none}}
+@media (max-width:760px){
+  main{flex-direction:column}
+  .bar{gap:6px 8px;padding-block:6px}.bar h1{font-size:15px}#filechip,.bar .spacer{display:none}.search{flex:1 1 120px}
+  #time{padding:8px 10px;gap:4px}#histo,.ticks{display:none}#play{width:36px;height:36px}
+  #panel{flex:0 0 44%;max-width:none;border-left:0;border-top:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px))}
+  #legend{display:none}#ticker div:nth-child(n+3){display:none}
+  #year{font-size:28px;min-width:70px}
+  #histo{height:24px}
+}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto} }
+</style>
+
+<div id="app">
+  <header class="bar">
+    <h1>GeneanoMap</h1>
+    <span class="chip" id="filechip">…</span>
+    <span class="chip" id="refchip">…</span>
+    <span class="spacer"></span>
+    <div class="search"><input id="q" type="search" autocomplete="off"><div class="results" id="qres" hidden></div></div>
+    <label class="btn primary" for="file" tabindex="0" id="filelabel" data-i="open"></label>
+    <input id="file" type="file" accept=".ged,.gedcom,.csv,.tsv,.txt,text/plain,text/csv" hidden>
+    <select class="mini" id="lang" aria-label="Language / Langue / Sprache / Lingua"></select>
+    <button class="btn" id="setbtn" aria-expanded="false" data-i="settings"></button>
+  </header>
+  <main>
+    <section id="mapwrap">
+      <canvas id="map"></canvas>
+      <div id="time">
+        <div class="trow">
+          <button id="play">▶</button>
+          <div><div id="year">—</div><div id="living">&nbsp;</div></div>
+          <span class="spacer"></span>
+          <button class="mini" id="dir"></button>
+          <select class="mini" id="speed"><option value="2"></option><option value="6" selected></option><option value="15"></option><option value="40"></option></select>
+        </div>
+        <canvas id="histo" aria-hidden="true"></canvas>
+        <input id="slider" type="range" min="1500" max="2026" step="1" value="1900">
+        <div class="ticks"><span id="tmin"></span><span id="tmid"></span><span id="tmax"></span></div>
+      </div>
+      <div id="ticker" aria-live="off"></div>
+      <div id="legend"><span><i class="dot d-self"></i><span data-i="lgSelf"></span></span><span><i class="dot d-direct"></i><span data-i="lgDirect"></span></span><span><i class="dot d-blood"></i><span data-i="lgBlood"></span></span><span><i class="dot d-ally"></i><span data-i="lgAlly"></span></span></div>
+      <div id="zoomctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit">⤢</button></div>
+      <div id="drop" hidden data-i="drop"></div>
+    </section>
+    <aside id="panel"></aside>
+  </main>
+  <div id="settings" hidden>
+    <strong data-i="settings"></strong>
+    <label><input type="checkbox" id="follow" checked> <span data-i="sFollow"></span></label>
+    <label><input type="checkbox" id="anon"> <span data-i="sAnon"></span></label>
+    <label><input type="checkbox" id="lines" checked> <span data-i="sLines"></span></label>
+    <label><input type="checkbox" id="tilesOpt"> <span data-i="sTiles"></span><br><span class="sub" id="tilesHint"></span></label>
+    <label><span data-i="sTpl"></span>
+      <input type="text" id="tpl" placeholder="https://example.org/person?id={id}">
+      <span class="sub" data-i="sTplHint"></span></label>
+    <div class="acts"><button class="btn" id="places" data-i="sPlaces"></button><button class="btn" id="sample" data-i="sSample"></button><button class="btn" id="forget" data-i="sForget"></button><button class="btn" id="csvtpl" data-i="tplCsv"></button></div>
+    <details><summary data-i="sAbout"></summary><p class="sub" data-ih="about"></p></details>
+    <!-- Soutien : renseigner SUPPORT_URL dans le script pour activer le bouton. -->
+    <div class="acts"><a class="btn" id="support" target="_blank" rel="noopener"></a><a class="btn" href="https://github.com/regis57/GeneanoMap" target="_blank" rel="noopener"><span data-i="code"></span> ↗</a></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const NOW=new Date().getFullYear();
+/* Lien de soutien (« offrir une bière ») : laisser vide tant qu'il n'existe pas. */
+const SUPPORT_URL='';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const jget=(k,d)=>{try{const v=store.get(k);return v?JSON.parse(v):d}catch(e){return d}};
+
+/* ---------- Langues (interface et liens de parenté) ---------- */
+const LANGS={fr:'Français',en:'English',de:'Deutsch',it:'Italiano'};
+const L={
+fr:{open:"Ouvrir un fichier",settings:"Réglages",search:"Chercher une personne…",sample:"Exemple fictif",persons:"{0} personne|{0} personnes",ref:"Référence",gens:"{0} générations",
+ play:"Lecture",pause:"Pause",dirF:"passé → présent",dirB:"présent → passé",dirT:"Changer le sens de lecture",speed:"{0} ans/s",living:"{0} en vie",nplaces:"{0} lieu|{0} lieux",
+ lgSelf:"référence",lgDirect:"ascendance et descendance directes",lgBlood:"parenté par le sang",lgAlly:"alliance ou sans lien",zin:"Zoomer",zout:"Dézoomer",zfit:"Voir toute la famille",drop:"Déposez le fichier ici (GEDCOM ou CSV)",
+ sFollow:"La carte suit la famille pendant la lecture",sAnon:"Masquer le nom des personnes présumées vivantes",sLines:"Relier la personne choisie à ses proches en vie",sTiles:"Fond de carte détaillé OpenStreetMap",sTilesHint:"Désactivé par défaut : une fois coché, votre navigateur demande les images de carte à openstreetmap.org, qui voit donc la zone affichée (jamais votre arbre).",sTilesKo:"Indisponible sur cet hébergement.",
+ sTpl:"Modèle de lien vers la fiche en ligne (optionnel)",sTplHint:"Utilisé si le fichier ne donne pas de lien par personne. {id} = identifiant, {nom} = nom complet.",sPlaces:"Lieux et coordonnées",sSample:"Charger l’exemple fictif",sForget:"Oublier mon fichier",sLang:"Langue",sAbout:"Confidentialité et crédits",support:"Offrir une bière",supportSoon:"Offrir une bière (lien à venir)",
+ inYear:"En {0}",sumLiving:"{0} personne en vie|{0} personnes en vie",inPlaces:"dans {0} lieu|dans {0} lieux",relTo:"liens exprimés par rapport à {0}",
+ sampleNote:"<b>Exemple fictif.</b> Cette famille est inventée pour montrer l’outil. Ouvrez votre propre fichier (GEDCOM ou CSV) avec le bouton en haut, ou glissez-le sur la page : il reste dans votre navigateur et n’est envoyé nulle part.",
+ approxN:"<b>{0}</b> lieu en position approximative|<b>{0}</b> lieux en position approximative",unlocN:"<b>{0}</b> non localisé|<b>{0}</b> non localisés",and:"et",checkPlaces:"Vérifier les lieux",noPlace:"Sans lieu connu ({0})",noneLiving:"Aucune personne datée n’est en vie cette année-là.",backYear:"← Toute l’année {0}",back:"← Retour",neighbors:"{0} lieux voisins",nobodyThere:"Personne de l’arbre n’y vit en {0}.",approxPos:"(position approximative)",
+ est:"(≈ estimé)",estTip:"Dates estimées à partir des proches et des événements connus",rename:"renommer ce lien",editTitle:"modifier le titre",commonAnc:"Ancêtre commun le plus proche :",at:"à",supposed:"(lieu supposé)",unknownPlace:"lieu inconnu",notBorn:"pas encore né|pas encore née",deceased:"décédé|décédée",goTo:"Aller à {0}",
+ proofs:"Preuves et liens",profile:"Fiche en ligne ↗",proof:"Preuve {0}",noLinks:"Aucun lien dans le fichier pour cette personne.",relatives:"Proches en vie en {0} ({1})",noRel:"Aucun proche connu en vie cette année-là.",
+ cats:["Conjoint","Parents","Enfants","Frères et sœurs","Grands-parents et aïeux","Petits-enfants","Oncles et tantes","Neveux et nièces","Cousins germains","Parenté plus éloignée"],
+ events:"Événements ({0})",noEvents:"Aucun événement daté ou localisé.",details:"Détails et sources",source:"Source :",notes:"Notes",setRef:"Prendre comme référence",center:"Centrer la carte",withP:"avec",link:"lien",age:"{0} an|{0} ans",
+ plTitle:"Lieux et coordonnées",plIntro:"{0} lieux distincts. Les coordonnées viennent d’abord du fichier (balises MAP du GEDCOM ou « @lat,lon » du CSV), sinon d’un répertoire mondial des communes de plus de 1 000 habitants ; les villages plus petits sont placés près des lieux voisins, en attendant mieux.",plClick:"<b>Cliquez sur la carte</b> pour placer « {0} ».",mentions:"{0} mention|{0} mentions",notLocated:"non localisé",qGedcom:"fichier",qExact:"répertoire",qApprox:"approximatif",qManual:"placé à la main",place:"placer",see:"voir",copyMap:"Copier les coordonnées (format GEDCOM)",copied:"Copié : {0} lieux.",copyKo:"La copie a été refusée par le navigateur.",
+ tkBirth:"naissance de {0}",tkDeath:"décès de {0}",tkMore:"… et {0} autre événement|… et {0} autres événements",
+ badTitle:"Fichier non reconnu",badText:"Ce fichier n’est ni un GEDCOM (lignes « 0 @…@ INDI ») ni un tableau CSV au format attendu (colonnes id, prenom, nom…). Exportez votre arbre au format .ged depuis votre logiciel ou site de généalogie, ou utilisez le modèle CSV, puis réessayez.",
+ about:"<b>Confidentialité.</b> Votre fichier est lu par votre navigateur et n’est jamais envoyé à un serveur. Il est seulement mémorisé dans ce navigateur pour votre prochaine visite (« Oublier mon fichier » l’efface). La page ne contacte aucun service tiers, sauf si vous activez le fond OpenStreetMap ou si vous cliquez sur un lien de votre fichier.<br><br><b>Crédits.</b> GeneanoMap, par Regis Hennequin, sous licence Apache 2.0 (réutilisation et adaptation libres en citant la source : github.com/regis57/GeneanoMap). Fonds : Natural Earth. Répertoire des lieux : GeoNames (CC BY 4.0).",
+ vers:"vers ",avant:"avant ",apres:"après ",living1:"Personne vivante",
+ ev:{BIRT:"Naissance",BAPM:"Baptême",CHR:"Baptême",DEAT:"Décès",BURI:"Inhumation",CREM:"Crémation",RESI:"Résidence",OCCU:"Profession",CENS:"Recensement",EMIG:"Émigration",IMMI:"Immigration",NATU:"Naturalisation",GRAD:"Diplôme",RETI:"Retraite",EVEN:"Événement",MARR:"Mariage",DIV:"Divorce",ENGA:"Fiançailles",MARB:"Bans",MARC:"Contrat de mariage",EDUC:"Études",CONF:"Confirmation",FCOM:"Communion",WILL:"Testament",PROB:"Succession",TITL:"Titre",ADOP:"Adoption",PROP:"Bien"}},
+en:{open:"Open a file",settings:"Settings",search:"Find a person…",sample:"Fictional example",persons:"{0} person|{0} people",ref:"Reference",gens:"{0} generations",
+ play:"Play",pause:"Pause",dirF:"past → present",dirB:"present → past",dirT:"Change playback direction",speed:"{0} yrs/s",living:"{0} alive",nplaces:"{0} place|{0} places",
+ lgSelf:"reference",lgDirect:"direct ancestors and descendants",lgBlood:"blood relatives",lgAlly:"by marriage or unrelated",zin:"Zoom in",zout:"Zoom out",zfit:"Show the whole family",drop:"Drop the file here (GEDCOM or CSV)",
+ sFollow:"The map follows the family during playback",sAnon:"Hide the names of people presumed living",sLines:"Link the selected person to living relatives",sTiles:"Detailed OpenStreetMap background",sTilesHint:"Off by default: once ticked, your browser requests map images from openstreetmap.org, which therefore sees the area displayed (never your tree).",sTilesKo:"Not available on this host.",
+ sTpl:"Link template to the online profile (optional)",sTplHint:"Used when the file has no per-person link. {id} = identifier, {nom} = full name.",sPlaces:"Places and coordinates",sSample:"Load the fictional example",sForget:"Forget my file",sLang:"Language",sAbout:"Privacy and credits",support:"Buy me a beer",supportSoon:"Buy me a beer (link coming soon)",
+ inYear:"In {0}",sumLiving:"{0} person alive|{0} people alive",inPlaces:"in {0} place|in {0} places",relTo:"relationships shown relative to {0}",
+ sampleNote:"<b>Fictional example.</b> This family is made up to demonstrate the tool. Open your own file (GEDCOM or CSV) with the button above, or drop it on the page: it stays in your browser and is not sent anywhere.",
+ approxN:"<b>{0}</b> place at an approximate position|<b>{0}</b> places at approximate positions",unlocN:"<b>{0}</b> not located|<b>{0}</b> not located",and:"and",checkPlaces:"Check places",noPlace:"No known place ({0})",noneLiving:"No dated person is alive that year.",backYear:"← Whole year {0}",back:"← Back",neighbors:"{0} neighbouring places",nobodyThere:"Nobody from the tree lives there in {0}.",approxPos:"(approximate position)",
+ est:"(≈ estimated)",estTip:"Dates estimated from relatives and known events",rename:"rename this relationship",editTitle:"edit title",commonAnc:"Nearest common ancestor:",at:"in",supposed:"(presumed place)",unknownPlace:"place unknown",notBorn:"not yet born|not yet born",deceased:"deceased|deceased",goTo:"Go to {0}",
+ proofs:"Evidence and links",profile:"Online profile ↗",proof:"Proof {0}",noLinks:"No link in the file for this person.",relatives:"Relatives alive in {0} ({1})",noRel:"No known relative alive that year.",
+ cats:["Spouse","Parents","Children","Siblings","Grandparents and ancestors","Grandchildren","Uncles and aunts","Nephews and nieces","First cousins","More distant relatives"],
+ events:"Events ({0})",noEvents:"No dated or located event.",details:"Details and sources",source:"Source:",notes:"Notes",setRef:"Set as reference",center:"Centre the map",withP:"with",link:"link",age:"{0} yr|{0} yrs",
+ plTitle:"Places and coordinates",plIntro:"{0} distinct places. Coordinates come first from the file (GEDCOM MAP tags or “@lat,lon” in CSV), otherwise from a world gazetteer of towns over 1,000 inhabitants; smaller villages are placed near neighbouring places until corrected.",plClick:"<b>Click on the map</b> to place “{0}”.",mentions:"{0} mention|{0} mentions",notLocated:"not located",qGedcom:"file",qExact:"gazetteer",qApprox:"approximate",qManual:"placed by hand",place:"place",see:"show",copyMap:"Copy coordinates (GEDCOM format)",copied:"Copied: {0} places.",copyKo:"The browser refused the copy.",
+ tkBirth:"birth of {0}",tkDeath:"death of {0}",tkMore:"… and {0} more event|… and {0} more events",
+ badTitle:"File not recognised",badText:"This file is neither a GEDCOM (lines “0 @…@ INDI”) nor a CSV table in the expected format (columns id, given, surname…). Export your tree as .ged from your genealogy software or website, or use the CSV template, then try again.",
+ about:"<b>Privacy.</b> Your file is read by your browser and is never sent to a server. It is only remembered in this browser for your next visit (“Forget my file” erases it). The page contacts no third-party service unless you enable the OpenStreetMap background or click a link from your file.<br><br><b>Credits.</b> GeneanoMap, by Regis Hennequin, under the Apache 2.0 licence (free to reuse and adapt with attribution: github.com/regis57/GeneanoMap). Basemap: Natural Earth. Gazetteer: GeoNames (CC BY 4.0).",
+ vers:"c. ",avant:"before ",apres:"after ",living1:"Living person",
+ ev:{BIRT:"Birth",BAPM:"Baptism",CHR:"Christening",DEAT:"Death",BURI:"Burial",CREM:"Cremation",RESI:"Residence",OCCU:"Occupation",CENS:"Census",EMIG:"Emigration",IMMI:"Immigration",NATU:"Naturalisation",GRAD:"Graduation",RETI:"Retirement",EVEN:"Event",MARR:"Marriage",DIV:"Divorce",ENGA:"Engagement",MARB:"Banns",MARC:"Marriage contract",EDUC:"Education",CONF:"Confirmation",FCOM:"First communion",WILL:"Will",PROB:"Probate",TITL:"Title",ADOP:"Adoption",PROP:"Property"}},
+de:{open:"Datei öffnen",settings:"Einstellungen",search:"Person suchen…",sample:"Fiktives Beispiel",persons:"{0} Person|{0} Personen",ref:"Bezugsperson",gens:"{0} Generationen",
+ play:"Abspielen",pause:"Pause",dirF:"Vergangenheit → heute",dirB:"heute → Vergangenheit",dirT:"Abspielrichtung ändern",speed:"{0} J./s",living:"{0} am Leben",nplaces:"{0} Ort|{0} Orte",
+ lgSelf:"Bezugsperson",lgDirect:"direkte Vor- und Nachfahren",lgBlood:"Blutsverwandte",lgAlly:"angeheiratet oder nicht verwandt",zin:"Vergrößern",zout:"Verkleinern",zfit:"Ganze Familie zeigen",drop:"Datei hier ablegen (GEDCOM oder CSV)",
+ sFollow:"Die Karte folgt der Familie beim Abspielen",sAnon:"Namen vermutlich lebender Personen verbergen",sLines:"Gewählte Person mit lebenden Verwandten verbinden",sTiles:"Detaillierter OpenStreetMap-Hintergrund",sTilesHint:"Standardmäßig aus: Nach dem Aktivieren lädt Ihr Browser Kartenbilder von openstreetmap.org, das somit den angezeigten Ausschnitt sieht (nie Ihren Stammbaum).",sTilesKo:"Auf diesem Server nicht verfügbar.",
+ sTpl:"Linkvorlage zum Online-Profil (optional)",sTplHint:"Wird verwendet, wenn die Datei keinen Link pro Person enthält. {id} = Kennung, {nom} = vollständiger Name.",sPlaces:"Orte und Koordinaten",sSample:"Fiktives Beispiel laden",sForget:"Meine Datei vergessen",sLang:"Sprache",sAbout:"Datenschutz und Quellen",support:"Ein Bier spendieren",supportSoon:"Ein Bier spendieren (Link folgt)",
+ inYear:"Im Jahr {0}",sumLiving:"{0} Person am Leben|{0} Personen am Leben",inPlaces:"an {0} Ort|an {0} Orten",relTo:"Verwandtschaft bezogen auf {0}",
+ sampleNote:"<b>Fiktives Beispiel.</b> Diese Familie ist erfunden, um das Werkzeug zu zeigen. Öffnen Sie Ihre eigene Datei (GEDCOM oder CSV) über die Schaltfläche oben oder ziehen Sie sie auf die Seite: Sie bleibt in Ihrem Browser und wird nirgendwohin gesendet.",
+ approxN:"<b>{0}</b> Ort mit ungefährer Lage|<b>{0}</b> Orte mit ungefährer Lage",unlocN:"<b>{0}</b> nicht verortet|<b>{0}</b> nicht verortet",and:"und",checkPlaces:"Orte prüfen",noPlace:"Ohne bekannten Ort ({0})",noneLiving:"In diesem Jahr lebt keine datierte Person.",backYear:"← Ganzes Jahr {0}",back:"← Zurück",neighbors:"{0} benachbarte Orte",nobodyThere:"{0} lebt dort niemand aus dem Stammbaum.",approxPos:"(ungefähre Lage)",
+ est:"(≈ geschätzt)",estTip:"Daten aus Verwandten und bekannten Ereignissen geschätzt",rename:"Bezeichnung ändern",editTitle:"Titel bearbeiten",commonAnc:"Nächster gemeinsamer Vorfahr:",at:"in",supposed:"(vermuteter Ort)",unknownPlace:"Ort unbekannt",notBorn:"noch nicht geboren|noch nicht geboren",deceased:"verstorben|verstorben",goTo:"Zu {0} springen",
+ proofs:"Belege und Links",profile:"Online-Profil ↗",proof:"Beleg {0}",noLinks:"Kein Link in der Datei für diese Person.",relatives:"Lebende Verwandte {0} ({1})",noRel:"Kein bekannter Verwandter lebt in diesem Jahr.",
+ cats:["Ehepartner","Eltern","Kinder","Geschwister","Großeltern und Vorfahren","Enkel","Onkel und Tanten","Neffen und Nichten","Cousins und Cousinen","Entferntere Verwandte"],
+ events:"Ereignisse ({0})",noEvents:"Kein datiertes oder verortetes Ereignis.",details:"Details und Quellen",source:"Quelle:",notes:"Notizen",setRef:"Als Bezugsperson wählen",center:"Karte zentrieren",withP:"mit",link:"Link",age:"{0} J.|{0} J.",
+ plTitle:"Orte und Koordinaten",plIntro:"{0} verschiedene Orte. Koordinaten stammen zuerst aus der Datei (GEDCOM-MAP-Angaben oder „@lat,lon“ im CSV), sonst aus einem weltweiten Ortsverzeichnis (Orte über 1.000 Einwohner); kleinere Dörfer werden vorläufig nahe den Nachbarorten platziert.",plClick:"<b>Klicken Sie auf die Karte</b>, um „{0}“ zu platzieren.",mentions:"{0} Nennung|{0} Nennungen",notLocated:"nicht verortet",qGedcom:"Datei",qExact:"Ortsverzeichnis",qApprox:"ungefähr",qManual:"von Hand gesetzt",place:"setzen",see:"zeigen",copyMap:"Koordinaten kopieren (GEDCOM-Format)",copied:"Kopiert: {0} Orte.",copyKo:"Der Browser hat das Kopieren abgelehnt.",
+ tkBirth:"Geburt von {0}",tkDeath:"Tod von {0}",tkMore:"… und {0} weiteres Ereignis|… und {0} weitere Ereignisse",
+ badTitle:"Datei nicht erkannt",badText:"Diese Datei ist weder ein GEDCOM (Zeilen „0 @…@ INDI“) noch eine CSV-Tabelle im erwarteten Format (Spalten id, given, surname…). Exportieren Sie Ihren Stammbaum als .ged aus Ihrem Programm oder Portal oder nutzen Sie die CSV-Vorlage.",
+ about:"<b>Datenschutz.</b> Ihre Datei wird von Ihrem Browser gelesen und nie an einen Server gesendet. Sie wird nur in diesem Browser für Ihren nächsten Besuch gemerkt („Meine Datei vergessen“ löscht sie). Die Seite kontaktiert keinen Drittdienst, außer Sie aktivieren den OpenStreetMap-Hintergrund oder klicken auf einen Link aus Ihrer Datei.<br><br><b>Quellen.</b> GeneanoMap von Regis Hennequin, Apache-2.0-Lizenz (freie Nutzung und Anpassung mit Quellenangabe: github.com/regis57/GeneanoMap). Karte: Natural Earth. Ortsverzeichnis: GeoNames (CC BY 4.0).",
+ vers:"um ",avant:"vor ",apres:"nach ",living1:"Lebende Person",
+ ev:{BIRT:"Geburt",BAPM:"Taufe",CHR:"Taufe",DEAT:"Tod",BURI:"Bestattung",CREM:"Einäscherung",RESI:"Wohnort",OCCU:"Beruf",CENS:"Volkszählung",EMIG:"Auswanderung",IMMI:"Einwanderung",NATU:"Einbürgerung",GRAD:"Abschluss",RETI:"Ruhestand",EVEN:"Ereignis",MARR:"Heirat",DIV:"Scheidung",ENGA:"Verlobung",MARB:"Aufgebot",MARC:"Ehevertrag",EDUC:"Ausbildung",CONF:"Konfirmation",FCOM:"Erstkommunion",WILL:"Testament",PROB:"Nachlass",TITL:"Titel",ADOP:"Adoption",PROP:"Besitz"}},
+it:{open:"Apri un file",settings:"Impostazioni",search:"Cerca una persona…",sample:"Esempio fittizio",persons:"{0} persona|{0} persone",ref:"Riferimento",gens:"{0} generazioni",
+ play:"Riproduci",pause:"Pausa",dirF:"passato → presente",dirB:"presente → passato",dirT:"Cambia il verso di lettura",speed:"{0} anni/s",living:"{0} in vita",nplaces:"{0} luogo|{0} luoghi",
+ lgSelf:"riferimento",lgDirect:"ascendenti e discendenti diretti",lgBlood:"parenti di sangue",lgAlly:"acquisiti o senza legame",zin:"Ingrandisci",zout:"Riduci",zfit:"Mostra tutta la famiglia",drop:"Rilascia qui il file (GEDCOM o CSV)",
+ sFollow:"La mappa segue la famiglia durante la riproduzione",sAnon:"Nascondi il nome delle persone presumibilmente viventi",sLines:"Collega la persona scelta ai parenti in vita",sTiles:"Sfondo dettagliato OpenStreetMap",sTilesHint:"Disattivato per impostazione predefinita: una volta attivato, il browser richiede le immagini della mappa a openstreetmap.org, che vede quindi la zona visualizzata (mai il tuo albero).",sTilesKo:"Non disponibile su questo host.",
+ sTpl:"Modello di link alla scheda online (facoltativo)",sTplHint:"Usato se il file non contiene un link per persona. {id} = identificativo, {nom} = nome completo.",sPlaces:"Luoghi e coordinate",sSample:"Carica l’esempio fittizio",sForget:"Dimentica il mio file",sLang:"Lingua",sAbout:"Privacy e crediti",support:"Offrimi una birra",supportSoon:"Offrimi una birra (link in arrivo)",
+ inYear:"Nel {0}",sumLiving:"{0} persona in vita|{0} persone in vita",inPlaces:"in {0} luogo|in {0} luoghi",relTo:"parentele espresse rispetto a {0}",
+ sampleNote:"<b>Esempio fittizio.</b> Questa famiglia è inventata per mostrare lo strumento. Apri il tuo file (GEDCOM o CSV) con il pulsante in alto oppure trascinalo sulla pagina: resta nel tuo browser e non viene inviato da nessuna parte.",
+ approxN:"<b>{0}</b> luogo in posizione approssimativa|<b>{0}</b> luoghi in posizione approssimativa",unlocN:"<b>{0}</b> non localizzato|<b>{0}</b> non localizzati",and:"e",checkPlaces:"Verifica i luoghi",noPlace:"Senza luogo noto ({0})",noneLiving:"Nessuna persona datata è in vita in quell’anno.",backYear:"← Tutto l’anno {0}",back:"← Indietro",neighbors:"{0} luoghi vicini",nobodyThere:"Nessuno dell’albero vi abita nel {0}.",approxPos:"(posizione approssimativa)",
+ est:"(≈ stimato)",estTip:"Date stimate dai parenti e dagli eventi noti",rename:"rinomina questa parentela",editTitle:"modifica il titolo",commonAnc:"Antenato comune più vicino:",at:"a",supposed:"(luogo presunto)",unknownPlace:"luogo sconosciuto",notBorn:"non ancora nato|non ancora nata",deceased:"deceduto|deceduta",goTo:"Vai al {0}",
+ proofs:"Prove e link",profile:"Scheda online ↗",proof:"Prova {0}",noLinks:"Nessun link nel file per questa persona.",relatives:"Parenti in vita nel {0} ({1})",noRel:"Nessun parente noto in vita in quell’anno.",
+ cats:["Coniuge","Genitori","Figli","Fratelli e sorelle","Nonni e antenati","Nipoti (di nonno)","Zii e zie","Nipoti (di zio)","Cugini di primo grado","Parenti più lontani"],
+ events:"Eventi ({0})",noEvents:"Nessun evento datato o localizzato.",details:"Dettagli e fonti",source:"Fonte:",notes:"Note",setRef:"Imposta come riferimento",center:"Centra la mappa",withP:"con",link:"link",age:"{0} anno|{0} anni",
+ plTitle:"Luoghi e coordinate",plIntro:"{0} luoghi distinti. Le coordinate provengono prima dal file (tag MAP del GEDCOM o «@lat,lon» nel CSV), altrimenti da un repertorio mondiale dei comuni con più di 1.000 abitanti; i paesi più piccoli sono collocati vicino ai luoghi limitrofi, in attesa di correzione.",plClick:"<b>Clicca sulla mappa</b> per collocare «{0}».",mentions:"{0} menzione|{0} menzioni",notLocated:"non localizzato",qGedcom:"file",qExact:"repertorio",qApprox:"approssimativo",qManual:"collocato a mano",place:"colloca",see:"mostra",copyMap:"Copia le coordinate (formato GEDCOM)",copied:"Copiato: {0} luoghi.",copyKo:"Il browser ha rifiutato la copia.",
+ tkBirth:"nascita di {0}",tkDeath:"morte di {0}",tkMore:"… e {0} altro evento|… e altri {0} eventi",
+ badTitle:"File non riconosciuto",badText:"Questo file non è né un GEDCOM (righe «0 @…@ INDI») né una tabella CSV nel formato previsto (colonne id, given, surname…). Esporta il tuo albero in formato .ged dal tuo programma o sito di genealogia, oppure usa il modello CSV.",
+ about:"<b>Privacy.</b> Il tuo file viene letto dal tuo browser e non viene mai inviato a un server. Viene solo ricordato in questo browser per la prossima visita («Dimentica il mio file» lo cancella). La pagina non contatta alcun servizio esterno, salvo se attivi lo sfondo OpenStreetMap o clicchi su un link del tuo file.<br><br><b>Crediti.</b> GeneanoMap, di Regis Hennequin, licenza Apache 2.0 (riuso e adattamento liberi citando la fonte: github.com/regis57/GeneanoMap). Mappa: Natural Earth. Repertorio dei luoghi: GeoNames (CC BY 4.0).",
+ vers:"circa ",avant:"prima del ",apres:"dopo il ",living1:"Persona vivente",
+ ev:{BIRT:"Nascita",BAPM:"Battesimo",CHR:"Battesimo",DEAT:"Morte",BURI:"Sepoltura",CREM:"Cremazione",RESI:"Residenza",OCCU:"Professione",CENS:"Censimento",EMIG:"Emigrazione",IMMI:"Immigrazione",NATU:"Naturalizzazione",GRAD:"Diploma",RETI:"Pensione",EVEN:"Evento",MARR:"Matrimonio",DIV:"Divorzio",ENGA:"Fidanzamento",MARB:"Pubblicazioni",MARC:"Contratto di matrimonio",EDUC:"Studi",CONF:"Cresima",FCOM:"Comunione",WILL:"Testamento",PROB:"Successione",TITL:"Titolo",ADOP:"Adozione",PROP:"Proprietà"}}
+};
+let LANG='fr';
+function t(k,...a){let s=(L[LANG]&&L[LANG][k]);if(s==null)s=L.fr[k];if(s==null)return k;if(typeof s!=='string')return s;
+  if(s.includes('|')&&typeof a[0]==='number'){const f=s.split('|');s=(LANG==='fr'?a[0]>1:a[0]!==1)?f[1]:f[0]}
+  return s.replace(/\{(\d)\}/g,(m,i)=>a[i]==null?'':a[i])}
+const tg=(k,sex)=>{const f=t(k).split('|');return sex==='F'&&f[1]?f[1]:f[0]};
+const evLabel=e=>e.label||(t('ev')[e.tag]||e.tag);
+
+/* ---------- Vocabulaire de la parenté ----------
+   du = générations entre la personne de référence et l'ancêtre commun, dx = générations entre l'autre personne et cet ancêtre.
+   c.aSex = sexe de l'ascendant de la référence situé à (du-dx) générations ; c.cSex = sexe de l'ascendant de l'autre personne situé à (dx-du) générations. */
+const sx3=(s,m,f,n)=>s==='M'?m:s==='F'?f:(n||m);
+const rep=(s,n)=>s.repeat(Math.max(0,n));
+const ORD_EN=['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
+const nth=n=>n+(n%10===1&&n%100!==11?'st':n%10===2&&n%100!==12?'nd':n%10===3&&n%100!==13?'rd':'th');
+const ORD_IT=['','primo','secondo','terzo','quarto','quinto','sesto','settimo','ottavo','nono','decimo'];
+const KIN={
+fr:{
+  anc(n,s){if(n===1)return sx3(s,'père','mère','parent');if(n<=6)return rep('arrière-',n-2)+sx3(s,'grand-père','grand-mère','grand-parent');return sx3(s,'aïeul','aïeule','ancêtre')+' à la '+n+'e génération'},
+  desc(n,s){if(n===1)return sx3(s,'fils','fille','enfant');if(n<=6)return rep('arrière-',n-2)+sx3(s,'petit-fils','petite-fille','petit-enfant');return sx3(s,'descendant','descendante')+' à la '+n+'e génération'},
+  sib(s,half){return (half?'demi-':'')+sx3(s,'frère','sœur','frère ou sœur')},
+  uncle(n,s){if(n===2)return sx3(s,'oncle','tante','oncle ou tante');if(n<=7)return rep('arrière-',n-3)+sx3(s,'grand-oncle','grand-tante');return sx3(s,'frère','sœur')+' d’un ancêtre à la '+(n-1)+'e génération'},
+  nephew(n,s){if(n===2)return sx3(s,'neveu','nièce','neveu ou nièce');return rep('arrière-',n-3)+sx3(s,'petit-neveu','petite-nièce')},
+  cousin(m,s){return m===2?sx3(s,'cousin germain','cousine germaine'):m===3?sx3(s,'cousin issu de germain','cousine issue de germain'):sx3(s,'cousin','cousine')+' au '+(m-1)+'e degré'},
+  of(x){return /^[aeiouyhéèàâêîôûAEIOUYHÉ]/.test(x)?'d’'+x:'de '+x},
+  ofThe(term,s){return s==='U'?'d’un '+term:/^[aeiouyhéèàâêîôû]/.test(term)?'de l’'+term:(s==='F'?'de la ':'du ')+term},
+  older(du,dx,s,c){return this.cousin(dx,s)+' '+this.ofThe(this.anc(du-dx,c.aSex),c.aSex)},
+  younger(du,dx,s,c){return this.desc(dx-du,s)+(c.cSex==='F'?' d’une ':' d’un ')+this.cousin(du,c.cSex==='F'?'F':'M')},
+  title(term,name){return term+' '+this.of(name)},
+  spouse(s){return sx3(s,'époux','épouse','conjoint')},stepParent(s){return sx3(s,'beau-père','belle-mère')+' (conjoint d’un parent)'},childIn(s){return sx3(s,'gendre','belle-fille')},sibIn(s){return sx3(s,'beau-frère','belle-sœur')},parentIn(s){return sx3(s,'beau-père','belle-mère')},
+  byMarriage(tx,sx,ts,ss){return /ancêtre/.test(tx)?sx3(sx,'époux','épouse','conjoint')+(ss==='F'?' d’une ':' d’un ')+ts:tx+' par alliance'},spouseOf(s,name,term){return this.spouse(s)+' '+this.of(name)+' ('+term+')'},spouseSide(term,name){return term+' '+this.of(name)+' (côté conjoint)'},also(sp,term){return sp+' (et '+term+')'},
+  self:'personne de référence',none:'sans lien de parenté connu',sosa:n=>'Sosa '+n},
+en:{
+  greats(n){return n<=2?rep('great-',n):nth(n)+' great-'},
+  anc(n,s){const b=sx3(s,'father','mother','parent');if(n===1)return b;return this.greats(n-2)+'grand'+b},
+  desc(n,s){const b=sx3(s,'son','daughter','child');if(n===1)return b;return this.greats(n-2)+'grand'+b},
+  sib(s,half){return (half?'half-':'')+sx3(s,'brother','sister','sibling')},
+  uncle(n,s){return this.greats(n-2)+sx3(s,'uncle','aunt','uncle or aunt')},
+  nephew(n,s){return this.greats(n-2)+sx3(s,'nephew','niece','nephew or niece')},
+  cousin(m){return (ORD_EN[m-1]||nth(m-1))+' cousin'},
+  removed(d){return d===1?' once removed':d===2?' twice removed':' '+d+' times removed'},
+  older(du,dx){return this.cousin(dx)+this.removed(du-dx)},younger(du,dx){return this.cousin(du)+this.removed(dx-du)},
+  title(term,name){return name+'’s '+term},
+  spouse(s){return sx3(s,'husband','wife','spouse')},stepParent(s){return sx3(s,'stepfather','stepmother','step-parent')},childIn(s){return sx3(s,'son-in-law','daughter-in-law')},sibIn(s){return sx3(s,'brother-in-law','sister-in-law')},parentIn(s){return sx3(s,'father-in-law','mother-in-law')},
+  byMarriage(tx){return tx+' by marriage'},spouseOf(s,name,term){return this.spouse(s)+' of '+name+' ('+term+')'},spouseSide(term,name){return name+'’s '+term+' (spouse’s side)'},also(sp,term){return sp+' (also '+term+')'},
+  self:'reference person',none:'no known relationship',sosa:n=>'Ahnentafel no. '+n},
+de:{
+  ur(n){return n<=0?'':'Ur'+rep('ur',n-1)},cap(pre,w){return pre?pre+w.toLowerCase():w},
+  anc(n,s){if(n===1)return sx3(s,'Vater','Mutter','Elternteil');if(n<=7)return this.cap(this.ur(n-2),sx3(s,'Großvater','Großmutter','Großelternteil'));return sx3(s,'Vorfahr','Vorfahrin')+' in der '+n+'. Generation'},
+  desc(n,s){if(n===1)return sx3(s,'Sohn','Tochter','Kind');if(n<=7)return this.cap(this.ur(n-2),sx3(s,'Enkel','Enkelin','Enkelkind'));return sx3(s,'Nachfahr','Nachfahrin')+' in der '+n+'. Generation'},
+  sib(s,half){return half?sx3(s,'Halbbruder','Halbschwester','Halbgeschwister'):sx3(s,'Bruder','Schwester','Geschwister')},
+  uncle(n,s){if(n===2)return sx3(s,'Onkel','Tante');return this.cap(this.ur(n-3),sx3(s,'Großonkel','Großtante'))},
+  nephew(n,s){if(n===2)return sx3(s,'Neffe','Nichte');return this.cap(this.ur(n-3),sx3(s,'Großneffe','Großnichte'))},
+  cousin(m,s){return sx3(s,'Cousin','Cousine')+(m>2?' '+(m-1)+'. Grades':'')},
+  older(du,dx,s){return this.uncle(du-dx+1,s)+' '+dx+'. Grades'},younger(du,dx,s){return this.nephew(dx-du+1,s)+' '+du+'. Grades'},
+  title(term,name){return term+' von '+name},
+  spouse(s){return sx3(s,'Ehemann','Ehefrau','Ehepartner')},stepParent(s){return sx3(s,'Stiefvater','Stiefmutter')},childIn(s){return sx3(s,'Schwiegersohn','Schwiegertochter')},sibIn(s){return sx3(s,'Schwager','Schwägerin')},parentIn(s){return sx3(s,'Schwiegervater','Schwiegermutter')},
+  byMarriage(tx,sx){return sx3(sx,'angeheirateter','angeheiratete')+' '+tx},spouseOf(s,name,term){return this.spouse(s)+' von '+name+' ('+term+')'},spouseSide(term,name){return term+' von '+name+' (Seite des Ehepartners)'},also(sp,term){return sp+' (auch '+term+')'},
+  self:'Bezugsperson',none:'keine bekannte Verwandtschaft',sosa:n=>'Kekule-Nr. '+n},
+it:{
+  anc(n,s){if(n===1)return sx3(s,'padre','madre','genitore');if(n===2)return sx3(s,'nonno','nonna');if(n===3)return sx3(s,'bisnonno','bisnonna');if(n===4)return sx3(s,'trisnonno','trisnonna');return sx3(s,'antenato','antenata')+' alla '+n+'ª generazione'},
+  desc(n,s){if(n===1)return sx3(s,'figlio','figlia');if(n===2)return 'nipote (di nonno)';if(n===3)return 'pronipote';return 'discendente alla '+n+'ª generazione'},
+  sib(s,half){return half?sx3(s,'fratellastro','sorellastra'):sx3(s,'fratello','sorella')},
+  ofThe(term,s){return s==='U'?'di un '+term:/^[aeiou]/.test(term)?'dell’'+term:s==='F'?'della '+term:(/^(z|gn|ps|s[^aeiou])/.test(term)?'dello ':'del ')+term},
+  uncle(n,s,c){if(n===2)return sx3(s,'zio','zia');if(n===3)return sx3(s,'prozio','prozia');const a=(c&&c.upSex)||'U';return sx3(s,'fratello','sorella')+' '+this.ofThe(this.anc(n-1,a),a)},
+  nephew(n,s){if(n===2)return 'nipote (di zio)';if(n===3)return 'pronipote (di zio)';return 'discendente di un fratello o di una sorella ('+n+' generazioni)'},
+  cousin(m,s){return sx3(s,'cugino','cugina')+' di '+(ORD_IT[m-1]||(m-1)+'°')+' grado'},
+  older(du,dx,s,c){return this.cousin(dx,s)+' '+this.ofThe(this.anc(du-dx,c.aSex),c.aSex)},
+  younger(du,dx,s,c){return this.desc(dx-du,s)+(c.cSex==='F'?' di una ':' di un ')+this.cousin(du,c.cSex==='F'?'F':'M')},
+  title(term,name){return term+' di '+name},
+  spouse(s){return sx3(s,'marito','moglie','coniuge')},stepParent(s){return sx3(s,'patrigno','matrigna')},childIn(s){return sx3(s,'genero','nuora')},sibIn(s){return sx3(s,'cognato','cognata')},parentIn(s){return sx3(s,'suocero','suocera')},
+  byMarriage(tx,sx,ts,ss){return sx3(sx,'marito','moglie','coniuge')+' '+this.ofThe(ts,ss)},spouseOf(s,name,term){return this.spouse(s)+' di '+name+' ('+term+')'},spouseSide(term,name){return term+' di '+name+' (lato del coniuge)'},also(sp,term){return sp+' (anche '+term+')'},
+  self:'persona di riferimento',none:'nessuna parentela nota',sosa:n=>'Sosa '+n}
+};
+function term(du,dx,sex,c){
+  const K=KIN[LANG]||KIN.fr;c=c||{aSex:'U',cSex:'U'};
+  if(dx===0)return K.anc(du,sex);
+  if(du===0)return K.desc(dx,sex);
+  if(dx===1)return du===1?K.sib(sex,c.half):K.uncle(du,sex,c);
+  if(du===1)return K.nephew(dx,sex);
+  if(du===dx)return K.cousin(du,sex);
+  return du>dx?K.older(du,dx,sex,c):K.younger(du,dx,sex,c);
+}
+
+const LX={"fr": {"tplCsv": "Télécharger le modèle CSV", "noRes": "Aucun résultat", "yearL": "Année", "speedL": "Vitesse", "noName": "(sans nom)", "mapL": "Carte", "detL": "Détails", "code": "Code source"}, "en": {"tplCsv": "Download the CSV template", "noRes": "No result", "yearL": "Year", "speedL": "Speed", "noName": "(no name)", "mapL": "Map", "detL": "Details", "code": "Source code"}, "de": {"tplCsv": "CSV-Vorlage herunterladen", "noRes": "Kein Treffer", "yearL": "Jahr", "speedL": "Geschwindigkeit", "noName": "(ohne Namen)", "mapL": "Karte", "detL": "Details", "code": "Quellcode"}, "it": {"tplCsv": "Scarica il modello CSV", "noRes": "Nessun risultato", "yearL": "Anno", "speedL": "Velocità", "noName": "(senza nome)", "mapL": "Mappa", "detL": "Dettagli", "code": "Codice sorgente"}};for(const k in LX)Object.assign(L[k],LX[k]);
+
+/* ---------- Exemple fictif (toute ressemblance serait fortuite) ---------- */
+const SAMPLE=`0 HEAD
+1 SOUR EXEMPLE
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Camille /Vernhet/
+1 SEX F
+1 BIRT
+2 DATE 14 MAR 1968
+2 PLAC Montréal, Québec, Canada
+3 MAP
+4 LATI N45.508
+4 LONG W73.588
+1 FAMC @F1@
+0 @I2@ INDI
+1 NAME Julien /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE 2 FEB 1936
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+1 EMIG
+2 DATE 1961
+2 PLAC Montréal, Québec, Canada
+3 MAP
+4 LATI N45.508
+4 LONG W73.588
+1 DEAT
+2 DATE 9 NOV 2011
+2 PLAC Montréal, Québec, Canada
+3 MAP
+4 LATI N45.508
+4 LONG W73.588
+1 FAMS @F1@
+1 FAMC @F2@
+0 @I3@ INDI
+1 NAME Hélène /Roux/
+1 SEX F
+1 BIRT
+2 DATE 30 JUL 1940
+2 PLAC Alger, Algérie
+3 MAP
+4 LATI N36.754
+4 LONG E3.059
+1 FAMS @F1@
+0 @I4@ INDI
+1 NAME Augustin /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE 11 OCT 1902
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 RESI
+2 DATE 1930
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+1 DEAT
+2 DATE 3 JAN 1975
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+1 FAMS @F2@
+1 FAMC @F3@
+0 @I5@ INDI
+1 NAME Rose /Malaval/
+1 SEX F
+1 BIRT
+2 DATE 5 MAY 1907
+2 PLAC Mende, Lozère, France
+3 MAP
+4 LATI N44.518
+4 LONG E3.501
+1 DEAT
+2 DATE 1989
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+1 FAMS @F2@
+0 @I6@ INDI
+1 NAME Marthe /Vernhet/
+1 SEX F
+1 BIRT
+2 DATE 1933
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+1 FAMC @F2@
+0 @I7@ INDI
+1 NAME Firmin /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE 20 JAN 1871
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 OCCU mineur
+2 DATE 1898
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 DEAT
+2 DATE 1940
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 FAMS @F3@
+1 FAMC @F4@
+0 @I8@ INDI
+1 NAME Léonie /Pagès/
+1 SEX F
+1 BIRT
+2 DATE 1876
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 DEAT
+2 DATE 1951
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 FAMS @F3@
+0 @I9@ INDI
+1 NAME Émile /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE 1900
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+1 DEAT
+2 DATE 1917
+2 PLAC Verdun, Meuse, France
+3 MAP
+4 LATI N49.160
+4 LONG E5.384
+1 FAMC @F3@
+0 @I10@ INDI
+1 NAME Baptiste /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE 1838
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 DEAT
+2 DATE 1904
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 FAMS @F4@
+1 FAMC @F5@
+0 @I11@ INDI
+1 NAME Victoire /Agulhon/
+1 SEX F
+1 BIRT
+2 DATE 1845
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 DEAT
+2 DATE 1899
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 FAMS @F4@
+0 @I12@ INDI
+1 NAME Jean /Vernhet/
+1 SEX M
+1 BIRT
+2 DATE ABT 1802
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 DEAT
+2 DATE 1866
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 FAMS @F5@
+0 @I13@ INDI
+1 NAME Marguerite /Combes/
+1 SEX F
+1 BIRT
+2 DATE 1809
+2 PLAC Mende, Lozère, France
+3 MAP
+4 LATI N44.518
+4 LONG E3.501
+1 DEAT
+2 DATE 1871
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 FAMS @F5@
+0 @I14@ INDI
+1 NAME Zélie /Vernhet/
+1 SEX F
+1 BIRT
+2 DATE 1841
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+1 DEAT
+2 DATE 1920
+2 PLAC Mende, Lozère, France
+3 MAP
+4 LATI N44.518
+4 LONG E3.501
+1 FAMC @F5@
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I3@
+1 CHIL @I1@
+1 MARR
+2 DATE 1965
+2 PLAC Montréal, Québec, Canada
+3 MAP
+4 LATI N45.508
+4 LONG W73.588
+0 @F2@ FAM
+1 HUSB @I4@
+1 WIFE @I5@
+1 CHIL @I6@
+1 CHIL @I2@
+1 MARR
+2 DATE 1931
+2 PLAC Marseille, Bouches-du-Rhône, France
+3 MAP
+4 LATI N43.297
+4 LONG E5.381
+0 @F3@ FAM
+1 HUSB @I7@
+1 WIFE @I8@
+1 CHIL @I9@
+1 CHIL @I4@
+1 MARR
+2 DATE 1898
+2 PLAC Alès, Gard, France
+3 MAP
+4 LATI N44.125
+4 LONG E4.081
+0 @F4@ FAM
+1 HUSB @I10@
+1 WIFE @I11@
+1 CHIL @I7@
+1 MARR
+2 DATE 1867
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+0 @F5@ FAM
+1 HUSB @I12@
+1 WIFE @I13@
+1 CHIL @I10@
+1 CHIL @I14@
+1 MARR
+2 DATE 1836
+2 PLAC Florac, Lozère, France
+3 MAP
+4 LATI N44.326
+4 LONG E3.594
+0 TRLR`;
+
+/* ---------- État ---------- */
+const S={persons:new Map(),fams:new Map(),places:new Map(),proofs:new Map(),up:new Map(),kinCache:new Map(),
+  fileName:'',isSample:true,ref:null,year:1900,minY:1700,maxY:NOW,playing:false,dir:1,sel:{type:'year'},
+  cam:{x:.5,y:.35,z:2},target:null,world:null,worldPath:null,gaz:null,gazIndex:null,groups:[],clusters:[],events:new Map(),counts:[],yearCache:new Map(),custom:{},manual:{},head:''};
+
+/* ---------- GEDCOM ---------- */
+function parseGed(text){
+  const recs=[];let stack=[];
+  for(const ln of text.split(/\r\n|\r|\n/)){
+    const m=/^\s*(\d+)\s+(?:(@[^@]+@)\s+)?(\S+)(?: (.*))?$/.exec(ln);if(!m)continue;
+    const lvl=+m[1],tag=m[3].toUpperCase(),val=m[4]||'';
+    if(tag==='CONC'||tag==='CONT'){const p=stack[lvl-1];if(p)p.val+=(tag==='CONT'?'\n':'')+val;continue}
+    const node={tag,val,xref:m[2]||null,ch:[]};
+    if(lvl===0){recs.push(node);stack=[node]}else{const p=stack[lvl-1];if(!p)continue;p.ch.push(node);stack[lvl]=node;stack.length=lvl+1}
+  }
+  return recs;
+}
+const MON={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12,JANV:1,FEV:2,FEVR:2,MARS:3,AVR:4,MAI:5,JUIN:6,JUIL:7,AOUT:8,SEPT:9,MRZ:3,OKT:10,DEZ:12};
+function parseDate(s){
+  if(!s)return null;const u=s.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  let q='';if(/^(ABT|EST|CAL|CIRCA|VERS|ENV|BET|FROM|ENTRE)/.test(u))q='~';else if(/^(BEF|AVANT|TO )/.test(u))q='<';else if(/^(AFT|APRES)/.test(u))q='>';
+  const ym=/(?:^|\D)(\d{3,4})(?!\d)/.exec(u);if(!ym)return null;const y=+ym[1];
+  const head=u.slice(0,ym.index+ym[0].length-ym[1].length).trim();
+  const mm=/([A-Z]{3,5})\.?$/.exec(head);const m=mm?(MON[mm[1]]||0):0;
+  const dm=m?/(\d{1,2})\s+[A-Z]{3,5}\.?$/.exec(head):null;
+  let d=dm?+dm[1]:0,mo=m;
+  if(!m){const n=/(\d{1,2})[\/.\-](\d{1,2})[\/.\-]$/.exec(head);if(n){d=+n[1];mo=+n[2]}}
+  return {y,m:mo,d,q};
+}
+const p2=n=>String(n).padStart(2,'0');
+function fmtDate(dt){if(!dt)return '';const pre=dt.q==='~'?t('vers'):dt.q==='<'?t('avant'):dt.q==='>'?t('apres'):'';return pre+(dt.d?p2(dt.d)+'/':'')+(dt.m?p2(dt.m)+'/':'')+dt.y}
+function coord(v){if(!v)return NaN;v=v.trim().replace(',','.');const m=/^([NSEW])\s*([\d.]+)$/i.exec(v);if(m){const n=parseFloat(m[2]);return /[SW]/i.test(m[1])?-n:n}return parseFloat(v)}
+function placeOf(node){
+  const pl=node.ch.find(c=>c.tag==='PLAC');if(!pl||!pl.val.trim())return null;
+  const key=pl.val.trim();let P=S.places.get(key);
+  if(!P){P={name:key,lat:NaN,lon:NaN,q:null,n:0};S.places.set(key,P)}
+  P.n++;
+  const map=pl.ch.find(c=>c.tag==='MAP');
+  if(map&&isNaN(P.lat)){const la=coord((map.ch.find(c=>c.tag==='LATI')||{}).val),lo=coord((map.ch.find(c=>c.tag==='LONG')||{}).val);if(!isNaN(la)&&!isNaN(lo)){P.lat=la;P.lon=lo;P.q='gedcom'}}
+  return key;
+}
+function readEvents(rec,owner){
+  const out=[];
+  for(const c of rec.ch){
+    const dn=c.ch.find(x=>x.tag==='DATE'),hasP=c.ch.some(x=>x.tag==='PLAC');
+    if(!dn&&!hasP)continue;if(/^(NAME|FAMC|FAMS|SOUR|OBJE|NOTE|CHAN|HUSB|WIFE|CHIL)$/.test(c.tag))continue;
+    const ty=c.ch.find(x=>x.tag==='TYPE');
+    const notes=c.ch.filter(x=>x.tag==='NOTE').map(x=>x.val).join('\n\n');
+    const src=c.ch.filter(x=>x.tag==='SOUR').map(x=>x.val).join(' ; ');
+    out.push({tag:c.tag,label:(c.tag==='EVEN'&&(ty||c.val))?(ty?ty.val:c.val):null,val:c.tag==='EVEN'?'':c.val,date:parseDate(dn&&dn.val),place:placeOf(c),note:notes,src,owner});
+  }
+  return out;
+}
+function recText(n){let t=n.val||'';for(const c of n.ch)t+='\n'+recText(c);return t}
+function loadGed(text,name,isSample){
+  Object.assign(S,{persons:new Map(),fams:new Map(),places:new Map(),proofs:new Map(),up:new Map(),kinCache:new Map(),yearCache:new Map(),events:new Map(),fileName:name,isSample:!!isSample,sel:{type:'year'},head:''});
+  const recs=parseGed(text);let first=null;
+  for(const r of recs){
+    if(r.tag==='HEAD'){S.head=recText(r);continue}
+    if(!r.xref)continue;
+    if(r.tag==='INDI'){
+      const nm=r.ch.find(c=>c.tag==='NAME');let given='',sur='';
+      if(nm){const m=/^([^\/]*)\/([^\/]*)\/?(.*)$/.exec(nm.val);if(m){given=(m[1]+' '+m[3]).trim();sur=m[2].trim()}else given=nm.val.trim();
+        const g=nm.ch.find(c=>c.tag==='GIVN'),s=nm.ch.find(c=>c.tag==='SURN');if(!given&&g)given=g.val;if(!sur&&s)sur=s.val}
+      const sx=(r.ch.find(c=>c.tag==='SEX')||{}).val||'U';
+      const www=r.ch.find(c=>/^(WWW|_URL|_LINK|URL)$/.test(c.tag));
+      const p={id:r.xref,given,sur,name:(given+' '+sur.toUpperCase()).trim()||t('noName'),sex:/^M/i.test(sx)?'M':/^F/i.test(sx)?'F':'U',
+        ev:readEvents(r,r.xref),famc:r.ch.filter(c=>c.tag==='FAMC').map(c=>c.val.trim()),fams:r.ch.filter(c=>c.tag==='FAMS').map(c=>c.val.trim()),
+        notes:r.ch.filter(c=>c.tag==='NOTE').map(c=>c.val),text:recText(r),www:www?www.val.trim():'',b:null,bEst:false,e:null,eEst:false,tl:[]};
+      S.persons.set(p.id,p);if(!first)first=p.id;
+    }else if(r.tag==='FAM'){
+      const f={id:r.xref,h:(r.ch.find(c=>c.tag==='HUSB')||{}).val,w:(r.ch.find(c=>c.tag==='WIFE')||{}).val,ch:r.ch.filter(c=>c.tag==='CHIL').map(c=>c.val.trim()),ev:readEvents(r,r.xref),text:recText(r)};
+      if(f.h)f.h=f.h.trim();if(f.w)f.w=f.w.trim();S.fams.set(f.id,f);
+    }
+  }
+  // liens de secours si FAMC/FAMS manquent
+  for(const f of S.fams.values()){for(const s of [f.h,f.w]){const p=S.persons.get(s);if(p&&!p.fams.includes(f.id))p.fams.push(f.id)}for(const c of f.ch){const p=S.persons.get(c);if(p&&!p.famc.includes(f.id))p.famc.push(f.id)}}
+  S.proofRev=null;indexProofs(text);
+  S.manual=jget('cg.manual',{});
+  for(const [k,v] of Object.entries(S.manual)){const P=S.places.get(k);if(P){P.lat=v[0];P.lon=v[1];P.q='manual'}}
+  computeLives();
+  S.custom=jget('cg.custom.'+name,{});
+  const savedRef=store.get('cg.ref.'+name);S.ref=(savedRef&&S.persons.has(savedRef))?savedRef:first;
+  afterPlaces(true);
+  if([...S.places.values()].some(P=>isNaN(P.lat)))ensureGaz().then(()=>{resolvePlaces();afterPlaces(true)});
+}
+function afterPlaces(fit){
+  buildTimelines();buildYearIndex();
+  const ys=[...S.persons.values()].filter(p=>p.b!=null).map(p=>p.b);
+  S.minY=ys.length?Math.min(...ys):1800;S.maxY=NOW;
+  const sl=$('#slider');sl.min=S.minY;sl.max=S.maxY;
+  $('#tmin').textContent=S.minY;$('#tmax').textContent=S.maxY;$('#tmid').textContent=Math.round((S.minY+S.maxY)/2);
+  if(fit){const r=S.persons.get(S.ref);S.year=Math.max(S.minY,Math.min(S.maxY,S.dir>0?S.minY+Math.min(40,Math.round((S.maxY-S.minY)/6)):S.maxY));if(S.isSample&&r&&r.b)S.year=Math.min(S.maxY,1905)}
+  S.yearCache.clear();drawHisto();setYear(S.year,true);if(fit)fitAll(true);renderChips();
+}
+
+/* ---------- Preuves et liens ---------- */
+function indexProofs(text){
+  const t=text.replace(/\r?\n\d+ CONC /g,'');let m;
+  const r1=/(?:Preuves?|Proofs?|Belege?|Prov[ae])\s+(\d+[a-z]?)\s*:\s*(https?:\/\/[^\s\]\)]+)/gi;while((m=r1.exec(t)))if(!S.proofs.has(m[1].toLowerCase()))S.proofs.set(m[1].toLowerCase(),m[2]);
+  const r2=/(\d+[a-z]?)\s*\[[^\]\[]{0,20}?(https?:\/\/[^\s\]]+)\]/g;while((m=r2.exec(t)))if(!S.proofs.has(m[1].toLowerCase()))S.proofs.set(m[1].toLowerCase(),m[2]);
+}
+function proofsOf(text){
+  const out=new Map();let m;
+  const r=/(?:preuves?|proofs?|belege?|prov[ae])\s+((?:\d+[a-z]?)(?:\s*(?:\[[^\]]*\])?\s*(?:,|et|à|-)\s*\d+[a-z]?)*)/gi;
+  while((m=r.exec(text))){
+    const seg=m[1].replace(/\[[^\]]*\]/g,' ');const ids=seg.match(/\d+[a-z]?/g)||[];
+    const range=/(\d+)\s*à\s*(\d+)/.exec(seg);
+    if(range){const a=+range[1],b=+range[2];if(b>a&&b-a<60)for(let i=a;i<=b;i++)ids.push(String(i))}
+    for(const id of ids){const u=S.proofs.get(id.toLowerCase());if(u)out.set(id.toLowerCase(),u)}
+  }
+  const other=[];const ru=/https?:\/\/[^\s\]\)<>"]+/g;
+  if(!S.proofRev){S.proofRev=new Map();for(const [k,u] of S.proofs)if(!S.proofRev.has(u))S.proofRev.set(u,k)}
+  while((m=ru.exec(text))){const u=m[0].replace(/[.,;]+$/,'');const id=S.proofRev.get(u);if(id)out.set(id,u);else if(!other.includes(u))other.push(u)}
+  const list=[...out.entries()].sort((a,b)=>parseInt(a[0])-parseInt(b[0])||a[0].localeCompare(b[0]));
+  return {list,other};
+}
+
+/* ---------- Vies : naissance, fin, lieux ---------- */
+const P=id=>S.persons.get(id);
+function parentsOf(id){const p=P(id);if(!p)return [];const out=[];for(const f of p.famc){const F=S.fams.get(f);if(F){if(F.h&&P(F.h))out.push(F.h);if(F.w&&P(F.w))out.push(F.w)}}return out}
+function spousesOf(id){const p=P(id);if(!p)return [];const out=[];for(const f of p.fams){const F=S.fams.get(f);if(F){const o=F.h===id?F.w:F.h;if(o&&P(o)&&o!==id)out.push(o)}}return out}
+function childrenOf(id){const p=P(id);if(!p)return [];const out=[];for(const f of p.fams){const F=S.fams.get(f);if(F)for(const c of F.ch)if(P(c))out.push(c)}return out}
+function computeLives(){
+  for(const p of S.persons.values()){
+    const b=p.ev.find(e=>e.tag==='BIRT'&&e.date)||p.ev.find(e=>(e.tag==='BAPM'||e.tag==='CHR')&&e.date);
+    if(b){p.b=b.date.y;p.bEst=b.date.q!==''&&b.date.q!==undefined&&b.date.q!==''?true:false;p.bDate=b.date}
+    const d=p.ev.find(e=>e.tag==='DEAT'&&e.date)||p.ev.find(e=>(e.tag==='BURI'||e.tag==='CREM')&&e.date);
+    p.dead=!!p.ev.find(e=>e.tag==='DEAT'||e.tag==='BURI'||e.tag==='CREM');
+    if(d){p.e=d.date.y;p.eEst=d.date.q!=='';p.dDate=d.date}
+  }
+  // naissances estimées (3 passes)
+  for(let pass=0;pass<4;pass++)for(const p of S.persons.values()){
+    if(p.b!=null)continue;let g=null;
+    const kids=childrenOf(p.id).map(c=>P(c).b).filter(v=>v!=null);if(kids.length)g=Math.min(...kids)-28;
+    if(g==null){for(const f of p.fams){const F=S.fams.get(f);const m=F&&F.ev.find(e=>e.tag==='MARR'&&e.date);if(m){g=m.date.y-25;break}}}
+    if(g==null){const sp=spousesOf(p.id).map(s=>P(s).b).filter(v=>v!=null);if(sp.length)g=sp[0]+(p.sex==='M'?-3:3)}
+    if(g==null){const pa=parentsOf(p.id).map(s=>P(s).b).filter(v=>v!=null);if(pa.length)g=Math.max(...pa)+28}
+    if(g==null){const own=p.ev.filter(e=>e.date).map(e=>e.date.y);if(own.length)g=(p.e!=null?p.e-60:Math.min(...own)-30)}
+    if(g!=null){if(p.e!=null&&g>p.e)g=p.e-1;p.b=g;p.bEst=true}
+  }
+  for(const p of S.persons.values()){
+    if(p.b==null)continue;
+    if(p.e!=null){if(p.e<p.b)p.e=p.b;continue}
+    const own=p.ev.filter(e=>e.date).map(e=>e.date.y);const kids=childrenOf(p.id).map(c=>P(c).b).filter(v=>v!=null);
+    const last=Math.max(p.b,...own,...kids);
+    if(!p.dead&&p.b>NOW-100){p.e=NOW;p.alive=true}else{p.e=Math.min(Math.max(last,p.b+62),p.b+100);p.eEst=true}
+  }
+}
+function located(k){const Q=k&&S.places.get(k);return Q&&!isNaN(Q.lat)?Q:null}
+function buildTimelines(){
+  for(const p of S.persons.values()){
+    const tl=[];
+    for(const e of p.ev)if(e.date&&located(e.place))tl.push({y:e.date.y,k:e.place});
+    for(const f of p.fams){const F=S.fams.get(f);if(!F)continue;
+      for(const e of F.ev)if(e.date&&located(e.place))tl.push({y:e.date.y,k:e.place});
+      for(const c of F.ch){const C=P(c);const be=C&&C.ev.find(e=>e.tag==='BIRT'&&e.date&&located(e.place));if(be)tl.push({y:be.date.y,k:be.place})}}
+    for(const e of p.ev)if(!e.date&&located(e.place)){if(e.tag==='BIRT'&&p.b!=null)tl.push({y:p.b,k:e.place});else if(/DEAT|BURI/.test(e.tag)&&p.e!=null)tl.push({y:p.e,k:e.place})}
+    tl.sort((a,b)=>a.y-b.y);p.tl=tl;
+  }
+}
+function locAt(p,Y,depth){
+  const tl=p.tl;if(tl.length){let r=null;for(const t of tl){if(t.y<=Y)r=t;else break}return r?{k:r.k,sure:true}:{k:tl[0].k,sure:false}}
+  if((depth||0)>2)return null;
+  for(const id of [...spousesOf(p.id),...parentsOf(p.id),...childrenOf(p.id)]){const o=P(id);if(o&&o.tl.length){const r=locAt(o,Y,(depth||0)+1);if(r)return {k:r.k,sure:false}}}
+  return null;
+}
+function buildYearIndex(){
+  S.events=new Map();const add=(y,o)=>{if(!S.events.has(y))S.events.set(y,[]);S.events.get(y).push(o)};
+  for(const p of S.persons.values()){
+    const b=p.ev.find(e=>e.tag==='BIRT'&&e.date);if(b)add(b.date.y,{t:'b',p:p.id,k:b.place});
+    const d=p.ev.find(e=>e.tag==='DEAT'&&e.date&&e.date.q!=='<');if(d)add(d.date.y,{t:'d',p:p.id,k:d.place});
+  }
+  for(const f of S.fams.values()){const m=f.ev.find(e=>e.tag==='MARR'&&e.date);if(m&&(P(f.h)||P(f.w)))add(m.date.y,{t:'m',f:f.id,k:m.place})}
+  S.counts=[];const ys=[...S.persons.values()].filter(p=>p.b!=null);const mn=ys.length?Math.min(...ys.map(p=>p.b)):1800;
+  for(let y=mn;y<=NOW;y++){let n=0;for(const p of ys)if(y>=p.b&&y<=p.e)n++;S.counts.push(n)}
+  S.countMin=mn;
+}
+
+/* ---------- Parenté ---------- */
+function upMap(id){let m=S.up.get(id);if(m)return m;m=new Map([[id,0]]);let fr=[id],d=0;while(fr.length&&d<60){d++;const nx=[];for(const x of fr)for(const pa of parentsOf(x))if(!m.has(pa)){m.set(pa,d);nx.push(pa)}fr=nx}S.up.set(id,m);return m}
+function blood(a,b){const A=upMap(a),B=upMap(b);let best=null;const sw=A.size>B.size;const sm=sw?B:A,lg=sw?A:B;
+  for(const [k,d1] of sm){const d2=lg.get(k);if(d2===undefined)continue;const du=sw?d2:d1,dx=sw?d1:d2,s=du+dx;if(!best||s<best.s||(s===best.s&&Math.max(du,dx)<Math.max(best.du,best.dx)))best={du,dx,s,anc:k}}return best}
+function pathUp(id,anc){const prev=new Map([[id,null]]);let fr=[id];
+  while(fr.length&&!prev.has(anc)){const nx=[];for(const x of fr)for(const pa of parentsOf(x))if(!prev.has(pa)){prev.set(pa,x);nx.push(pa)}fr=nx}
+  const out=[];if(!prev.has(anc))return out;let c=anc;while(c!=null){out.push(c);c=prev.get(c)}return out.reverse()}
+function kinCtx(ref,x,b){
+  const c={aSex:'U',cSex:'U',upSex:'U',half:false};
+  if(b.du>1&&b.dx>0){const pu=pathUp(ref,b.anc);if(b.du>b.dx){const a=P(pu[b.du-b.dx]);if(a)c.aSex=a.sex}const u=P(pu[b.du-1]);if(u)c.upSex=u.sex}
+  if(b.dx>b.du&&b.du>0){const pxu=pathUp(x,b.anc);const a=P(pxu[b.dx-b.du]);if(a)c.cSex=a.sex}
+  if(b.du===1&&b.dx===1){const pa=parentsOf(ref),pb=parentsOf(x);c.half=pa.length>1&&pb.length>1&&pa.filter(v=>pb.includes(v)).length<2}
+  return c;
+}
+function bloodTerm(a,x,b){return term(b.du,b.dx,P(x).sex,kinCtx(a,x,b))}
+function sosaMap(ref){const m=new Map([[ref,1]]);let fr=[[ref,1]],d=0;while(fr.length&&d<40){d++;const nx=[];for(const [id,n] of fr){const p=P(id);if(!p)continue;for(const f of p.famc){const F=S.fams.get(f);if(!F)continue;if(F.h&&P(F.h)&&!m.has(F.h)){m.set(F.h,n*2);nx.push([F.h,n*2])}if(F.w&&P(F.w)&&!m.has(F.w)){m.set(F.w,n*2+1);nx.push([F.w,n*2+1])}}}fr=nx}return m}
+/* Lien de x par rapport à ref. Le sang prime : deux personnes qui partagent des grands-parents sont cousins germains, mariées ou non ;
+   le mariage s'ajoute au lien de sang, il ne le remplace pas et ne le crée pas. */
+function kin(ref,x){
+  const key=ref+'|'+x;let r=S.kinCache.get(key);if(r)return r;const px=P(x),K=KIN[LANG]||KIN.fr;
+  if(ref===x)r={cat:'self',label:K.self,full:true};
+  else{const b=blood(ref,x),isSp=spousesOf(ref).includes(x);
+    if(b){const base=bloodTerm(ref,x,b);
+      r={cat:(b.dx===0||b.du===0)?'direct':'blood',label:base,du:b.du,dx:b.dx,anc:b.anc};
+      if(isSp){r.sp=K.spouse(px.sex);r.base=base;r.label=K.also(r.sp,base)}}
+    else if(isSp)r={cat:'ally',label:K.spouse(px.sex),ally:true};
+    else{
+      for(const s of spousesOf(x)){if(s===ref)continue;const bs=blood(ref,s);if(!bs)continue;const sp=P(s);
+        if(bs.dx===0&&bs.du===1)r={label:K.stepParent(px.sex)};
+        else if(bs.du===0&&bs.dx===1)r={label:K.childIn(px.sex)};
+        else if(bs.du===1&&bs.dx===1)r={label:K.sibIn(px.sex)};
+        else if(bs.dx===1&&bs.du>=2){const cx=kinCtx(ref,s,bs);r={label:K.byMarriage(term(bs.du,1,px.sex,cx),px.sex,term(bs.du,1,sp.sex,cx),sp.sex)}}
+        else r={label:K.spouseOf(px.sex,sp.name,bloodTerm(ref,s,bs)),full:true};
+        r.cat='ally';r.ally=true;break}
+      if(!r)for(const t2 of spousesOf(ref)){const bt=blood(t2,x);if(!bt)continue;
+        if(bt.dx===0&&bt.du===1)r={label:K.parentIn(px.sex)};
+        else if(bt.du===1&&bt.dx===1)r={label:K.sibIn(px.sex)};
+        else r={label:K.spouseSide(bloodTerm(t2,x,bt),P(t2).name),full:true};
+        r.cat='ally';r.ally=true;break}
+      if(!r)r={cat:'none',label:K.none,full:true};
+    }}
+  S.kinCache.set(key,r);return r;
+}
+function refSosa(){if(!S._sosa||S._sosaRef!==S.ref){S._sosa=sosaMap(S.ref);S._sosaRef=S.ref}return S._sosa}
+function titleOf(id){
+  const c=S.custom[S.ref+'|'+id];const k=kin(S.ref,id);const r=P(S.ref),K=KIN[LANG]||KIN.fr;
+  let t2=c||k.label;
+  if(!c&&!k.full&&r){const n=r.given.split(' ')[0]||r.name;t2=k.sp?K.also(K.title(k.sp,n),k.base):K.title(k.label,n)}
+  if(!c&&k.cat==='direct'&&k.dx===0){const s=refSosa().get(id);if(s)t2+=' · '+K.sosa(s)}
+  return {text:t2,cat:k.cat==='none'?'ally':k.cat,custom:!!c,k};
+}
+const dispName=p=>($('#anon').checked&&p.alive&&p.id!==S.ref)?t('living1'):p.name;
+
+/* ---------- Lieux : géocodage ---------- */
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[-'’.]/g,' ').replace(/\bsainte\b/g,'ste').replace(/\bsaint\b/g,'st').replace(/\s+/g,' ').trim();
+const EXO={'treves':'trier','cologne':'koln','munich':'munchen','londres':'london','rome':'roma','milan':'milano','turin':'torino','venise':'venezia','florence':'firenze','genes':'genova','naples':'napoli','vienne':'wien','varsovie':'warszawa','lisbonne':'lisboa','bruxelles':'brussels','anvers':'antwerpen','bale':'basel','berne':'bern','francfort':'frankfurt am main','hambourg':'hamburg','mayence':'mainz','aix la chapelle':'aachen','sarrebruck':'saarbrucken','barcelone':'barcelona','seville':'sevilla','pekin':'beijing','alger':'algiers','le caire':'cairo','athenes':'athens','cracovie':'krakow','la haye':'the hague','copenhague':'copenhagen','edimbourg':'edinburgh','moscou':'moscow','nouvelle orleans':'new orleans','geneve':'geneve','ratisbonne':'regensburg','nuremberg':'nurnberg','coblence':'koblenz','fribourg':'freiburg','padoue':'padova','mantoue':'mantova','bologne':'bologna','tunis':'tunis','casablanca':'casablanca','dantzig':'gdansk','breslau':'wroclaw'};
+let ccNames=null;
+function countryCode(name){
+  if(!ccNames){ccNames=new Map();try{const codes=new Set((S.world||[]).map(c=>c.c).filter(Boolean));for(const c of (S.gaz||[]))codes.add(c[1]);for(const lg of ['fr','en','de','es','it','pt','nl']){const dn=new Intl.DisplayNames([lg],{type:'region'});for(const c of codes){const n=dn.of(c);if(n)ccNames.set(norm(n),c)}}}catch(e){}
+    for(const [a,b] of [['angleterre','GB'],['ecosse','GB'],['grande bretagne','GB'],['usa','US'],['etats unis d amerique','US'],['hollande','NL'],['prusse','DE'],['baviere','DE'],['boheme','CZ'],['russie','RU']])ccNames.set(a,b)}
+  return ccNames.get(norm(name))||null;
+}
+let gazP=null;
+function ensureGaz(){if(!gazP)gazP=loadGaz();return gazP}
+async function loadGaz(){
+  if(S.gaz)return;try{const r=await fetch('gaz.json');S.gaz=await r.json()}catch(e){S.gaz=[]}
+  const ix=new Map();const add=(k,i)=>{const a=ix.get(k);if(a)a.push(i);else ix.set(k,[i])};
+  S.gaz.forEach((c,i)=>{add(norm(c[0]),i);if(c[5])for(const al of c[5].split('|'))add(norm(al),i)});S.gazIndex=ix;ccNames=null;
+  const gr=new Map();S.gaz.forEach((c,i)=>{const k=Math.floor(c[2])+','+Math.floor(c[3]);const a=gr.get(k);if(a)a.push(i);else gr.set(k,[i])});for(const a of gr.values())a.sort((x,y)=>S.gaz[y][4]-S.gaz[x][4]);S.gazGrid=gr;
+}
+const km=(a,b,c,d)=>{const R=6371,r=Math.PI/180,x=(d-b)*r*Math.cos((a+c)/2*r),y=(c-a)*r;return R*Math.sqrt(x*x+y*y)};
+function resolvePlaces(){
+  if(!S.gazIndex)return;const todo=[...S.places.values()].filter(Q=>isNaN(Q.lat)||Q.q==='approx'||Q.q==='exact');
+  const info=new Map();
+  for(const Q of todo){
+    const parts=Q.name.split(',').map(s=>s.trim()).filter(Boolean);const cc=parts.length?countryCode(parts[parts.length-1]):null;
+    const suffix=parts.slice(1).join(', ');let cands=null,level=-1;
+    for(let i=0;i<parts.length;i++){
+      const vars=[parts[i]];const pm=/^(.*?)\s*\((.*?)\)\s*$/.exec(parts[i]);if(pm){vars.push(pm[1],pm[2])}
+      let found=[];for(const v of vars){let n=norm(v);for(const key of [n,EXO[n]].filter(Boolean)){const a=S.gazIndex.get(key);if(a)found=found.concat(a)}}
+      if(cc)found=found.filter(ix=>S.gaz[ix][1]===cc);
+      if(found.length){cands=[...new Set(found)];level=i;break}
+    }
+    info.set(Q,{parts,cc,suffix,cands,level});
+  }
+  const cent=new Map();
+  const med=a=>{a.sort((x,y)=>x-y);const h=a.length>>1;return a.length%2?a[h]:(a[h-1]+a[h])/2};
+  const centOf=suf=>{if(cent.has(suf))return cent.get(suf);const la=[],lo=[];
+    for(const Z of S.places.values()){if(Z.name.split(',').slice(1).map(s=>s.trim()).join(', ')!==suf||isNaN(Z.lat))continue;if(Z.q!=='gedcom'&&Z.q!=='manual')continue;la.push(Z.lat);lo.push(Z.lon)}
+    for(const [Q,I] of info){if(Q.q==='gedcom'||Q.q==='manual'||I.suffix!==suf||!I.cands||I.level!==0||I.cands.length!==1)continue;const c=S.gaz[I.cands[0]];la.push(c[2]);lo.push(c[3])}
+    const v=la.length>=1?[med(la),med(lo),la.length]:null;cent.set(suf,v);return v};
+  for(const [Q,I] of info){
+    if(Q.q==='gedcom'||Q.q==='manual')continue;
+    const ce=I.suffix?centOf(I.suffix):null;let pick=null;
+    if(I.cands){const cs=I.cands.map(ix=>S.gaz[ix]);
+      if(ce){cs.sort((a,b)=>km(a[2],a[3],ce[0],ce[1])-km(b[2],b[3],ce[0],ce[1]));pick=cs[0];if(I.level===0&&ce[2]>=3&&km(pick[2],pick[3],ce[0],ce[1])>150)pick=null}
+      else{cs.sort((a,b)=>b[4]-a[4]);pick=cs[0]}}
+    if(pick){Q.lat=pick[2];Q.lon=pick[3];Q.q=I.level===0?'exact':'approx'}
+    else if(ce){Q.lat=ce[0];Q.lon=ce[1];Q.q='approx'}
+    else if(I.cc&&S.world){const w=S.world.find(c=>c.c===I.cc&&c.k);if(w){Q.lat=w.k[1];Q.lon=w.k[0];Q.q='approx'}}
+  }
+  // légère dispersion des lieux approximatifs superposés
+  const seen=new Map();for(const Q of S.places.values()){if(Q.q!=='approx')continue;const k=Q.lat.toFixed(3)+','+Q.lon.toFixed(3);const n=seen.get(k)||0;seen.set(k,n+1);if(n){const a=n*2.4,r=.012*Math.sqrt(n);Q.lat+=r*Math.sin(a);Q.lon+=r*Math.cos(a)*1.5}}
+}
+
+/* ---------- Année courante ---------- */
+function yearData(Y){
+  let d=S.yearCache.get(Y);if(d)return d;const groups=new Map();const living=[];const lost=[];
+  for(const p of S.persons.values()){if(p.b==null||Y<p.b||Y>p.e)continue;living.push(p);const l=locAt(p,Y);if(!l){lost.push(p);continue}
+    let G=groups.get(l.k);if(!G){const Q=S.places.get(l.k);G={k:l.k,Q,people:[]};groups.set(l.k,G)}G.people.push(p)}
+  d={living,groups:[...groups.values()],lost};if(S.yearCache.size>400)S.yearCache.clear();S.yearCache.set(Y,d);return d;
+}
+function setYear(Y,force){
+  Y=Math.max(S.minY,Math.min(S.maxY,Math.round(Y)));if(Y===S.year&&!force)return;const prev=S.year;S.year=Y;
+  $('#slider').value=Y;$('#year').textContent=Y;const d=yearData(Y);
+  $('#living').textContent=t('living',d.living.length)+' · '+t('nplaces',d.groups.length);
+  showTicker(Y);if($('#follow').checked&&(S.playing||force===2))followCam();
+  renderPanel();drawHisto();dirty();
+}
+function showTicker(Y){
+  const ev=S.events.get(Y)||[];const el=$('#ticker');const rows=[];
+  for(const e of ev.slice(0,5)){const pl=e.k?' · '+esc(e.k.split(',')[0]):'';
+    if(e.t==='b')rows.push('<div><b>'+Y+'</b> ✶ '+t('tkBirth',esc(dispName(P(e.p))))+pl+'</div>');
+    else if(e.t==='d'){const p=P(e.p);rows.push('<div><b>'+Y+'</b> ✝ '+t('tkDeath',esc(dispName(p)))+(p.b!=null?' ('+(p.bEst?'≈':'')+t('age',Y-p.b)+')':'')+pl+'</div>')}
+    else{const F=S.fams.get(e.f);rows.push('<div><b>'+Y+'</b> ⚭ '+esc([F.h,F.w].map(x=>P(x)?dispName(P(x)):'?').join(' '+t('and')+' '))+pl+'</div>')}}
+  if(ev.length>5)rows.push('<div>'+t('tkMore',ev.length-5)+'</div>');
+  el.innerHTML=rows.join('');
+}
+
+/* ---------- Carte ---------- */
+const cv=$('#map'),ctx=cv.getContext('2d');let W=0,H=0,DPR=1,raf=0,colors={};
+const mx=lon=>(lon+180)/360,my=lat=>{const s=Math.sin(Math.max(-85,Math.min(85,lat))*Math.PI/180);return .5-Math.log((1+s)/(1-s))/(4*Math.PI)};
+const scale=()=>256*Math.pow(2,S.cam.z);
+const sx=x=>(x-S.cam.x)*scale()+W/2,sy=y=>(y-S.cam.y)*scale()+H/2;
+function readColors(){const cs=getComputedStyle(document.documentElement);for(const k of ['sea','land','border','ink','muted','direct','blood','ally','focus','panel','line'])colors[k]=cs.getPropertyValue('--'+k).trim()}
+function resize(){const r=cv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);dirty()}
+function dirty(){if(!raf)raf=requestAnimationFrame(frame)}
+function buildWorldPath(){const p=new Path2D();for(const c of S.world)for(const ring of c.p){let x=0,y=0;for(let i=0;i<ring.length;i+=2){x+=ring[i];y+=ring[i+1];const X=mx(x/100)*1000,Y=my(y/100)*1000;if(i)p.lineTo(X,Y);else p.moveTo(X,Y)}p.closePath()}S.worldPath=p}
+let tiles={ok:false,cache:new Map()};
+function probeTiles(){tiles.ko=false;const im=new Image();im.onload=()=>{tiles.ok=true;dirty()};im.onerror=()=>{tiles.ko=true;applyLang()};im.referrerPolicy='no-referrer';try{im.src='https://tile.openstreetmap.org/0/0/0.png'}catch(e){tiles.ko=true}}
+function drawTiles(){
+  const z=Math.max(0,Math.min(18,Math.round(S.cam.z)));const n=Math.pow(2,z),ts=scale()/n;
+  const x0=Math.floor((S.cam.x-W/2/scale())*n),x1=Math.floor((S.cam.x+W/2/scale())*n),y0=Math.max(0,Math.floor((S.cam.y-H/2/scale())*n)),y1=Math.min(n-1,Math.floor((S.cam.y+H/2/scale())*n));
+  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){const xx=((x%n)+n)%n,key=z+'/'+xx+'/'+y;let im=tiles.cache.get(key);
+    if(!im){im=new Image();im.referrerPolicy='no-referrer';im.onload=dirty;im.src='https://tile.openstreetmap.org/'+key+'.png';tiles.cache.set(key,im);if(tiles.cache.size>300)tiles.cache.delete(tiles.cache.keys().next().value)}
+    if(im.complete&&im.naturalWidth)ctx.drawImage(im,sx(x/n),sy(y/n),ts+.5,ts+.5)}
+}
+function frame(){
+  raf=0;let anim=false;
+  if(S.target){const c=S.cam,t=S.target,k=.12;c.x+=(t.x-c.x)*k;c.y+=(t.y-c.y)*k;c.z+=(t.z-c.z)*k;if(Math.abs(t.x-c.x)*scale()<.5&&Math.abs(t.y-c.y)*scale()<.5&&Math.abs(t.z-c.z)<.01){Object.assign(c,t);S.target=null}else anim=true}
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=colors.sea;ctx.fillRect(0,0,W,H);
+  const sc=scale();
+  if(tiles.ok)drawTiles();
+  else if(S.worldPath){ctx.save();ctx.translate(W/2-S.cam.x*sc,H/2-S.cam.y*sc);ctx.scale(sc/1000,sc/1000);ctx.fillStyle=colors.land;ctx.fill(S.worldPath);ctx.lineWidth=1000/sc;ctx.strokeStyle=colors.border;ctx.stroke(S.worldPath);ctx.restore();
+    if(S.cam.z<6.5){ctx.font='500 11px Inter,system-ui,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='center';ctx.globalAlpha=.75;let dn=null;try{dn=new Intl.DisplayNames([LANG],{type:'region'})}catch(e){}
+      for(const c of S.world){if(!c.k)continue;const X=sx(mx(c.k[0])),Y=sy(my(c.k[1]));if(X<0||X>W||Y<0||Y>H)continue;const big=c.p.reduce((a,r)=>Math.max(a,r.length),0);if(S.cam.z<3.2&&big<300)continue;if(S.cam.z<4.6&&big<90)continue;let n=c.n;if(dn&&c.c){try{n=dn.of(c.c)||n}catch(e){}}ctx.fillText(n.toUpperCase(),X,Y)}ctx.globalAlpha=1}}
+  if(!tiles.ok&&S.cam.z>=6.2){if(S.gazGrid)drawTowns();else ensureGaz().then(dirty)}
+  drawMarkers();drawScale();
+  if(tiles.ok){ctx.font='10px Inter,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='right';ctx.fillText('© OpenStreetMap',W-52,H-4)}
+  if(anim||pulse.until>performance.now())dirty();
+}
+const pulse={until:0};
+function drawTowns(){
+  const sc=scale();const lon0=(S.cam.x-W/2/sc)*360-180,lon1=(S.cam.x+W/2/sc)*360-180;const inv=y=>Math.atan(Math.sinh(Math.PI*(1-2*y)))*180/Math.PI;const lat1=inv(S.cam.y-H/2/sc),lat0=inv(S.cam.y+H/2/sc);
+  const a0=Math.floor(lat0),a1=Math.floor(lat1),o0=Math.floor(lon0),o1=Math.floor(lon1);if((a1-a0+1)*(o1-o0+1)>260)return;
+  let c=[];for(let a=a0;a<=a1;a++)for(let o=o0;o<=o1;o++){const l=S.gazGrid.get(a+','+o);if(l)for(let i=0;i<l.length&&i<40;i++)c.push(l[i])}
+  c.sort((x,y)=>S.gaz[y][4]-S.gaz[x][4]);const placed=[];ctx.font='500 11px Inter,system-ui,sans-serif';ctx.textAlign='left';
+  for(const ix of c){if(placed.length>=30)break;const t=S.gaz[ix];const X=sx(mx(t[3])),Y=sy(my(t[2]));if(X<4||X>W-4||Y<4||Y>H-4)continue;if(placed.some(q=>Math.abs(q[0]-X)<84&&Math.abs(q[1]-Y)<16))continue;placed.push([X,Y]);
+    ctx.globalAlpha=.6;ctx.fillStyle=colors.muted;ctx.fillRect(X-2,Y-2,4,4);ctx.fillText(t[0],X+6,Y+4);ctx.globalAlpha=1}
+}
+function drawScale(){const lat=Math.atan(Math.sinh(Math.PI*(1-2*S.cam.y)))*180/Math.PI;const mpp=40075016*Math.cos(lat*Math.PI/180)/scale();let m=mpp*90;const pw=Math.pow(10,Math.floor(Math.log10(m)));const st=[1,2,5,10].map(v=>v*pw).filter(v=>v<=m).pop()||pw;const px=st/mpp;const x=W-60-px,y=H-64;
+  if(W<520)return;ctx.strokeStyle=colors.muted;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x,y);ctx.lineTo(x+px,y);ctx.lineTo(x+px,y-4);ctx.stroke();ctx.font='11px Inter,sans-serif';ctx.fillStyle=colors.muted;ctx.textAlign='center';ctx.fillText(st>=1000?(st/1000)+' km':st+' m',x+px/2,y-6)}
+function catRank(c){return c==='self'?3:c==='direct'?2:c==='blood'?1:0}
+function drawMarkers(){
+  const d=yearData(S.year);const pts=d.groups.map(G=>({G,x:sx(mx(G.Q.lon)),y:sy(my(G.Q.lat))}));
+  // regroupement à l'écran
+  const cl=[];pts.sort((a,b)=>b.G.people.length-a.G.people.length);
+  for(const p of pts){let host=null;for(const c of cl){const dx=c.x-p.x,dy=c.y-p.y;if(dx*dx+dy*dy<34*34){host=c;break}}
+    if(host){host.items.push(p);host.n+=p.G.people.length}else cl.push({x:p.x,y:p.y,items:[p],n:p.G.people.length})}
+  const selP=S.sel.type==='person'?P(S.sel.id):null;const selLoc=selP&&S.year>=selP.b&&S.year<=selP.e?locAt(selP,S.year):null;
+  // liens vers les proches
+  if(selLoc&&$('#lines').checked){const Q=S.places.get(selLoc.k);const x0=sx(mx(Q.lon)),y0=sy(my(Q.lat));ctx.strokeStyle=colors.focus;ctx.globalAlpha=.45;ctx.lineWidth=1.2;ctx.setLineDash([5,4]);
+    for(const G of d.groups){if(G.k===selLoc.k)continue;if(!G.people.some(o=>{const b=blood(selP.id,o.id);return (b&&b.du<=2&&b.dx<=2)||spousesOf(selP.id).includes(o.id)}))continue;const x1=sx(mx(G.Q.lon)),y1=sy(my(G.Q.lat));ctx.beginPath();ctx.moveTo(x0,y0);const mxx=(x0+x1)/2,myy=(y0+y1)/2-Math.hypot(x1-x0,y1-y0)*.12;ctx.quadraticCurveTo(mxx,myy,x1,y1);ctx.stroke()}
+    ctx.setLineDash([]);ctx.globalAlpha=1}
+  const evs=S.events.get(S.year)||[];const now=performance.now();
+  for(const c of cl){
+    let rank=0,approx=false,hasSel=false,hasPlaceSel=false;
+    for(const it of c.items){if(it.G.Q.q==='approx')approx=true;if(S.sel.type==='place'&&S.sel.id===it.G.k)hasPlaceSel=true;for(const p of it.G.people){rank=Math.max(rank,catRank(kin(S.ref,p.id).cat));if(selP&&p.id===selP.id)hasSel=true}}
+    const r=6+2.6*Math.sqrt(c.n);c.r=r;const col=rank===3?colors.focus:rank===2?colors.direct:rank===1?colors.blood:colors.ally;
+    if(c.x<-60||c.x>W+60||c.y<-60||c.y>H+60)continue;
+    const born=evs.some(e=>e.t==='b'&&c.items.some(it=>it.G.k===e.k)),died=evs.some(e=>e.t==='d'&&c.items.some(it=>it.G.k===e.k));
+    if((born||died)&&pulse.until>now){const t=1-(pulse.until-now)/900;ctx.beginPath();ctx.arc(c.x,c.y,r+4+t*14,0,6.3);ctx.strokeStyle=born?colors.direct:colors.muted;ctx.globalAlpha=1-t;ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1}
+    ctx.beginPath();ctx.arc(c.x,c.y,r,0,6.3);ctx.fillStyle=col;ctx.globalAlpha=.86;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=approx?1.5:2;ctx.strokeStyle=colors.panel;if(approx)ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+    if(hasSel||hasPlaceSel){ctx.beginPath();ctx.arc(c.x,c.y,r+4,0,6.3);ctx.strokeStyle=colors.focus;ctx.lineWidth=2.5;ctx.stroke()}
+    ctx.fillStyle=colors.panel;ctx.font='600 '+(r>11?12:10)+'px Inter,system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.n,c.x,c.y+.5);ctx.textBaseline='alphabetic';
+    const main=c.items[0].G.Q.name.split(',')[0];const lab=main+(c.items.length>1?' +'+(c.items.length-1)+' lieu'+(c.items.length>2?'x':''):'');
+    ctx.font='600 12px Inter,system-ui,sans-serif';ctx.lineWidth=3.5;ctx.strokeStyle=colors.panel;ctx.lineJoin='round';ctx.strokeText(lab,c.x,c.y+r+14);ctx.fillStyle=colors.ink;ctx.fillText(lab,c.x,c.y+r+14);
+  }
+  S.clusters=cl;
+}
+function bboxCam(pts,pad){
+  if(!pts.length)return null;let x0=1,x1=0,y0=1,y1=0;for(const [lo,la] of pts){const x=mx(lo),y=my(la);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+  const narrow=W<560;const availW=Math.max(120,W-(pad||90)*2),availH=Math.max(120,H-(pad||90)*2-(narrow?150:60));
+  let z=Math.min(Math.log2(availW/256/Math.max(x1-x0,1e-9)),Math.log2(availH/256/Math.max(y1-y0,1e-9)));z=Math.max(1.2,Math.min(11.5,z));
+  const off=(narrow?70:30)/(256*Math.pow(2,z));return {x:(x0+x1)/2,y:(y0+y1)/2-off,z};
+}
+function followCam(){const d=yearData(S.year);const t=bboxCam(d.groups.map(G=>[G.Q.lon,G.Q.lat]));if(!t)return;
+  const c=S.target||S.cam;if(Math.abs(t.z-c.z)<.35&&Math.abs(t.x-c.x)*scale()<W*.12&&Math.abs(t.y-c.y)*scale()<H*.12)return;S.target=t;dirty()}
+function fitAll(instant){const d=yearData(S.year);let pts=d.groups.map(G=>[G.Q.lon,G.Q.lat]);if(!pts.length)pts=[...S.places.values()].filter(Q=>!isNaN(Q.lat)).map(Q=>[Q.lon,Q.lat]);const t=bboxCam(pts);if(!t)return;if(instant){Object.assign(S.cam,t);S.target=null}else S.target=t;dirty()}
+// interactions
+const ptrs=new Map();let drag=null,pinch=null;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});S.target=null;
+  if(ptrs.size===1){drag={x:e.offsetX,y:e.offsetY,cx:S.cam.x,cy:S.cam.y,moved:0};cv.classList.add('drag')}
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z:S.cam.z};drag=null}});
+cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});
+  if(pinch&&ptrs.size===2){const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);zoomAt((a.x+b.x)/2,(a.y+b.y)/2,pinch.z+Math.log2(d/pinch.d)-S.cam.z);return}
+  if(drag){const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;drag.moved=Math.max(drag.moved,Math.hypot(dx,dy));S.cam.x=drag.cx-dx/scale();S.cam.y=drag.cy-dy/scale();dirty()}});
+function endPtr(e){const was=drag;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(!ptrs.size){cv.classList.remove('drag');drag=null;if(was&&was.moved<6&&e.type==='pointerup')clickMap(e.offsetX,e.offsetY)}}
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',e=>{e.preventDefault();S.target=null;zoomAt(e.offsetX,e.offsetY,-e.deltaY*(e.ctrlKey?.01:.0022))},{passive:false});
+cv.addEventListener('dblclick',e=>zoomAt(e.offsetX,e.offsetY,1));
+function zoomAt(px,py,dz){const z0=S.cam.z,z1=Math.max(1,Math.min(tiles.ok?17:13.5,z0+dz));const wx=S.cam.x+(px-W/2)/scale(),wy=S.cam.y+(py-H/2)/scale();S.cam.z=z1;S.cam.x=wx-(px-W/2)/scale();S.cam.y=wy-(py-H/2)/scale();dirty()}
+function clickMap(x,y){
+  if(placing){const sc=scale();const wx=S.cam.x+(x-W/2)/sc,wy=S.cam.y+(y-H/2)/sc;const lon=wx*360-180,lat=Math.atan(Math.sinh(Math.PI*(1-2*wy)))*180/Math.PI;const Q=S.places.get(placing);
+    if(Q){Q.lat=+lat.toFixed(4);Q.lon=+lon.toFixed(4);Q.q='manual';S.manual[placing]=[Q.lat,Q.lon];store.set('cg.manual',JSON.stringify(S.manual))}placing=null;cv.style.cursor='';afterPlaces(false);S.sel={type:'places'};renderPanel();return}
+  let hit=null;for(const c of S.clusters){if(Math.hypot(c.x-x,c.y-y)<=c.r+5){hit=c;break}}
+  if(!hit){if(S.sel.type!=='year'){S.sel={type:'year'};renderPanel();dirty()}return}
+  if(hit.items.length>1){const t=bboxCam(hit.items.map(it=>[it.G.Q.lon,it.G.Q.lat]),140);if(t){t.z=Math.min(t.z,S.cam.z+3);S.target=t;dirty()}S.sel={type:'cluster',keys:hit.items.map(it=>it.G.k)}}
+  else S.sel={type:'place',id:hit.items[0].G.k};
+  renderPanel();dirty();
+}
+let placing=null;
+
+/* ---------- Frise ---------- */
+function drawHisto(){
+  const c=$('#histo');const r=c.getBoundingClientRect();if(!r.width)return;const dpr=Math.min(2,window.devicePixelRatio||1);c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext('2d');x.scale(dpr,dpr);
+  const n=S.counts.length;if(!n)return;const mxc=Math.max(...S.counts,1);const w=r.width,h=r.height;const pad=8;
+  const X=i=>pad+(w-2*pad)*(i/(Math.max(1,S.maxY-S.minY)));
+  x.beginPath();x.moveTo(X(0),h);for(let i=0;i<n;i++)x.lineTo(X(S.countMin+i-S.minY),h-2-(h-6)*S.counts[i]/mxc);x.lineTo(X(n-1+S.countMin-S.minY),h);x.closePath();
+  x.fillStyle=colors.direct;x.globalAlpha=.22;x.fill();x.globalAlpha=1;x.strokeStyle=colors.direct;x.lineWidth=1.2;x.stroke();
+  const cx=X(S.year-S.minY);x.strokeStyle=colors.focus;x.lineWidth=2;x.beginPath();x.moveTo(cx,0);x.lineTo(cx,h);x.stroke();
+  const rp=P(S.ref);if(rp&&rp.b!=null){x.fillStyle=colors.focus;x.globalAlpha=.25;x.fillRect(X(rp.b-S.minY),h-3,Math.max(2,X(rp.e-S.minY)-X(rp.b-S.minY)),3);x.globalAlpha=1}
+}
+let timer=0,acc=0,lastT=0;
+function tick(t){if(!S.playing)return;const dt=Math.min(.25,(t-lastT)/1000);lastT=t;acc+=dt*(+$('#speed').value);
+  if(acc>=1){const st=Math.floor(acc);acc-=st;const ny=S.year+S.dir*st;if(ny>S.maxY||ny<S.minY){setYear(ny);setPlaying(false);return}pulse.until=performance.now()+900;setYear(ny)}
+  timer=requestAnimationFrame(tick)}
+function setPlaying(v){S.playing=v;$('#play').textContent=v?'❚❚':'▶';$('#play').setAttribute('aria-label',v?t('pause'):t('play'));if(v){if(S.dir>0&&S.year>=S.maxY)setYear(S.minY);if(S.dir<0&&S.year<=S.minY)setYear(S.maxY);lastT=performance.now();acc=0;followCam();timer=requestAnimationFrame(tick)}else cancelAnimationFrame(timer)}
+$('#play').onclick=()=>setPlaying(!S.playing);
+$('#dir').onclick=()=>{S.dir*=-1;$('#dir').textContent=S.dir>0?t('dirF'):t('dirB')};
+$('#slider').oninput=e=>{setPlaying(false);setYear(+e.target.value,2)};
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key===' '){e.preventDefault();setPlaying(!S.playing)}else if(e.key==='ArrowRight')setYear(S.year+1,2);else if(e.key==='ArrowLeft')setYear(S.year-1,2)});
+
+/* ---------- Panneau ---------- */
+function ageTxt(p,Y){return (p.bEst?'≈ ':'')+t('age',Y-p.b)}
+function rowHtml(p,Y,extra){const t=titleOf(p.id);return '<button class="row" data-p="'+esc(p.id)+'"><i class="dot d-'+t.cat+'"></i><span class="nm">'+esc(dispName(p))+'</span><span class="ag">'+ageTxt(p,Y)+'</span><span class="tt">'+esc(extra||t.text)+'</span></button>'}
+function lifeTxt(p){return (p.b!=null?(p.bEst?'≈ ':'')+p.b:'?')+' – '+(p.alive?'':(p.eEst?'≈ ':'')+(p.e!=null?p.e:'?'))}
+function placeBlock(G,Y){const ppl=G.people.slice().sort((a,b)=>catRank(kin(S.ref,b.id).cat)-catRank(kin(S.ref,a.id).cat)||a.b-b.b);
+  return '<button class="place-h" data-k="'+esc(G.k)+'"><span>'+esc(G.Q.name.split(',').slice(0,2).join(', '))+(G.Q.q==='approx'?' <span class="sub">'+t('approxPos')+'</span>':'')+'</span><span>'+ppl.length+'</span></button><div class="rows">'+ppl.map(p=>rowHtml(p,Y)).join('')+'</div>'}
+function renderPanel(){
+  const el=$('#panel'),Y=S.year,d=yearData(Y);let h='';const keep=el.scrollTop,sameSel=el.dataset.sel===JSON.stringify(S.sel);
+  if(S.sel.type==='person'&&P(S.sel.id))h=personHtml(P(S.sel.id),Y,d);
+  else if(S.sel.type==='places')h=placesHtml();
+  else if(S.sel.type==='place'||S.sel.type==='cluster'){
+    const keys=S.sel.type==='place'?[S.sel.id]:S.sel.keys;const gs=d.groups.filter(G=>keys.includes(G.k));
+    const nm=keys.length===1?keys[0]:t('neighbors',keys.length);
+    h='<button class="linkbtn" data-back="1">'+t('backYear',Y)+'</button><h2>'+esc(nm.split(',')[0])+'</h2><div class="sub">'+esc(keys.length===1?nm.split(',').slice(1).join(',').trim():'')+' · '+Y+'</div>';
+    h+=gs.length?gs.map(G=>placeBlock(G,Y)).join(''):'<p class="note">'+t('nobodyThere',Y)+'</p>';
+  }else{
+    const r=P(S.ref);
+    h='<h2>'+t('inYear',Y)+'</h2><div class="sub">'+t('sumLiving',d.living.length)+', '+t('inPlaces',d.groups.length)+(r?' · '+t('relTo',esc(r.name)):'')+'</div>';
+    if(S.isSample)h+='<div class="note">'+t('sampleNote')+'</div>';
+    const pc=[...S.places.values()];const ap=pc.filter(Q=>Q.q==='approx').length,un=pc.filter(Q=>isNaN(Q.lat)).length;
+    if(ap||un)h+='<div class="note">'+(ap?t('approxN',ap):'')+(ap&&un?' '+t('and')+' ':'')+(un?t('unlocN',un):'')+'. <button class="linkbtn" data-places="1">'+t('checkPlaces')+'</button></div>';
+    const gs=d.groups.slice().sort((a,b)=>b.people.length-a.people.length);h+=gs.map(G=>placeBlock(G,Y)).join('');
+    if(d.lost.length)h+='<h3>'+t('noPlace',d.lost.length)+'</h3><div class="rows">'+d.lost.map(p=>rowHtml(p,Y)).join('')+'</div>';
+    if(!d.living.length)h+='<p class="note">'+t('noneLiving')+'</p>';
+  }
+  el.innerHTML=h;el.dataset.sel=JSON.stringify(S.sel);el.scrollTop=sameSel?keep:0;
+}
+function evHtml(e,who){const Q=e.place&&S.places.get(e.place);
+  let h='<div class="ev"><span class="d">'+(e.date?'<button class="linkbtn" data-y="'+e.date.y+'">'+esc(fmtDate(e.date))+'</button>':'—')+'</span><span><b>'+esc(evLabel(e))+'</b>'+(who?' '+who:'')+(e.val?' : '+esc(e.val):'')+(e.place?'<br><span class="sub">'+esc(e.place)+(Q&&Q.q==='approx'?' (≈)':'')+'</span>':'')+'</span>';
+  if(e.note||e.src)h+='<details><summary>'+t('details')+'</summary>'+(e.src?'<p><b>'+t('source')+'</b> '+esc(e.src)+'</p>':'')+(e.note?'<p>'+linkify(e.note)+'</p>':'')+'</details>';
+  return h+'</div>'}
+function linkify(t){return esc(t).replace(/https?:\/\/[^\s\]\)<>"]+/g,u=>'<a href="'+u+'" target="_blank" rel="noopener noreferrer">'+tr('link')+'</a>')}
+const tr=(...a)=>t(...a);
+function personHtml(p,Y,d){
+  const t=titleOf(p.id);const alive=Y>=p.b&&Y<=p.e;const loc=alive?locAt(p,Y):null;
+  let h='<button class="linkbtn" data-back="1">'+tr('backYear',Y)+'</button><h2>'+esc(dispName(p))+'</h2><div class="sub">'+lifeTxt(p)+(p.bEst||p.eEst?' <span title="'+esc(tr('estTip'))+'">'+tr('est')+'</span>':'')+'</div>';
+  h+='<div class="title-line"><span class="badge '+t.cat+'" id="ttl">'+esc(t.text)+'</span>'+(p.id!==S.ref?'<button class="linkbtn" data-edit="'+esc(p.id)+'">'+(t.custom?tr('editTitle'):tr('rename'))+'</button>':'')+'</div>';
+  if(t.k.anc&&t.k.cat==='blood'){const a=P(t.k.anc);if(a)h+='<div class="sub">'+tr('commonAnc')+' <button class="linkbtn" data-p="'+esc(a.id)+'">'+esc(a.name)+'</button></div>'}
+  h+='<div class="note">'+(alive?'<b>'+tr('inYear',Y)+'</b> : '+ageTxt(p,Y)+(loc?', '+tr('at')+' '+esc(loc.k.split(',').slice(0,2).join(', '))+(loc.sure?'':' '+tr('supposed')):', '+tr('unknownPlace')):'<b>'+tr('inYear',Y)+'</b> : '+(Y<p.b?tg('notBorn',p.sex):tg('deceased',p.sex))+'. <button class="linkbtn" data-y="'+Math.min(p.e,p.b+30)+'">'+tr('goTo',Math.min(p.e,p.b+30))+'</button>')+'</div>';
+  // preuves et fiche
+  let text=p.text;for(const f of p.fams){const F=S.fams.get(f);if(F)text+='\n'+F.text}
+  const pr=proofsOf(text);const fiche=p.www||($('#tpl').value.trim()?$('#tpl').value.trim().replace('{id}',encodeURIComponent(p.id.replace(/@/g,''))).replace('{nom}',encodeURIComponent(p.name)):'');
+  h+='<h3>'+tr('proofs')+'</h3>';
+  if(pr.list.length||pr.other.length||fiche){h+='<div class="proofs">'+(fiche?'<a href="'+esc(fiche)+'" target="_blank" rel="noopener noreferrer">'+tr('profile')+'</a>':'')+pr.list.map(([id,u])=>'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+tr('proof',esc(id))+'</a>').join('')+pr.other.slice(0,12).map((u,i)=>{let host=tr('link');try{host=new URL(u).hostname.replace(/^www\./,'')}catch(e){}return '<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(host)+' '+(i+1)+'</a>'}).join('')+'</div>'}
+  else h+='<div class="sub">'+tr('noLinks')+'</div>';
+  // proches en vie
+  if(alive){
+    const cats=tr('cats').map(c=>[c,[]]);
+    const sp=spousesOf(p.id);
+    for(const o of d.living){if(o.id===p.id)continue;let i=-1;
+      if(sp.includes(o.id))i=0;else{const b=blood(p.id,o.id);if(!b)continue;const du=b.du,dx=b.dx;
+        i=dx===0?(du===1?1:4):du===0?(dx===1?2:5):(du===1&&dx===1)?3:(dx===1&&du===2)?6:(du===1&&dx===2)?7:(du===2&&dx===2)?8:(du<=4&&dx<=4)?9:-1}
+      if(i>=0)cats[i][1].push(o)}
+    const tot=cats.reduce((a,c)=>a+c[1].length,0);
+    h+='<h3>'+tr('relatives',Y,tot)+'</h3>';
+    if(!tot)h+='<div class="sub">'+tr('noRel')+'</div>';
+    for(const [nm,arr] of cats){if(!arr.length)continue;arr.sort((a,b)=>a.b-b.b);
+      h+='<div class="sub" style="margin-top:8px;font-weight:600">'+nm+'</div><div class="rows">'+arr.map(o=>{const k=kin(p.id,o.id);const l=locAt(o,Y);return rowHtml(o,Y,k.label+(l?' · '+l.k.split(',')[0]:''))}).join('')+'</div>'}
+  }
+  // événements
+  const evs=p.ev.map(e=>({e,who:''}));
+  for(const f of p.fams){const F=S.fams.get(f);if(!F)continue;const o=P(F.h===p.id?F.w:F.h);for(const e of F.ev)evs.push({e,who:o?tr('withP')+' <button class="linkbtn" data-p="'+esc(o.id)+'">'+esc(dispName(o))+'</button>':''})}
+  evs.sort((a,b)=>((a.e.date?a.e.date.y*10000+a.e.date.m*100+a.e.date.d:9e9)-(b.e.date?b.e.date.y*10000+b.e.date.m*100+b.e.date.d:9e9)));
+  h+='<h3>'+tr('events',evs.length)+'</h3>'+(evs.length?evs.map(x=>evHtml(x.e,x.who)).join(''):'<div class="sub">'+tr('noEvents')+'</div>');
+  if(p.notes.length)h+='<h3>'+tr('notes')+'</h3>'+p.notes.map(n=>'<details class="ev" style="display:block"><summary>'+esc(n.slice(0,90))+(n.length>90?'…':'')+'</summary><p>'+linkify(n)+'</p></details>').join('');
+  h+='<div class="acts">'+(p.id!==S.ref?'<button class="btn" data-ref="'+esc(p.id)+'">'+tr('setRef')+'</button>':'')+(loc?'<button class="btn" data-zoom="'+esc(loc.k)+'">'+tr('center')+'</button>':'')+'</div>';
+  return h;
+}
+function placesHtml(){
+  const pc=[...S.places.values()].sort((a,b)=>(isNaN(a.lat)?0:a.q==='approx'?1:2)-(isNaN(b.lat)?0:b.q==='approx'?1:2)||b.n-a.n);
+  const lab={gedcom:t('qGedcom'),exact:t('qExact'),approx:t('qApprox'),manual:t('qManual')};
+  let h='<button class="linkbtn" data-back="1">'+t('back')+'</button><h2>'+t('plTitle')+'</h2><div class="sub">'+t('plIntro',pc.length)+'</div>';
+  if(placing)h+='<div class="note">'+t('plClick',esc(placing.split(',')[0]))+'</div>';
+  h+='<table class="plist">'+pc.map(Q=>'<tr><td>'+esc(Q.name)+'<br><span class="sub">'+t('mentions',Q.n)+' · '+(isNaN(Q.lat)?'<b>'+t('notLocated')+'</b>':lab[Q.q]+' · '+Q.lat.toFixed(3)+', '+Q.lon.toFixed(3))+'</span></td><td style="white-space:nowrap"><button class="linkbtn" data-place="'+esc(Q.name)+'">'+t('place')+'</button>'+(isNaN(Q.lat)?'':' · <button class="linkbtn" data-zoom="'+esc(Q.name)+'">'+t('see')+'</button>')+'</td></tr>').join('')+'</table>';
+  h+='<div class="acts"><button class="btn" id="copymap">'+t('copyMap')+'</button></div><div class="sub" id="copymsg"></div>';
+  return h;
+}
+$('#panel').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const ds=b.dataset;
+  if(ds.p){selectPerson(ds.p,false)}
+  else if(ds.k){S.sel={type:'place',id:ds.k};renderPanel();dirty()}
+  else if(ds.back){S.sel={type:'year'};renderPanel();dirty()}
+  else if(ds.y){setPlaying(false);setYear(+ds.y,2)}
+  else if(ds.ref){setRef(ds.ref)}
+  else if(ds.places){S.sel={type:'places'};renderPanel()}
+  else if(ds.place){placing=ds.place;cv.style.cursor='crosshair';renderPanel()}
+  else if(ds.zoom){const Q=S.places.get(ds.zoom);if(Q&&!isNaN(Q.lat)){S.target={x:mx(Q.lon),y:my(Q.lat),z:Math.max(S.cam.z,9.5)};dirty()}}
+  else if(ds.edit){const id=ds.edit;const cur=S.custom[S.ref+'|'+id]||'';const sp=$('#ttl');const inp=document.createElement('input');inp.type='text';inp.value=cur||titleOf(id).text;inp.id='ttlinput';inp.className='mini';inp.style.minWidth='220px';sp.replaceWith(inp);inp.focus();inp.select();
+    const done=()=>{const v=inp.value.trim();const auto=kin(S.ref,id).label;if(!v||v===titleOf(id).text&&!cur)delete S.custom[S.ref+'|'+id];else S.custom[S.ref+'|'+id]=v;if(v===auto)delete S.custom[S.ref+'|'+id];store.set('cg.custom.'+S.fileName,JSON.stringify(S.custom));renderPanel()};
+    inp.onkeydown=ev=>{if(ev.key==='Enter')done();if(ev.key==='Escape')renderPanel()};inp.onblur=done}
+  else if(b.id==='copymap'){const lines=[...S.places.values()].filter(Q=>!isNaN(Q.lat)).map(Q=>'2 PLAC '+Q.name+'\n3 MAP\n4 LATI '+(Q.lat>=0?'N':'S')+Math.abs(Q.lat).toFixed(4)+'\n4 LONG '+(Q.lon>=0?'E':'W')+Math.abs(Q.lon).toFixed(4)).join('\n');
+    const ok=()=>{$('#copymsg').textContent=t('copied',S.places.size)};const ko=()=>{$('#copymsg').textContent=t('copyKo')};try{navigator.clipboard.writeText(lines).then(ok,ko)}catch(err){ko()}}
+});
+function selectPerson(id,jump){const p=P(id);if(!p)return;S.sel={type:'person',id};if(jump&&p.b!=null&&(S.year<p.b||S.year>p.e)){setPlaying(false);setYear(Math.min(p.e,p.b+30),2)}
+  renderPanel();const l=(S.year>=p.b&&S.year<=p.e)?locAt(p,S.year):null;if(l){const Q=S.places.get(l.k);const X=sx(mx(Q.lon)),Y2=sy(my(Q.lat));if(X<40||X>W-40||Y2<40||Y2>H-40)S.target={x:mx(Q.lon),y:my(Q.lat),z:S.cam.z}}dirty()}
+function setRef(id){S.ref=id;S.kinCache.clear();store.set('cg.ref.'+S.fileName,id);renderChips();renderPanel();drawHisto();dirty()}
+function renderChips(){const r=P(S.ref);$('#filechip').innerHTML=(S.isSample?t('sample'):'<b>'+esc(S.fileName)+'</b>')+' · '+t('persons',S.persons.size);
+  let gen=0;if(r){gen=Math.max(...upMap(S.ref).values())+1}
+  $('#refchip').innerHTML=r?t('ref')+' : <b>'+esc(r.name)+'</b>'+(gen>1?' · '+t('gens',gen):''):'';}
+
+/* ---------- Recherche, fichier, réglages ---------- */
+$('#q').addEventListener('input',e=>{const v=norm(e.target.value);const box=$('#qres');if(v.length<2){box.hidden=true;return}
+  const ws=v.split(' ');const res=[];for(const p of S.persons.values()){const n=norm(p.name);if(ws.every(w=>n.includes(w))){res.push(p);if(res.length>=30)break}}
+  box.innerHTML=res.length?res.map(p=>'<button data-p="'+esc(p.id)+'">'+esc(p.name)+' <small>'+lifeTxt(p)+'</small></button>').join(''):'<button disabled>'+t('noRes')+'</button>';box.hidden=false});
+$('#qres').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.p){$('#qres').hidden=true;$('#q').value='';selectPerson(b.dataset.p,true)}});
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))$('#qres').hidden=true;if(!e.target.closest('#settings')&&!e.target.closest('#setbtn')){$('#settings').hidden=true;$('#setbtn').setAttribute('aria-expanded','false')}});
+$('#setbtn').onclick=()=>{const s=$('#settings');s.hidden=!s.hidden;$('#setbtn').setAttribute('aria-expanded',String(!s.hidden))};
+$('#filelabel').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#file').click()}});
+function readFile(f){const fr=new FileReader();fr.onload=()=>{let buf=fr.result,txt=new TextDecoder('utf-8').decode(buf);
+  if(/1 CHAR (ANSI|ANSEL|IBMPC|WINDOWS)/i.test(txt.slice(0,3000))||(txt.match(/\uFFFD/g)||[]).length>5)txt=new TextDecoder('windows-1252').decode(buf);
+  if(!/0 @[^@]+@ INDI/.test(txt)){const conv=csvToGed(txt);if(conv)txt=conv;else{$('#panel').innerHTML='<h2>'+t('badTitle')+'</h2><p class="note">'+t('badText')+'</p>';return}}
+  store.set('cg.ged',txt)||store.del('cg.ged');store.set('cg.name',f.name);setPlaying(false);loadGed(txt,f.name,false)};fr.readAsArrayBuffer(f)}
+$('#file').onchange=e=>{if(e.target.files[0])readFile(e.target.files[0]);e.target.value=''};
+const mw=$('#app');mw.addEventListener('dragover',e=>{e.preventDefault();$('#drop').hidden=false});mw.addEventListener('dragleave',e=>{if(e.target===mw||!mw.contains(e.relatedTarget))$('#drop').hidden=true});
+mw.addEventListener('drop',e=>{e.preventDefault();$('#drop').hidden=true;const f=e.dataTransfer.files[0];if(f)readFile(f)});
+$('#sample').onclick=()=>{setPlaying(false);loadGed(SAMPLE,'sample',true);$('#settings').hidden=true};
+$('#forget').onclick=()=>{try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.startsWith('cg.')&&k!=='cg.lang')localStorage.removeItem(k)}}catch(e){}setPlaying(false);loadGed(SAMPLE,'sample',true);$('#settings').hidden=true};
+$('#places').onclick=()=>{S.sel={type:'places'};renderPanel();$('#settings').hidden=true};
+$('#anon').onchange=()=>{renderPanel();showTicker(S.year)};$('#lines').onchange=dirty;
+$('#tpl').value=store.get('cg.tpl')||'';$('#tpl').onchange=e=>{store.set('cg.tpl',e.target.value.trim());renderPanel()};
+$('#zin').onclick=()=>{S.target=null;zoomAt(W/2,H/2,1)};$('#zout').onclick=()=>{S.target=null;zoomAt(W/2,H/2,-1)};$('#zfit').onclick=()=>fitAll(false);
+window.addEventListener('resize',()=>{resize();drawHisto()});
+function themeChanged(){readColors();drawHisto();dirty()}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',themeChanged)}catch(e){}
+new MutationObserver(themeChanged).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- Tableau CSV (format décrit dans FORMAT.md) converti en GEDCOM dans le navigateur ---------- */
+const CSV_COLS={id:['id','identifiant'],given:['given','prenom','prenoms','first_name','firstname','vorname'],surname:['surname','nom','last_name','lastname','family_name','nachname','cognome'],
+  name:['name','full_name','nom_complet'],sex:['sex','sexe','gender','geschlecht','sesso'],
+  birth_date:['birth_date','naissance_date','date_naissance'],birth_place:['birth_place','naissance_lieu','lieu_naissance'],
+  death_date:['death_date','deces_date','date_deces'],death_place:['death_place','deces_lieu','lieu_deces'],
+  father_id:['father_id','pere_id','id_pere'],mother_id:['mother_id','mere_id','id_mere'],spouse_ids:['spouse_ids','spouse_id','conjoint_ids','conjoint_id','id_conjoint'],
+  marriage_date:['marriage_date','mariage_date','date_mariage'],marriage_place:['marriage_place','mariage_lieu','lieu_mariage'],
+  residences:['residences'],occupation:['occupation','profession'],profile_url:['profile_url','fiche_url','url'],links:['links','liens','preuves'],notes:['notes','note']};
+const CSV_TEMPLATE='id,given,surname,sex,birth_date,birth_place,death_date,death_place,father_id,mother_id,spouse_ids,marriage_date,marriage_place,residences,occupation,profile_url,links,notes\n'+
+ 'P1,Camille,Vernhet,F,1968-03-14,"Montréal, Québec, Canada @45.508,-73.588",,,P2,P3,,,,,,,,Fictional example row: replace with your own family\n'+
+ 'P2,Julien,Vernhet,M,1936-02-02,"Marseille, Bouches-du-Rhône, France",2011-11-09,"Montréal, Québec, Canada @45.508,-73.588",,,P3,1965,"Montréal, Québec, Canada @45.508,-73.588","1961=Montréal, Québec, Canada @45.508,-73.588",,,,\n'+
+ 'P3,Hélène,Roux,F,1940-07-30,"Alger, Algérie",,,,,P2,,,,,,,\n';
+function parseCsv(text){
+  text=text.replace(/^﻿/,'');const first=text.split(/\r?\n/).find(l=>l.trim())||'';
+  const cnt=d=>first.split(d).length-1;const delim=[',',';','\t'].sort((a,b)=>cnt(b)-cnt(a))[0];
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"'&&cur==='')q=true;
+    else if(ch===delim){row.push(cur);cur=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cur);cur='';if(row.some(c=>c.trim()))rows.push(row);row=[]}
+    else cur+=ch}
+  row.push(cur);if(row.some(c=>c.trim()))rows.push(row);return rows;
+}
+const GMON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function csvDate(s){
+  s=(s||'').trim();if(!s)return '';let pre='';
+  const m0=/^(~|≈|<|>|ca?\.?\s|abt\.?\s|vers\s|um\s|circa\s|avant\s|before\s|vor\s|prima\s|apr[eè]s\s|after\s|nach\s|dopo\s)\s*/i.exec(s);
+  if(m0){const k=m0[1].trim().toLowerCase();pre=/^(<|avant|before|vor|prima)/.test(k)?'BEF ':/^(>|apr|after|nach|dopo)/.test(k)?'AFT ':'ABT ';s=s.slice(m0[0].length)}
+  let m=/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/.exec(s);if(m)return pre+(m[3]?+m[3]+' ':'')+(GMON[+m[2]-1]||'')+' '+m[1];
+  m=/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})$/.exec(s);if(m)return pre+(+m[1])+' '+(GMON[+m[2]-1]||'')+' '+m[3];
+  m=/^(\d{1,2})[\/.](\d{4})$/.exec(s);if(m)return pre+(GMON[+m[1]-1]||'')+' '+m[2];
+  return pre+s;
+}
+function csvPlace(s,lvl){
+  s=(s||'').trim();if(!s)return [];const m=/^(.*?)\s*@\s*(-?\d+(?:[.,]\d+)?)\s*[,;]\s*(-?\d+(?:[.,]\d+)?)\s*$/.exec(s);
+  if(!m)return [lvl+' PLAC '+s];const la=parseFloat(m[2].replace(',','.')),lo=parseFloat(m[3].replace(',','.'));
+  return [lvl+' PLAC '+m[1],(lvl+1)+' MAP',(lvl+2)+' LATI '+(la>=0?'N':'S')+Math.abs(la),(lvl+2)+' LONG '+(lo>=0?'E':'W')+Math.abs(lo)];
+}
+function csvToGed(text){
+  const rows=parseCsv(text);if(rows.length<2)return null;
+  const nk=s=>s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[\s\-]+/g,'_');
+  const head=rows[0].map(nk),col={};
+  for(const [k,al] of Object.entries(CSV_COLS)){const i=head.findIndex(h=>al.includes(h));if(i>=0)col[k]=i}
+  if(col.id==null||(col.given==null&&col.surname==null&&col.name==null))return null;
+  const one=s=>String(s||'').replace(/[\r\n]+/g,' ').trim();
+  const xid=s=>'@'+one(s).replace(/[@\s]/g,'_')+'@';
+  const recs=[],byId=new Map();
+  for(const r of rows.slice(1)){const v=k=>col[k]==null?'':one(r[col[k]]);if(!v('id'))continue;
+    const o={};for(const k of Object.keys(CSV_COLS))o[k]=v(k);if(!byId.has(o.id)){byId.set(o.id,o);recs.push(o)}}
+  if(!recs.length)return null;
+  const fams=new Map(),famOf=(a,b)=>{const key=[a||'',b||''].sort().join('|');let F=fams.get(key);if(!F){F={id:'@F'+(fams.size+1)+'@',a,b,ch:[],md:'',mp:''};fams.set(key,F)}return F};
+  const sexOf=s=>/^(m|h|u)/i.test(s)?'M':/^(f|w|d)/i.test(s)?'F':'';
+  for(const o of recs){
+    o.sx=sexOf(o.sex);o.famc=null;o.fams=[];
+    if(o.father_id||o.mother_id){const F=famOf(o.father_id,o.mother_id);F.h=F.h||o.father_id;F.w=F.w||o.mother_id;F.ch.push(o.id);o.famc=F}
+  }
+  for(const o of recs){
+    const sps=o.spouse_ids.split(/[|;,\s]+/).filter(Boolean);
+    sps.forEach((s,i)=>{const F=famOf(o.id,s);if(!F.h&&!F.w){const os=byId.get(s);if(o.sx==='F'||(os&&sexOf(os.sex)==='M')){F.h=s;F.w=o.id}else{F.h=o.id;F.w=s}}
+      if(i===0){if(o.marriage_date&&!F.md)F.md=o.marriage_date;if(o.marriage_place&&!F.mp)F.mp=o.marriage_place}});
+  }
+  for(const F of fams.values())for(const s of [F.h,F.w]){const o=byId.get(s);if(o&&!o.fams.includes(F))o.fams.push(F)}
+  const L2=['0 HEAD','1 SOUR GENEANOMAP-CSV','1 CHAR UTF-8'];
+  const ev=(tag,d,p,val)=>{if(!d&&!p&&!val)return;L2.push('1 '+tag+(val?' '+val:''));const gd=csvDate(d);if(gd)L2.push('2 DATE '+gd);for(const l of csvPlace(p,2))L2.push(l)};
+  for(const o of recs){
+    let gv=o.given,sn=o.surname;if(!gv&&!sn&&o.name){const w=o.name.split(' ');sn=w.length>1?w.pop():'';gv=w.join(' ')}
+    L2.push('0 '+xid(o.id)+' INDI','1 NAME '+gv+' /'+sn+'/');if(o.sx)L2.push('1 SEX '+o.sx);
+    ev('BIRT',o.birth_date,o.birth_place);ev('DEAT',o.death_date,o.death_place);
+    if(o.occupation)L2.push('1 OCCU '+o.occupation);
+    for(const seg of o.residences.split(/\s*\|\s*|\s*;\s*(?=[~<>]?\d{3,4}\b[^=]*=)/).filter(Boolean)){const i=seg.indexOf('=');if(i<0)ev('RESI','',seg);else ev('RESI',seg.slice(0,i),seg.slice(i+1))}
+    if(/^https?:\/\//i.test(o.profile_url))L2.push('1 WWW '+o.profile_url);
+    for(const u of o.links.split(/[\s|]+/).filter(x=>/^https?:\/\//i.test(x)))L2.push('1 NOTE '+u);
+    if(o.notes)L2.push('1 NOTE '+o.notes);
+    if(o.famc)L2.push('1 FAMC '+o.famc.id);for(const F of o.fams)L2.push('1 FAMS '+F.id);
+  }
+  for(const F of fams.values()){L2.push('0 '+F.id+' FAM');if(F.h&&byId.has(F.h))L2.push('1 HUSB '+xid(F.h));if(F.w&&byId.has(F.w))L2.push('1 WIFE '+xid(F.w));
+    for(const c of F.ch)L2.push('1 CHIL '+xid(c));if(F.md||F.mp){L2.push('1 MARR');const gd=csvDate(F.md);if(gd)L2.push('2 DATE '+gd);for(const l of csvPlace(F.mp,2))L2.push(l)}}
+  L2.push('0 TRLR');return L2.join('\n');
+}
+
+/* ---------- Langue, fond de carte, soutien ---------- */
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i]').forEach(e=>{e.textContent=t(e.dataset.i)});
+  document.querySelectorAll('[data-ih]').forEach(e=>{e.innerHTML=t(e.dataset.ih)});
+  $('#q').placeholder=t('search');$('#q').setAttribute('aria-label',t('search'));
+  $('#play').setAttribute('aria-label',S.playing?t('pause'):t('play'));$('#dir').textContent=S.dir>0?t('dirF'):t('dirB');$('#dir').title=t('dirT');
+  for(const o of $('#speed').options)o.textContent=t('speed',o.value);$('#speed').setAttribute('aria-label',t('speedL'));$('#slider').setAttribute('aria-label',t('yearL'));
+  $('#zin').setAttribute('aria-label',t('zin'));$('#zout').setAttribute('aria-label',t('zout'));$('#zfit').setAttribute('aria-label',t('zfit'));$('#zfit').title=t('zfit');
+  $('#mapwrap').setAttribute('aria-label',t('mapL'));$('#panel').setAttribute('aria-label',t('detL'));
+  $('#tilesHint').textContent=tiles.ko?t('sTilesKo'):t('sTilesHint');
+  const a=$('#support');if(SUPPORT_URL){a.href=SUPPORT_URL;a.textContent='🍺 '+t('support');a.removeAttribute('aria-disabled')}else{a.removeAttribute('href');a.textContent='🍺 '+t('supportSoon');a.setAttribute('aria-disabled','true')}
+}
+function setLang(l){LANG=LANGS[l]?l:'en';store.set('cg.lang',LANG);$('#lang').value=LANG;S.kinCache.clear();applyLang();if(S.persons.size){renderChips();setYear(S.year,true)}}
+$('#lang').innerHTML=Object.entries(LANGS).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('');
+$('#lang').onchange=e=>setLang(e.target.value);
+$('#tilesOpt').onchange=e=>{store.set('cg.tiles',e.target.checked?'1':'');if(e.target.checked)probeTiles();else{tiles.ok=false;tiles.ko=false;tiles.cache.clear();applyLang();dirty()}};
+$('#csvtpl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+CSV_TEMPLATE],{type:'text/csv'}));a.download='geneanomap-template.csv';document.body.appendChild(a);a.click();a.remove()};
+
+/* ---------- Démarrage ---------- */
+function boot(){
+  {const sv=store.get('cg.lang'),nv=(navigator.language||'en').slice(0,2).toLowerCase();LANG=LANGS[sv]?sv:LANGS[nv]?nv:'en';$('#lang').value=LANG;applyLang()}
+  if(store.get('cg.tiles')){$('#tilesOpt').checked=true;probeTiles()}
+  readColors();resize();
+  const saved=store.get('cg.ged');
+  if(saved&&/0 @[^@]+@ INDI/.test(saved))loadGed(saved,store.get('cg.name')||'tree.ged',false);else loadGed(SAMPLE,'sample',true);
+  fetch('world.json').then(r=>r.json()).then(w=>{S.world=w;buildWorldPath();ccNames=null;if(S.gazIndex){resolvePlaces();afterPlaces(false)}dirty()}).catch(()=>{});
+}
+boot();
+</script>
+</body>
+</html>
