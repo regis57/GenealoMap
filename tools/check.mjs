@@ -21,9 +21,20 @@ else {
       console.log('fingerprint updated');
     } else errors.push('script fingerprint in the policy is out of date: run node tools/check.mjs --fix');
   }
+  // Same for the single <style> block; style attributes are not allowed at all.
+  const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)];
+  if (styles.length !== 1) errors.push('index.html must contain exactly one <style> block');
+  const wantCss = `style-src 'sha256-${createHash('sha256').update(styles[0]?.[1] ?? '', 'utf8').digest('base64')}'`;
+  if (!csp[1].includes(wantCss)) {
+    if (process.argv.includes('--fix')) {
+      html = html.replace(/style-src 'sha256-[^']*'/, wantCss);
+      writeFileSync(file, html);
+      console.log('style fingerprint updated');
+    } else errors.push('style fingerprint in the policy is out of date: run node tools/check.mjs --fix');
+  }
   for (const part of ["default-src 'none'", "connect-src 'self'", "form-action 'none'", "base-uri 'none'"])
     if (!csp[1].includes(part)) errors.push(`policy must keep: ${part}`);
-  if (/unsafe-eval|script-src[^;]*unsafe-inline|script-src[^;]*https?:/.test(csp[1])) errors.push('policy must not allow eval, inline or remote scripts');
+  if (/unsafe-eval|unsafe-inline|script-src[^;]*https?:/.test(csp[1])) errors.push('policy must not allow eval, inline code or remote scripts');
 }
 
 // 2. No address outside the short list below may appear anywhere in the page.
@@ -33,7 +44,7 @@ for (const [url] of html.matchAll(/https?:\/\/[^\s"'<>)\\]+/g))
 
 // 3. Constructs that have no place in a page that reads private files.
 const banned = [[/\beval\s*\(/, 'eval()'], [/\bnew Function\b/, 'new Function'], [/document\.write/, 'document.write'], [/XMLHttpRequest|sendBeacon|WebSocket|EventSource/, 'network API other than fetch'],
-  [/\son[a-z]+\s*=\s*["']/i, 'inline event handler attribute'], [/<(iframe|object|embed|form)\b/i, 'iframe/object/embed/form element'], [/document\.cookie/, 'cookies']];
+  [/\son[a-z]+\s*=\s*["']/i, 'inline event handler attribute'], [/<(iframe|object|embed|form)\b/i, 'iframe/object/embed/form element'], [/document\.cookie/, 'cookies'], [/\sstyle\s*=\s*["']/i, 'style attribute (use a class)']];
 for (const [re, name] of banned) if (re.test(html)) errors.push(`forbidden: ${name}`);
 const fetches = [...html.matchAll(/\bfetch\(([^)]*)\)/g)].map(m => m[1].trim());
 for (const f of fetches) if (!["'world.json'", "'gaz.json'"].includes(f)) errors.push(`fetch() may only load world.json and gaz.json, found: ${f}`);
