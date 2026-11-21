@@ -27,6 +27,8 @@ Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`),
 
 Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tree`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
 
+Page icon: drawn in `tools/icon.svg` and embedded in `index.html` as data addresses (an SVG `rel="icon"` and a 180 px PNG `apple-touch-icon`), so no extra file is needed at run time. In the SVG address `http://` must stay percent-encoded, or `tools/check.mjs` reports an unexpected address.
+
 ## Working method
 
 - Develop on a branch, run the check, test the page in a browser, then open a pull request to `main`, wait for the `check` workflow to be green and merge it. The owner has asked not to be consulted for these steps (decision of 21 November 2026): do them without asking. Ask only for choices that are his to make (licence, wording of public texts, anything irreversible outside this repository).
