@@ -11,6 +11,8 @@ Everything runs in the browser. The family file is never uploaded.
 - **Timeline with a play button**: past to present or present to past, at 2 to 40 years per second, with a histogram of people alive.
 - **Map of the world**: each place shows who lives there that year; the camera can follow the family as it moves.
 - **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 300 former states (Holy Roman Empire, Austria-Hungary, Two Sicilies, ...) are shown in the interface language. Can be switched off.
+- **Routes**: select a person and the map draws where they went, stop by stop with the years - or the route of their paternal or maternal line from the oldest known ancestor. The same route is listed as text.
+- **Lines in colour**: colour people by kinship, by paternal and maternal line of the reference person, or by who bears their surname - on the map, in the lists and as curves on the timeline.
 - **Reference person**: choose anyone; every other person gets a title relative to them (grandmother, great-uncle, first cousin once removed, uncle by marriage, ...), their Sosa/Ahnentafel number, and the nearest common ancestor. Titles can be renamed by hand.
 - **Living relatives for any person and year**, with their ages: spouse, parents, children, siblings, grandparents, uncles and aunts, nephews and nieces, cousins.
 - **Proofs and links**: links found in the file (scans on Google Drive, online profile, sources) are one click away from each person and event.
@@ -62,10 +64,24 @@ The page address can set how an embedded copy starts - after `?` or, to keep it 
 | `theme=dark` | `light` or `dark` instead of the device setting |
 | `hist=0` | current borders only |
 | `play=1` | start playing at once |
+| `file=tree.ged` | show a tree you publish: a file placed in the same folder as the page (see below) |
+| `living=1` | with `file`: also show people presumed living |
 
-Example: `/geneanomap/#lang=de&year=1870&theme=dark`. These options describe the display only; the tree shown is still the one the visitor opened (or the fictional example).
+Example: `/geneanomap/#lang=de&year=1870&theme=dark`. Without `file`, the tree shown is the one the visitor opened (or the fictional example).
 
-If you change the script, run `node tools/check.mjs --fix` so the security policy accepts it.
+### Publish your own tree
+
+Put your file (`.ged`, `.gdz`, `.csv`, `.xlsx` or `.ods`) in the same folder as `index.html` and name it in the address:
+
+```
+https://your-site.example/geneanomap/?file=tree.ged&ref=I12&lang=fr
+```
+
+Visitors then see your tree instead of the fictional example. People presumed living (no death recorded, born less than 100 years ago) are not shown: not on the map, not in lists, searches or titles. Add `living=1` only if everyone concerned agrees.
+
+Two things to know. The file itself can be downloaded by anyone who knows its name, whatever the page displays: **export it without living people** from your genealogy program before publishing. And only a file in that folder can be named - a name with a `/` or an address is ignored. The published file is not stored in the visitor's browser, and a visitor can still open their own file.
+
+If you change the script, run `node tools/check.mjs --fix` so the security policy accepts it, then `node tools/test.mjs`.
 
 ### Finer gazetteer
 
@@ -113,13 +129,11 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles.
 
 Next, for people who use it:
 
-- **Show a published tree**: let a site owner put their own file next to the page and name it in the address, so visitors see that tree instead of the fictional example. Living people hidden by default.
-- **Migration paths**: draw the route of a person or of a whole line across the years (birth, moves, death), not only where people are in a given year.
-- **Branches in colour**: paternal and maternal lines, or one surname, picked out on the map and the timeline.
+- **Tree views** next to the map: ancestors and descendants as a chart (top-down or left-to-right), always titled relative to the reference person, usable on a phone.
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
 - **More input formats**: Gramps XML and GeneWeb (`.gw`) files.
 - **Use without a connection**: install the page on a phone or computer and keep it working offline.
@@ -130,5 +144,5 @@ Next, for quality:
 - **Historical borders**: more reference dates, regions inside states (provinces, Alsace-Lorraine, ...), and the smaller former states still named as the source writes them.
 - **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
 - **Larger trees**: keep playback smooth with tens of thousands of people.
-- **Automatic tests**: a table of expected kinship titles in every language, and a browser run of the page, checked on each change.
+- **Automatic tests**: a browser run of the page on each change (the kinship table, completeness of the languages and the published-tree rules are already checked by `tools/test.mjs`).
 - **End of the test phase**: remove `noindex` once the above has settled.

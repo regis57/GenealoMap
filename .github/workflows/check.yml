@@ -15,3 +15,4 @@ jobs:
         with:
           persist-credentials: false
       - run: node tools/check.mjs
+      - run: node tools/test.mjs
