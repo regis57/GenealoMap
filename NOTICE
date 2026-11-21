@@ -16,6 +16,16 @@ Third-party data shipped with this project:
               (https://www.geonames.org), Creative Commons Attribution 4.0,
               via the all-the-cities package.
 
+  gaz/*.json  Finer gazetteer by country, built with tools/build-gaz.mjs from
+              GeoNames country files, Creative Commons Attribution 4.0.
+
+Optional data under its own licence, read by the program but not part of it:
+
+  hist/*.json Historical borders derived from historical-basemaps by
+              Andre Ourednik (https://github.com/aourednik/historical-basemaps),
+              GNU General Public License version 3. See hist/README.md.
+              Leave the folder out if that licence does not suit your use.
+
 Optional, only if the visitor turns it on in the settings:
 
   Map tiles (c) OpenStreetMap contributors, Open Database License,

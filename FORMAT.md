@@ -1,10 +1,10 @@
 # Input formats
 
-GeneanoMap reads one file, in the browser. Two formats are accepted.
+GeneanoMap reads one file, in the browser. Two families of formats are accepted: GEDCOM, and a table of people.
 
 ## 1. GEDCOM (recommended)
 
-GEDCOM (`.ged`) is the exchange format every genealogy program and website can export: Filae, Geneanet, Ancestry, MyHeritage, FamilySearch, Heredis, Gramps, Family Tree Maker and others. Look for "Export" or "Download GEDCOM" in your tool. Versions 5.5, 5.5.1 and 7.0 are read; UTF-8 is preferred, ANSI/Windows-1252 is detected.
+GEDCOM (`.ged`) is the exchange format every genealogy program and website can export: Filae, Geneanet, Ancestry, MyHeritage, FamilySearch, Heredis, Gramps, Family Tree Maker and others. Look for "Export" or "Download GEDCOM" in your tool. Versions 5.5, 5.5.1 and 7.0 are read; UTF-8 is preferred, ANSI/Windows-1252 is detected. A GEDCOM 7 package (`.gdz`, a zip archive holding `gedcom.ged` and media) is opened directly: only the GEDCOM inside is read, the media are ignored.
 
 What is used:
 
@@ -17,15 +17,22 @@ What is used:
 | `NOTE`, `SOUR` | shown under each event; any `http(s)` address becomes a link |
 | `WWW` (or `_URL`) under `INDI` | "online profile" link for that person |
 
-Dates: `14 MAR 1968`, `MAR 1968`, `1968`, `ABT 1802`, `BEF 1850`, `AFT 1850`, `BET 1800 AND 1810`. French and German month abbreviations are tolerated.
+Dates: `14 MAR 1968`, `MAR 1968`, `1968`, `ABT 1802`, `BEF 1850`, `AFT 1850`, `BET 1800 AND 1810`. French, German, Spanish, Dutch and Portuguese month abbreviations are tolerated.
 
-Places without coordinates are looked up in the bundled gazetteer (towns above about 1,000 inhabitants, worldwide). Write them from the most local to the widest level, ending with the country: `Florac, Lozère, France`. Villages missing from the gazetteer are placed near neighbouring places and flagged "approximate"; you can place them by hand (Settings > Places and coordinates) and copy the resulting `MAP` lines back into your file.
+Places without coordinates are looked up in the bundled gazetteer (towns above about 1,000 inhabitants, worldwide). Write them from the most local to the widest level, ending with the country: `Florac, Lozère, France`. If the copy you use has the finer gazetteer for the country (folder `gaz/`), hamlets and vanished villages are looked up there next. Villages still missing are placed near neighbouring places and flagged "approximate"; you can place them by hand (Settings > Places and coordinates) and copy the resulting `MAP` lines back into your file.
 
-Numbered proofs: a note containing `Proof 12 : https://...` (also `Preuve`, `Beleg`, `Prova`) defines proof 12; any event note mentioning `proof 12` then links to it.
+Numbered proofs: a note containing `Proof 12 : https://...` (also `Preuve`, `Beleg`, `Prova`, `Prueba`, `Bewijs`, `Beweis`) defines proof 12; any event note mentioning `proof 12` then links to it.
 
-## 2. CSV table (from Excel, LibreOffice, Google Sheets)
+## 2. Table of people (Excel, LibreOffice, Google Sheets, CSV)
 
-For people who keep their family in a spreadsheet. One row per person, first row = column names. Save as "CSV UTF-8". Comma, semicolon or tab separators are detected. See [`template.csv`](template.csv).
+For people who keep their family in a spreadsheet. One row per person, first row = column names. See [`template.csv`](template.csv).
+
+The table can be opened as:
+
+- an Excel workbook (`.xlsx`) or an OpenDocument spreadsheet (`.ods`): the first sheet is read; cells formatted as dates are understood, and a plain number such as `1968` is a year;
+- a CSV file saved as "CSV UTF-8": comma, semicolon or tab separators are detected.
+
+Older `.xls` files are not read: save them as `.xlsx`.
 
 | Column | Required | Content |
 |---|---|---|
@@ -33,7 +40,7 @@ For people who keep their family in a spreadsheet. One row per person, first row
 | `given` | yes (or `surname`) | given names |
 | `surname` | | family name |
 | `sex` | | `M` or `F` |
-| `birth_date`, `death_date` | | `1968-03-14`, `1968-03`, `1968`, `14/03/1968`; prefix `~` (about), `<` (before), `>` (after) |
+| `birth_date`, `death_date` | | `1968-03-14`, `1968-03`, `1968`, `14/03/1968`; prefix `~` (about), `<` (before), `>` (after), or the word in your language (`vers`, `about`, `um`, `circa`, `hacia`, `rond`, `cerca`; `avant`, `before`, `vor`, `voor`, `antes`; `après`, `after`, `nach`, `na`, `después`, `depois`) |
 | `birth_place`, `death_place` | | `Town, Region, Country`, optionally followed by coordinates: `Florac, Lozère, France @44.326,3.594` |
 | `father_id`, `mother_id` | | the `id` of each parent |
 | `spouse_ids` | | one or more `id`, separated by `\|` |
@@ -44,6 +51,6 @@ For people who keep their family in a spreadsheet. One row per person, first row
 | `links` | | one or more `http(s)` addresses (scans, proofs), separated by spaces |
 | `notes` | | free text |
 
-French column names are also understood (`prenom`, `nom`, `sexe`, `pere_id`, `mere_id`, ...). The table is converted to GEDCOM inside the browser; nothing is uploaded.
+French column names are also understood (`prenom`, `nom`, `sexe`, `pere_id`, `mere_id`, ...), and the usual words for given name, surname and sex in German, Italian, Spanish, Dutch and Portuguese. The table is converted to GEDCOM inside the browser; nothing is uploaded.
 
 A Word document or a link to a genealogy website cannot be read directly: a web page is not allowed to fetch another site on your behalf, and that restriction is what keeps your data on your device. Export a GEDCOM from the site, or fill the CSV template.
