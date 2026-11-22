@@ -285,6 +285,16 @@ ok(P2.P('@I1@').hid === true && !P2.P('@I7@').hid, 'published tree: people presu
 ok(!P2.yearData(2000).living.some(p => p.hid), 'published tree: hidden people are not in the year view');
 ok(![...P2.S.events.values()].flat().some(e => e.p === '@I1@'), 'published tree: no event of a hidden person in the text version');
 ok(!/Camille/.test(P2.titleOf('@I2@').text), 'published tree: the name of a hidden reference person is not used in titles');
+// no reference person: no title, neutral colours, and a tree of everybody alive that year
+T.loadGed(T.SAMPLE, 'sample', true); T.S.ref = null;
+eq(T.titleOf('@I4@').text, '', 'no reference: no kinship title'); eq(T.titleOf('@I4@').cat, 'ally', 'no reference: neutral category');
+eq(T.tint('@I4@'), 'ally', 'no reference: neutral colour'); eq(T.kin(null, '@I4@').label, '', 'kin() without a reference gives no label');
+const eraAll = y => { T.S.year = y; return [...T.treeEra(null, 6, {c: 0}).matchAll(/data-p="([^"]+)"/g)].map(m => m[1]).join(' '); };
+eq(eraAll(1936), '@I7@ @I4@ @I6@ @I2@', 'no reference, 1936: the living family of the year, each person once');
+eq(eraAll(1916), '@I12@ @I10@ @I7@ @I9@ @I4@ @I14@', 'no reference, 1916: one tree, nobody twice (a dead ancestor links two living branches)');
+eq(eraAll(1810), '@I12@', 'no reference, 1810: the only person alive');
+ok(eraAll(1700) === '', 'no reference, 1700: nobody, no failure');
+T.S.ref = '@I1@';
 ok(sandbox('?file=../secret.ged').pub.name === '' && sandbox('?file=https://x.org/a.ged').pub.name === '' && sandbox('?file=tree.ged').pub.name === 'tree.ged', 'published file must be a bare name in the same folder');
 const P3 = sandbox('?file=tree.ged&living=1'); P3.pub.on = true; P3.loadGed(P3.SAMPLE, 'tree.ged', false);
 ok(!P3.P('@I1@').hid, 'published tree with living=1 shows everyone');
