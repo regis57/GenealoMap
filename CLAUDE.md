@@ -27,7 +27,7 @@ Page address options (`ARGS`): `lang`, `ref`, `year`, `theme`, `hist`, `play`, `
 
 `S.ref` may be `null` (no reference person, saved as `cg.ref.<file>` = `none`): `kin()`, `titleOf()`, `tint()` and the tree must keep working without it, and nothing may interrupt or move the timeline when it is removed or restored.
 
-Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`), tree view (`renderTree`, `treeHtml`, `treeEra` for the chart that follows the year (`tree.pref` is the chart the user chose; without a root person the list is disabled and the chart of the year is shown, with a hint), `setView`; nested lists drawn with CSS only, since no style attribute is allowed; address option `view=tree`). OpenStreetMap tiles need `referrerPolicy='origin'` (they are refused without a referrer).
+Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`), tree view (`renderTree`, `treeHtml`, `treeEra` for the chart that follows the year (`tree.pref` is the chart chosen with the three buttons of `#trMode`; `tree.rootId` is the last person opened and stays the root after the sheet is closed; `treeNav` is the strip to move to parents, spouses or children; ancestors and descendants are never trimmed by the year, only the contemporaries chart is; without any person the two line charts are disabled and a hint says why), `setView`; nested lists drawn with CSS only, since no style attribute is allowed; address option `view=tree`). OpenStreetMap tiles need `referrerPolicy='origin'` (they are refused without a referrer).
 
 Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tree`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
 
