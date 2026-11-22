@@ -41,4 +41,4 @@ Page icon: drawn in `tools/icon.svg` and embedded in `index.html` as data addres
 
 `main` is served by GitHub Pages at https://regis57.github.io/GenealoMap/. The page keeps `noindex` during the test phase.
 
-A second copy runs at https://regis-hennequin.info/geneanomap/ (repository `regis57/regis-hennequin-site`, folder `public/geneanomap/`). That address still carries the first, misspelt name ("Geneano"); it is a real path on another site, so it is written here as it is until that site renames it. That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.
+A second copy runs at https://regis-hennequin.info/genealomap/ (repository `regis57/regis-hennequin-site`, folder `public/genealomap/`). That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.
