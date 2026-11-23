@@ -122,6 +122,14 @@ await step('tree view: charts, moving up and down', async () => {
   await p.click('#treebody .trnav button[data-p="@I7@"]');
   check(await p.evaluate(() => document.querySelector('#treebody .root b').textContent) === 'Firmin VERNHET', 'cannot move up to a parent');
   await p.click('#trMode button[data-m=t]'); check(await p.locator('#treebody .nd').count() > 1, 'contemporaries chart is empty');
+  await p.evaluate(() => selectPerson('@I4@', false)); await p.click('#trMode button[data-m=h]');
+  check(await p.locator('#treebody .hg .tv.up .root').count() === 1 && await p.locator('#treebody .hgd .nd').count() >= 2, 'hourglass lacks ancestors or descendants');
+  await p.selectOption('#trDir', 'h'); check(await p.locator('#treebody .hgh .th.rev .nd').count() >= 2, 'horizontal hourglass lacks descendants');
+  await p.click('#trMode button[data-m=f]'); check(await p.locator('#treebody svg.fan g.fs').count() >= 7, 'fan chart not drawn');
+  await p.locator('#treebody g[data-p="@I7@"]').click(); check(await p.evaluate(() => tree.rootId) === '@I7@', 'a fan sector does not open the person');
+  await p.emulateMedia({media: 'print'});
+  check(await p.evaluate(() => getComputedStyle($('#map')).display === 'none' && getComputedStyle($('#panel')).display === 'none' && getComputedStyle($('#tree')).position === 'static'), 'print layout does not show the tree alone');
+  await p.emulateMedia({media: 'screen'});
   await done(p, 'tree');
 });
 
