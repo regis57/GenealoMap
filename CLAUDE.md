@@ -9,7 +9,7 @@ A static web page that plays a family tree on a map, year by year. Owner and aut
 ## Hard rules
 
 1. **Privacy first.** A visitor's file never leaves the browser. No analytics, no remote font, no CDN, no cookie, no third-party request by default. Do not weaken the Content-Security-Policy in `index.html`.
-2. **Three run-time files only**: `index.html`, `world.json`, `gaz.json`. No framework, no bundler, no npm dependency at run time. It must keep working when the three files are copied to any web folder. Two folders of data are optional and loaded on demand; the page must degrade quietly without them: `hist/` (borders of the time, GPL-3.0 data built by `tools/build-hist.mjs`) and `gaz/` (finer gazetteer by country, built by `tools/build-gaz.mjs`). `fetch()` may only name these files; `tools/check.mjs` holds the list.
+2. **Three run-time files only**: `index.html`, `world.json`, `gaz.json`. No framework, no bundler, no npm dependency at run time. It must keep working when the three files are copied to any web folder. Two folders of data are optional and loaded on demand; the page must degrade quietly without them: `hist/` (borders of the time, GPL-3.0 data built by `tools/build-hist.mjs`) and `gaz/` (finer gazetteer by country, built by `tools/build-gaz.mjs`). `fetch()` may only name these files; `tools/check.mjs` holds the list. Offline use is optional too: `sw.js` (service worker, caches only the page, its data and `app/`, never a family file or a published tree) and `app/` (manifest and install icons, built by `tools/build-icons.mjs`); without them the page simply works online.
 3. **File content is untrusted.** Everything coming from a GEDCOM/CSV goes through `esc()` before reaching `innerHTML`; links go through `safeUrl()` or the `https?://` patterns. Never `eval`, never inline event attributes, never `style="…"` attributes (use a class): the policy allows one script and one style block, each by fingerprint.
 4. **After any change to the script**, run `node tools/check.mjs --fix`, then `node tools/check.mjs`, `node tools/test.mjs` and `node tools/browser-test.mjs` (the page driven in Chromium with fictional data, including a 20,000-person tree from `tools/make-big-tree.mjs`). CI runs all three and must be green. If a kinship title changes on purpose, review the difference and run `node tools/test.mjs --update`; never update the expected table to silence a failure you do not understand.
 5. **Authorship.** Commits, pull requests and releases are authored by Regis Hennequin only. No "Co-Authored-By", "Generated with" or other AI/tool attribution in commit messages, PR descriptions or files.
@@ -33,6 +33,8 @@ Other pieces: colours (`tint`, `renderLegend`), routes (`routeOf`, `drawRoute`),
 
 Storage keys (browser only): `cg.ged`, `cg.name`, `cg.lang`, `cg.tiles`, `cg.hist`, `cg.theme`, `cg.route`, `cg.tint`, `cg.tree`, `cg.tpl`, `cg.manual`, `cg.ref.*`, `cg.custom.*`.
 
+Offline: `offline()` registers `sw.js`; `HIST` in `sw.js` must equal `HIST` in the page (checked). Change the cache name `genealomap-N` in `sw.js` when its caching rules change.
+
 Page icon: drawn in `tools/icon.svg` and embedded in `index.html` as data addresses (an SVG `rel="icon"` and a 180 px PNG `apple-touch-icon`), so no extra file is needed at run time. In the SVG address `http://` must stay percent-encoded, or `tools/check.mjs` reports an unexpected address.
 
 ## Working method
@@ -45,4 +47,4 @@ Page icon: drawn in `tools/icon.svg` and embedded in `index.html` as data addres
 
 `main` is served by GitHub Pages at https://regis57.github.io/GenealoMap/. The page keeps `noindex` during the test phase.
 
-A second copy runs at https://regis-hennequin.info/genealomap/ (repository `regis57/regis-hennequin-site`, folder `public/genealomap/`). That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here.
+A second copy runs at https://regis-hennequin.info/genealomap/ (repository `regis57/regis-hennequin-site`, folder `public/genealomap/`). That site forbids anything inline, so its copy is the same page split into `index.html`, `app.js` and `app.css`; update it whenever `index.html` changes here, and copy `sw.js`, `app/`, `hist/` and `gaz/` with it.

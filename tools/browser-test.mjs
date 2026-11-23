@@ -198,6 +198,21 @@ await step('historical borders, export, keyboard', async () => {
   await done(p, 'borders');
 });
 
+await step('installable, and works offline once visited', async () => {
+  const ctx = await browser.newContext({viewport: {width: 1300, height: 800}});
+  const p = await ctx.newPage(); p.errors = []; p.on('pageerror', e => p.errors.push(e.message));
+  await p.goto(base + 'index.html?lang=fr');
+  await p.evaluate(() => navigator.serviceWorker.ready);
+  await p.waitForFunction(async () => { const c = await caches.open('genealomap-1'); return !!(await c.match('world.json')) && !!(await c.match('hist/1900.json')); }, null, {timeout: 30000});
+  check(await p.evaluate(() => fetch('app/manifest.webmanifest').then(r => r.json()).then(m => m.icons.length >= 2 && m.start_url === '../')), 'manifest not served');
+  await ctx.setOffline(true);
+  await p.reload(); await p.waitForFunction(() => typeof S !== 'undefined' && S.persons.size === 14 && S.world, null, {timeout: 15000});
+  await p.evaluate(() => setYear(1836, 2)); await p.waitForFunction(() => /1815/.test($('#histnote').textContent), null, {timeout: 10000});
+  check(await p.evaluate(() => /enregistrée|saved/.test($('#offMsg').textContent)), 'offline status not shown');
+  check(!p.errors.length, 'offline: page errors: ' + p.errors.join(' | '));
+  await ctx.close();
+});
+
 await step('large fictional tree (20,000 people) plays smoothly', async () => {
   const p = await page('?lang=fr');
   await p.setInputFiles('#file', {name: 'big.ged', mimeType: 'text/plain', buffer: BIG});
