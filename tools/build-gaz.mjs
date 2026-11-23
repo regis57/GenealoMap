@@ -5,6 +5,10 @@
 // Each output file is a list of [name, lat, lon] or [name, lat, lon, "other|names"]; gaz/index.json lists the countries present.
 // Only populated places (feature class P) that gaz.json does not already hold are kept; abandoned, destroyed and
 // historical places (PPLQ, PPLW, PPLH) are included on purpose: they are what old records mention.
+// Other names come from the GeoNames alternate names of the country (alternatenames/<CC>.zip, read from the same folder or
+// downloaded): names in the languages of old records (local, French, German, Latin, Occitan, Breton, Alsatian, ...), names
+// flagged historic, and the names French communes bore in 1793-1794 (GeoNames code fr_1793). For towns that gaz.json
+// already holds, a row is written only to carry such old names ("Diedenhofen" for Thionville).
 import {readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync} from 'node:fs';
 import {inflateRawSync} from 'node:zlib';
 
@@ -33,6 +37,24 @@ function unzipOne(buf, want) {
   }
   throw new Error(want + ' not found in the archive');
 }
+// languages kept for other names; '' = no language given (often the local or an old spelling)
+const LANGS = new Set(['', 'fr', 'de', 'it', 'es', 'pt', 'nl', 'lb', 'la', 'oc', 'br', 'ca', 'eu', 'co', 'gsw', 'wa', 'pcd', 'frp', 'fr_1793', 'en', 'pl', 'cs', 'sk', 'hu', 'ro', 'hr', 'sl', 'sv', 'no', 'nb', 'nn', 'da', 'fi', 'lt', 'lv', 'et', 'el', 'uk', 'be', 'ga', 'gd', 'cy']);
+const latin = t => !/[^\u0000-\u024F\u1E00-\u1EFF]/.test(t);
+async function altNames(cc) {
+  let text = null;
+  if (from && existsSync(`${from}/alt/${cc}.zip`)) text = unzipOne(readFileSync(`${from}/alt/${cc}.zip`), cc + '.txt');
+  else if (!from) { const r = await fetch(`https://download.geonames.org/export/dump/alternatenames/${cc}.zip`); if (r.ok) text = unzipOne(Buffer.from(await r.arrayBuffer()), cc + '.txt'); }
+  const m = new Map(); if (!text) return null;
+  for (const line of text.split('\n')) {
+    const f = line.split('\t'); if (f.length < 4) continue;
+    const lang = f[2], hist = f[7] === '1';
+    if (!LANGS.has(lang) && !(hist && !/^(post|link|wkdt|unlc|iata|icao|faac|abbr|lauc|uicn|tcid)$/.test(lang))) continue;
+    let t = f[3].replace(/\s*\(a\.\s*\d+\)\s*$/, '').trim();
+    if (!t || t.length > 40 || !latin(t) || /[,;:]|https?:|^\d|\d{2}/.test(t) || t.split(' ').length > 5) continue;
+    (m.get(f[1]) || m.set(f[1], []).get(f[1])).push({t, rank: lang === 'fr_1793' || hist ? 0 : lang === '' ? 1 : 2});
+  }
+  return m;
+}
 async function source(cc) {
   if (from) {
     if (existsSync(`${from}/${cc}.txt`)) return readFileSync(`${from}/${cc}.txt`, 'utf8');
@@ -47,19 +69,21 @@ for (const cc of codes) {
   // what gaz.json already knows in this country: same name within about 3 km is a duplicate
   const known = new Map();
   for (const c of base) if (c[1] === cc) { const k = norm(c[0]); (known.get(k) || known.set(k, []).get(k)).push(c); }
-  const rows = [], seen = new Set();
+  const rows = [], seen = new Set(), alt = await altNames(cc);
   for (const line of (await source(cc)).split('\n')) {
     const f = line.split('\t');
     if (f.length < 15 || f[6] !== 'P') continue;
     const name = f[1].trim(), lat = +(+f[4]).toFixed(3), lon = +(+f[5]).toFixed(3);
     if (!name || !isFinite(lat) || !isFinite(lon)) continue;
     const k = norm(name);
-    if ((known.get(k) || []).some(c => Math.abs(c[2] - lat) < .03 && Math.abs(c[3] - lon) < .04)) continue;
+    const dup = (known.get(k) || []).find(c => Math.abs(c[2] - lat) < .03 && Math.abs(c[3] - lon) < .04);
     const id = k + '|' + lat.toFixed(2) + '|' + lon.toFixed(2);
     if (seen.has(id)) continue; seen.add(id);
-    // other names: Latin script only, different once normalised, a handful at most
-    const alts = [];
-    for (const a of f[3].split(',')) { const t = a.trim(); if (!t || t.length > 40 || /[^\u0000-ɏḀ-ỿ]/.test(t) || /^https?:/i.test(t)) continue; const n = norm(t); if (n && n !== k && !alts.some(x => norm(x) === n)) alts.push(t); if (alts.length >= 4) break; }
+    // other names: old names first (1793, historic), then names without language, then the others; Latin script only, a few at most
+    const have = new Set([k, ...(dup && dup[5] ? dup[5].split('|').map(norm) : [])]), alts = [];
+    const cand = alt ? (alt.get(f[0]) || []).sort((a, b) => a.rank - b.rank).map(a => a.t) : f[3].split(',').map(a => a.trim()).filter(t => t && t.length <= 40 && latin(t) && !/^https?:/i.test(t));
+    for (const t of cand) { const n = norm(t); if (n && !have.has(n)) { have.add(n); alts.push(t); } if (alts.length >= (dup ? 6 : 8)) break; }
+    if (dup) { if (alts.length) rows.push([name, lat, lon, alts.join('|')]); continue; }  // a town of gaz.json: only its old names
     rows.push(alts.length ? [name, lat, lon, alts.join('|')] : [name, lat, lon]);
   }
   rows.sort((a, b) => a[0].localeCompare(b[0]));

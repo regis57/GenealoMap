@@ -19,7 +19,7 @@ What is used:
 
 Dates: `14 MAR 1968`, `MAR 1968`, `1968`, `ABT 1802`, `BEF 1850`, `AFT 1850`, `BET 1800 AND 1810`. French, German, Spanish, Dutch and Portuguese month abbreviations are tolerated.
 
-Places without coordinates are looked up in the bundled gazetteer (towns above about 1,000 inhabitants, worldwide). Write them from the most local to the widest level, ending with the country: `Florac, Lozère, France`. If the copy you use has the finer gazetteer for the country (folder `gaz/`), hamlets and vanished villages are looked up there next. Villages still missing are placed near neighbouring places and flagged "approximate"; you can place them by hand (Settings > Places and coordinates) and copy the resulting `MAP` lines back into your file.
+Places without coordinates are looked up in the bundled gazetteer (towns above about 1,000 inhabitants, worldwide). Write them from the most local to the widest level, ending with the country: `Florac, Lozère, France`. If the copy you use has the finer gazetteer for the country (folder `gaz/`), hamlets, vanished villages and old names of places (including the names of 1793-1794 in France) are looked up there next; then a loose spelling is tried inside the country (doubled letters, y/i, silent final letters), always flagged "approximate". Villages still missing are placed near neighbouring places and flagged "approximate"; you can place them by hand (Settings > Places and coordinates) and copy the resulting `MAP` lines back into your file.
 
 Numbered proofs: a note containing `Proof 12 : https://...` (also `Preuve`, `Beleg`, `Prova`, `Prueba`, `Bewijs`, `Beweis`) defines proof 12; any event note mentioning `proof 12` then links to it.
 
