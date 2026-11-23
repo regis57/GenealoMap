@@ -269,7 +269,7 @@ eq(T.csvDate('1968-03-14'), '14 MAR 1968', 'csvDate ISO'); eq(T.csvDate('~1802')
 const ged = T.csvToGed('id;prenom;nom;sexe;naissance_date;pere_id\nP1;Ann;Test;F;1850;P2\nP2;Bob;Test;M;1820;\n');
 ok(ged && /0 @P1@ INDI/.test(ged) && /1 FAMC @F1@/.test(ged) && /1 HUSB @P2@/.test(ged), 'CSV table with French headers and semicolons becomes GEDCOM');
 ok(T.csvToGed('just some text\nwithout columns') === null, 'a text that is not a table is refused');
-ok(T.histYear(1836) === 1815 && T.histYear(1500) === 1500 && T.histYear(1400) === 1500 && T.histYear(2020) === 0, 'reference date of historical borders');
+ok(T.histYear(1836) === 1815 && T.histYear(1500) === 1500 && T.histYear(1450) === 1400 && T.histYear(700) === 800 && T.histYear(1879) === 1878 && T.histYear(2020) === 0, 'reference date of historical borders');
 T.loadGed(T.SAMPLE, 'sample', true);
 const r = T.routeOf('@I7@', 'person').map(s => s.y + ' ' + s.k.split(',')[0]).join(' > ');
 eq(r, '1871 Florac > 1898 Alès', 'route of a person follows dated, located events');

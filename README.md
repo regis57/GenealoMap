@@ -11,7 +11,8 @@ Everything runs in the browser. The family file is never uploaded.
 - **Playback pauses when you open a person or a place**, so you can read; leaving the selection (name at the top, Esc, or a second click on the box in the tree) does not stop it. Space plays and pauses.
 - **Timeline with a play button**: past to present or present to past, at 2 to 40 years per second, with a histogram of people alive.
 - **Map of the world**: each place shows who lives there that year; the camera can follow the family as it moves.
-- **Borders of the time**: from 1500 to today the map shows the states as they were, at 20 reference dates (1500, 1530, 1600, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 300 former states (Holy Roman Empire, Austria-Hungary, Two Sicilies, ...) are shown in the interface language. Can be switched off.
+- **Borders of the time**: from the year 800 to today the map shows the states as they were, at 30 reference dates (800, 900, 1000, 1100, 1200, 1279, 1300, 1400, 1492, 1500, 1530, ... 1815, 1878, 1880, ... 1914, 1920, 1938, 1945, 1994, 2010). Outlines are approximate and say so: the reference date is shown with "≈", uncertain borders are dashed. The usual names of some 400 former states (Carolingian Empire, Holy Roman Empire, Kievan Rus, Austria-Hungary, Two Sicilies, ...) are shown in the interface language; names of peoples stay as the source writes them. Can be switched off.
+- **Regions**: zoomed in, the map shows today's first-level subdivisions (départements, provinces, Länder, states...), marked "current regions" under the year; historical regions known exactly, such as Alsace-Lorraine (1871-1918), are drawn for their own years with their dates.
 - **Tree view**: one button swaps the map for a chart, vertical or horizontal, 3 to 16 generations. Five buttons choose the chart: *ancestors*, *descendants*, *hourglass* (ancestors above, descendants below - or right and left), *fan chart* (ancestors in rings, father's side on the left, up to 8 generations) show the whole line whatever the year (people not alive that year are only faded); *contemporaries of the year* shows only the family alive in the year shown and changes as the timeline plays. *Print* prints the chart alone, landscape, reduced to the page width. The tree stays on the last person you opened, even after closing their sheet. A strip above the tree lets you move with one click: up to the parents from a descendants chart, down to the children from an ancestors chart, sideways to a spouse. The last two need a person: with no reference and nobody selected, the list is greyed, a note says why, and the chart of the year is shown; your choice comes back as soon as a person is chosen. Each box carries the title relative to the reference person and the colour in use; people not alive in the year shown are faded, so the timeline plays on the tree too. Click a box to move the tree to that person.
 - **Routes**: select a person and the map draws where they went, stop by stop with the years - or the route of their paternal or maternal line from the oldest known ancestor. The same route is listed as text.
 - **Lines in colour**: colour people by kinship, by paternal and maternal line of the reference person, or by who bears their surname - on the map, in the lists and as curves on the timeline.
@@ -50,7 +51,7 @@ Some files are optional; the page works without them and loads from them only wh
 ```
 sw.js         offline copy: keeps the page and its maps in the browser so it opens without a connection
 app/          manifest and icons, so the page can be installed like an app on a phone or computer
-hist/         borders of the time, one file per reference date, and names.json (GPL-3.0 data, see hist/README.md)
+hist/         borders of the time, one file per reference date, and names.json (GPL-3.0 data); hist/regions/: today's subdivisions and dated historical regions (Natural Earth, public domain); see hist/README.md
 gaz/          finer gazetteer by country: hamlets and vanished villages (see below)
 ```
 
@@ -146,7 +147,7 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files, offline use and installation, finer gazetteer for 42 countries with old names and spellings.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files, offline use and installation, finer gazetteer for 42 countries with old names and spellings, 30 border dates from the year 800, regions and Alsace-Lorraine.
 
 Next, for people who use it:
 
@@ -155,6 +156,6 @@ Next, for people who use it:
 Next, for quality:
 
 - **Review of the newer languages** by native speakers, Luxembourgish first.
-- **Historical borders**: more reference dates, regions inside states (provinces, Alsace-Lorraine, ...), and the smaller former states still named as the source writes them.
+- **Historical borders**: more historical regions (each must be an exact union of today's subdivisions: add a line to `tools/hist-regions.txt`), and the names of smaller former states (`tools/hist-names.txt`).
 - **Smaller places**: more countries (Russia, Japan, ...) when trees need them.
 - **End of the test phase**: remove `noindex` once the above has settled.

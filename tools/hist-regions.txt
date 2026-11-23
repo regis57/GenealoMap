@@ -1,0 +1,6 @@
+# Historical regions drawn over the borders of their time, as unions of today's first-level subdivisions (Natural Earth codes).
+# Only regions whose extent is exactly a set of today's subdivisions belong here: nothing is drawn by guess.
+# from | to | codes | name in en | fr | de | it | es | pt | nl | lb
+# Reichsland Elsass-Lothringen (Treaty of Frankfurt, 10 May 1871, to the armistice and return to France, 1918): today's Bas-Rhin,
+# Haut-Rhin and Moselle, which were cut out of the annexed land in 1919 along its 1871 boundary.
+1871|1918|FR-67 FR-68 FR-57|Alsace-Lorraine|Alsace-Lorraine|Elsass-Lothringen|Alsazia-Lorena|Alsacia-Lorena|Alsácia-Lorena|Elzas-Lotharingen|Elsass-Lothringen
