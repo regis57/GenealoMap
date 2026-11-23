@@ -8,7 +8,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       # actions/checkout v4.4.0, pinned by commit
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -16,3 +16,6 @@ jobs:
           persist-credentials: false
       - run: node tools/check.mjs
       - run: node tools/test.mjs
+      # Browser run: the page is driven in the runner's Google Chrome by playwright-core (exact version, no install scripts, nothing saved).
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.63.0
+      - run: node tools/browser-test.mjs
