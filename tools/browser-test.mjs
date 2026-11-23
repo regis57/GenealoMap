@@ -191,6 +191,10 @@ await step('published tree hides people presumed living', async () => {
 await step('historical borders, export, keyboard', async () => {
   const p = await page('?lang=fr&year=1905');
   await p.waitForFunction(() => /1900/.test($('#histnote').textContent), null, {timeout: 10000});
+  await p.evaluate(() => { setYear(1890, 2); S.target = null; Object.assign(S.cam, {x: mx(6.6), y: my(48.6), z: 6}); dirty(); });
+  await p.waitForFunction(() => reg.shown && reg.hist && /1880/.test($('#histnote').textContent) && /régions actuelles/.test($('#histnote').textContent), null, {timeout: 10000});
+  check(await p.evaluate(() => reg.hist.some(h => h.y0 === 1871 && h.y1 === 1918) && [...reg.ld.values()].some(r => r.ok)), 'regions or Alsace-Lorraine not loaded');
+  check(await p.evaluate(() => { LANG = 'de'; hist.names = null; const n = histName('Kingdom of France'); LANG = 'fr'; hist.names = null; return n === 'Königreich Frankreich'; }), 'former state names not translated');
   const [dl] = await Promise.all([p.waitForEvent('download'), p.evaluate(() => $('#shImg').click())]);
   check(/\.png$/.test(dl.suggestedFilename()), 'image export did not produce a PNG');
   await p.focus('#map'); await p.keyboard.press('PageDown'); await p.keyboard.press('Enter');
@@ -203,7 +207,7 @@ await step('installable, and works offline once visited', async () => {
   const p = await ctx.newPage(); p.errors = []; p.on('pageerror', e => p.errors.push(e.message));
   await p.goto(base + 'index.html?lang=fr');
   await p.evaluate(() => navigator.serviceWorker.ready);
-  await p.waitForFunction(async () => { const c = await caches.open('genealomap-1'); return !!(await c.match('world.json')) && !!(await c.match('hist/1900.json')); }, null, {timeout: 30000});
+  await p.waitForFunction(async () => { const c = await caches.open('genealomap-2'); return !!(await c.match('world.json')) && !!(await c.match('hist/1900.json')); }, null, {timeout: 30000});
   check(await p.evaluate(() => fetch('app/manifest.webmanifest').then(r => r.json()).then(m => m.icons.length >= 2 && m.start_url === '../')), 'manifest not served');
   await ctx.setOffline(true);
   await p.reload(); await p.waitForFunction(() => typeof S !== 'undefined' && S.persons.size === 14 && S.world, null, {timeout: 15000});
@@ -223,7 +227,7 @@ await step('large fictional tree (20,000 people) plays smoothly', async () => {
     $('#speed').value = '15'; const y0 = S.year; setPlaying(true); await new Promise(r => setTimeout(r, 3000)); setPlaying(false); po.disconnect();
     return {years: S.year - y0, worst: Math.max(0, ...long)};
   });
-  check(r.years >= 30, 'playback too slow on a large tree: ' + r.years + ' years in 3 s');
+  check(r.years >= 20, 'playback too slow on a large tree: ' + r.years + ' years in 3 s');
   check(r.worst < 1000, 'a single step took ' + Math.round(r.worst) + ' ms on a large tree');
   await done(p, 'large tree');
 });

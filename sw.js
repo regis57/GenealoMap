@@ -2,13 +2,13 @@
 // It keeps in the browser's cache the page and the data files of this folder, so the page opens and plays without a connection.
 // It never stores a family file: the visitor's file stays where the page keeps it (local storage), and a tree published
 // with ?file=... is not cached. Only requests to this folder are handled; everything else goes to the network untouched.
-const CACHE = 'genealomap-1';
+const CACHE = 'genealomap-2';
 // Same list as HIST in index.html (tools/check.mjs compares them).
-const HIST = [1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1880, 1900, 1914, 1920, 1930, 1938, 1945, 1960, 1994, 2000, 2010];
-const CORE = ['./', 'index.html', 'world.json', 'gaz.json', 'app/manifest.webmanifest', 'app/icon.svg', 'app/icon-192.png', 'app/icon-512.png', 'hist/names.json', 'gaz/index.json'];
+const HIST = [800, 900, 1000, 1100, 1200, 1279, 1300, 1400, 1492, 1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1878, 1880, 1900, 1914, 1920, 1930, 1938, 1945, 1960, 1994, 2000, 2010];
+const CORE = ['./', 'index.html', 'world.json', 'gaz.json', 'app/manifest.webmanifest', 'app/icon.svg', 'app/icon-192.png', 'app/icon-512.png', 'hist/names.json', 'gaz/index.json', 'hist/regions/index.json', 'hist/regions/hist.json'];
 const scope = new URL(self.registration.scope);
 // Files that may be kept: the page, its data and the app icons. Anything else (a published tree, other files of the site) is not cached.
-const keep = path => /^(|index\.html|world\.json|gaz\.json|app\/[\w.-]+|hist\/[\w.-]+\.json|gaz\/[\w.-]+\.json)$/.test(path);
+const keep = path => /^(|index\.html|world\.json|gaz\.json|app\/[\w.-]+|hist\/[\w.-]+\.json|hist\/regions\/[\w.-]+\.json|gaz\/[\w.-]+\.json)$/.test(path);
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {

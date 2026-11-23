@@ -10,7 +10,7 @@
 //   k label point, p rings in hundredths of a degree, delta-encoded.
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 
-export const YEARS = [1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1880, 1900, 1914, 1920, 1930, 1938, 1945, 1960, 1994, 2000, 2010];
+export const YEARS = [800, 900, 1000, 1100, 1200, 1279, 1300, 1400, 1492, 1500, 1530, 1600, 1650, 1700, 1715, 1783, 1800, 1815, 1878, 1880, 1900, 1914, 1920, 1930, 1938, 1945, 1960, 1994, 2000, 2010];
 const SRC = 'https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/';
 const dir = process.argv[2];
 const out = new URL('../hist/', import.meta.url);

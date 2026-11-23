@@ -313,3 +313,110 @@ Turan|Touran|Turan|Turan|Turán|Turão|Toeran|Turan
 Songhai|Empire songhaï|Songhaireich|Impero Songhai|Imperio songhai|Império Songai|Songhairijk|Songhairäich
 Rajputs|Rajputs|Rajputen|Rajput|Rajputs|Rajputes|Rajputs|Rajputen
 Tanganyika|Tanganyika|Tanganjika|Tanganica|Tanganica|Tanganica|Tanganyika|Tanganjika
+San Marino|@SM
+Malta|@MT
+Andorra|@AD
+Liechtenstein|@LI
+Kievan Rus|Rus’ de Kiev|Kiewer Rus|Rus’ di Kiev|Rus de Kiev|Rus de Kiev|Kievse Rijk|Kiewer Rus
+Kyivan Rus|Rus’ de Kiev|Kiewer Rus|Rus’ di Kiev|Rus de Kiev|Rus de Kiev|Kievse Rijk|Kiewer Rus
+Rus' Khaganate|Khaganat de la Rus’|Rus-Khaganat|Khaganato della Rus’|Kanato de la Rus|Canato da Rus|Kaganaat van de Roes|Rus-Khaganat
+Other Rus Principalities|autres principautés de la Rus’|andere Fürstentümer der Rus|altri principati della Rus’|otros principados de la Rus|outros principados da Rus|andere vorstendommen van de Roes|aner Fürstentümer vun der Rus
+Principality of Novgorod|Principauté de Novgorod|Fürstentum Nowgorod|Principato di Novgorod|Principado de Nóvgorod|Principado de Novgorod|Vorstendom Novgorod|Fürstentum Nowgorod
+Novgorod|Novgorod|Nowgorod|Novgorod|Nóvgorod|Novgorod|Novgorod|Nowgorod
+Novgorod-Seversky|Novgorod-Severski|Nowgorod-Sewerski|Novgorod-Severskij|Nóvgorod-Síverski|Novgorod-Severski|Novgorod-Severski|Nowgorod-Sewerski
+Principality of Vladimir-Suzdal|Principauté de Vladimir-Souzdal|Fürstentum Wladimir-Susdal|Principato di Vladimir-Suzdal’|Principado de Vladímir-Súzdal|Principado de Vladimir-Susdália|Vorstendom Vladimir-Soezdal|Fürstentum Wladimir-Susdal
+Principality of Galicia-Volhynia|Principauté de Galicie-Volhynie|Fürstentum Galizien-Wolhynien|Principato di Galizia-Volinia|Principado de Galitzia-Volinia|Principado da Galícia-Volínia|Vorstendom Galicië-Wolhynië|Fürstentum Galizien-Wolhynien
+Principality of Kyiv|Principauté de Kiev|Fürstentum Kiew|Principato di Kiev|Principado de Kiev|Principado de Kiev|Vorstendom Kiev|Fürstentum Kiew
+Principality of Polotsk|Principauté de Polotsk|Fürstentum Polozk|Principato di Polock|Principado de Pólotsk|Principado de Polotsk|Vorstendom Polotsk|Fürstentum Polozk
+Principality of Wallachia|Principauté de Valachie|Fürstentum Walachei|Principato di Valacchia|Principado de Valaquia|Principado da Valáquia|Vorstendom Walachije|Fürstentum Walachei
+Ryazan|Riazan|Rjasan|Rjazan’|Riazán|Riazã|Rjazan|Rjasan
+Pskov|Pskov|Pskow|Pskov|Pskov|Pskov|Pskov|Pskow
+Blue Horde|Horde bleue|Blaue Horde|Orda Blu|Horda Azul|Horda Azul|Blauwe Horde|Blo Horde
+Khanate of the Golden Horde|Khanat de la Horde d’or|Khanat der Goldenen Horde|Khanato dell’Orda d’Oro|Kanato de la Horda de Oro|Canato da Horda Dourada|Kanaat van de Gouden Horde|Khanat vun der Gëllener Horde
+Great Khanate|Grand Khanat|Großkhanat|Gran Khanato|Gran Kanato|Grande Canato|Groot-Kanaat|Grousskhanat
+Mongol Empire|Empire mongol|Mongolisches Reich|Impero mongolo|Imperio mongol|Império Mongol|Mongoolse Rijk|Mongolescht Räich
+Timurid Empire|Empire timouride|Timuridenreich|Impero timuride|Imperio timúrida|Império Timúrida|Timoeridische Rijk|Timuridesch Räich
+Ilkhanate|Ilkhanat|Ilchanat|Ilkhanato|Iljanato|Ilcanato|Il-kanaat|Ilchanat
+Kara Khitai Khaganate|Khanat Kara-Khitan|Kara-Kitai-Reich|Khanato Kara Khitai|Kanato Kara-Kitai|Canato Kara-Khitai|Kara-Khitai-kanaat|Kara-Kitai-Räich
+Cuman Khanates|khanats coumans|Kumanen-Khanate|khanati cumani|kanatos cumanos|canatos cumanos|Koemaanse kanaten|Kumanen-Khanater
+Bulgar Khanate|Bulgarie de la Volga|Wolgabulgarien|Bulgaria del Volga|Bulgaria del Volga|Bulgária do Volga|Wolga-Bulgarije|Wolgabulgarien
+Abbasid Caliphate|Califat abbasside|Abbasiden-Kalifat|Califfato abbaside|Califato abasí|Califado Abássida|Abbasidisch kalifaat|Abbasiden-Kalifat
+Fatimid Caliphate|Califat fatimide|Fatimiden-Kalifat|Califfato fatimide|Califato fatimí|Califado Fatímida|Fatimidisch kalifaat|Fatimiden-Kalifat
+Almohad Caliphate|Califat almohade|Almohaden-Kalifat|Califfato almohade|Califato almohade|Califado Almóada|Almohadisch kalifaat|Almohaden-Kalifat
+Almoravid dynasty|Almoravides|Almoraviden|Almoravidi|Almorávides|Almorávidas|Almoraviden|Almoraviden
+Seljuk Empire|Empire seldjoukide|Seldschukenreich|Impero selgiuchide|Imperio selyúcida|Império Seljúcida|Seltsjoekenrijk|Seldschukeräich
+Seljuk Caliphate|Califat seldjoukide|Seldschuken-Kalifat|Califfato selgiuchide|Califato selyúcida|Califado Seljúcida|Seltsjoeks kalifaat|Seldschuken-Kalifat
+Samanid Empire|Empire samanide|Samanidenreich|Impero samanide|Imperio samánida|Império Samânida|Samanidenrijk|Samanideräich
+Ghaznavid Emirate|Émirat ghaznévide|Ghaznawiden-Emirat|Emirato ghaznavide|Emirato gaznávida|Emirado Gasnévida|Ghaznavidisch emiraat|Ghaznawiden-Emirat
+Buwayhid Emirates|Émirats bouyides|Buyiden-Emirate|Emirati buwayhidi|Emiratos búyidas|Emirados Buídas|Buyidische emiraten|Buyiden-Emirater
+Buyid Emirate|Émirat bouyide|Buyiden-Emirat|Emirato buwayhide|Emirato búyida|Emirado Buída|Buyidisch emiraat|Buyiden-Emirat
+Buyid dynasty|Bouyides|Buyiden|Buwayhidi|Búyidas|Buídas|Buyiden|Buyiden
+Khwarazmian dynasty|Khwarezmchahs|Choresm-Schahs|Corasmi|Corasmios|Corásmios|Chwarazm-sjahs|Choresm-Schahs
+Aghlabid Emirate|Émirat aghlabide|Aghlabiden-Emirat|Emirato aghlabide|Emirato aglabí|Emirado Aglábida|Aghlabidisch emiraat|Aghlabiden-Emirat
+Idrisid Caliphate|Califat idrisside|Idrisiden-Kalifat|Califfato idriside|Califato idrisí|Califado Idríssida|Idrisidisch kalifaat|Idrisiden-Kalifat
+Emirate of Córdoba|Émirat de Cordoue|Emirat von Córdoba|Emirato di Cordova|Emirato de Córdoba|Emirado de Córdova|Emiraat Córdoba|Emirat vu Córdoba
+Caliphate of Córdoba|Califat de Cordoue|Kalifat von Córdoba|Califfato di Cordova|Califato de Córdoba|Califado de Córdova|Kalifaat Córdoba|Kalifat vu Córdoba
+Emirate of Sicily|Émirat de Sicile|Emirat von Sizilien|Emirato di Sicilia|Emirato de Sicilia|Emirado da Sicília|Emiraat Sicilië|Emirat vu Sizilien
+Carolingian Empire|Empire carolingien|Karolingerreich|Impero carolingio|Imperio carolingio|Império Carolíngio|Karolingische Rijk|Karolingerräich
+East Francia|Francie orientale|Ostfrankenreich|Francia orientale|Francia Oriental|Frância Oriental|Oost-Francië|Ostfrankeräich
+West Francia|Francie occidentale|Westfrankenreich|Francia occidentale|Francia Occidental|Frância Ocidental|West-Francië|Westfrankeräich
+Kingdom of France|Royaume de France|Königreich Frankreich|Regno di Francia|Reino de Francia|Reino de França|Koninkrijk Frankrijk|Kinnekräich Frankräich
+Kingdom of Hungary|Royaume de Hongrie|Königreich Ungarn|Regno d’Ungheria|Reino de Hungría|Reino da Hungria|Koninkrijk Hongarije|Kinnekräich Ungarn
+Kingdom of Norway|Royaume de Norvège|Königreich Norwegen|Regno di Norvegia|Reino de Noruega|Reino da Noruega|Koninkrijk Noorwegen|Kinnekräich Norwegen
+Kingdom of Georgia|Royaume de Géorgie|Königreich Georgien|Regno di Georgia|Reino de Georgia|Reino da Geórgia|Koninkrijk Georgië|Kinnekräich Georgien
+Byzantine Empire|Empire byzantin|Byzantinisches Reich|Impero bizantino|Imperio bizantino|Império Bizantino|Byzantijnse Rijk|Byzantinescht Räich
+Angevin Empire|Empire Plantagenêt|Angevinisches Reich|Impero angioino|Imperio angevino|Império Angevino|Angevijnse Rijk|Angevinescht Räich
+Great Moravia|Grande-Moravie|Großmähren|Grande Moravia|Gran Moravia|Grande Morávia|Groot-Moravië|Groussmähren
+Icelandic Commonwealth|État libre islandais|Isländischer Freistaat|Stato libero d’Islanda|Estado Libre Islandés|Estado Livre Islandês|Vrijstaat IJsland|Islännesche Fräistaat
+Croatian kingdom|Royaume de Croatie|Königreich Kroatien|Regno di Croazia|Reino de Croacia|Reino da Croácia|Koninkrijk Kroatië|Kinnekräich Kroatien
+Celtic kingdoms|royaumes celtes|keltische Königreiche|regni celtici|reinos celtas|reinos celtas|Keltische koninkrijken|keltesch Kinnekräicher
+Lombard duchies|duchés lombards|langobardische Herzogtümer|ducati longobardi|ducados lombardos|ducados lombardos|Longobardische hertogdommen|langobardesch Herzogtümer
+Duchy of Swabia|Duché de Souabe|Herzogtum Schwaben|Ducato di Svevia|Ducado de Suabia|Ducado da Suábia|Hertogdom Zwaben|Herzogtum Schwaben
+Duchy of Benevento|Duché de Bénévent|Herzogtum Benevent|Ducato di Benevento|Ducado de Benevento|Ducado de Benevento|Hertogdom Benevento|Herzogtum Benevent
+Comté de Toulouse|Comté de Toulouse|Grafschaft Toulouse|Contea di Tolosa|Condado de Toulouse|Condado de Toulouse|Graafschap Toulouse|Grofschaft Toulouse
+Burgandy|Bourgogne|Burgund|Borgogna|Borgoña|Borgonha|Bourgondië|Burgund
+English territory|territoire anglais|englisches Gebiet|territorio inglese|territorio inglés|território inglês|Engels gebied|englescht Gebitt
+Castile|Castille|Kastilien|Castiglia|Castilla|Castela|Castilië|Kastilien
+Castilla|Castille|Kastilien|Castiglia|Castilla|Castela|Castilië|Kastilien
+León|León|León|León|León|Leão|León|León
+Asturias|Asturies|Asturien|Asturie|Asturias|Astúrias|Asturië|Asturien
+Granada|Grenade|Granada|Granada|Granada|Granada|Granada|Granada
+Irlanda|Irlande|Irland|Irlanda|Irlanda|Irlanda|Ierland|Irland
+Mercia|Mercie|Mercia|Mercia|Mercia|Mércia|Mercia|Mercia
+Northumbria|Northumbrie|Northumbria|Northumbria|Northumbria|Nortúmbria|Northumbria|Northumbria
+Raška|Rascie|Raszien|Rascia|Rascia|Ráscia|Rascië|Raszien
+Bosnia|Bosnie|Bosnien|Bosnia|Bosnia|Bósnia|Bosnië|Bosnien
+Pomerania|Poméranie|Pommern|Pomerania|Pomerania|Pomerânia|Pommeren|Pommeren
+Corsica|Corse|Korsika|Corsica|Córcega|Córsega|Corsica|Korsika
+Trebizond|Trébizonde|Trapezunt|Trebisonda|Trebisonda|Trebizonda|Trebizonde|Trapezunt
+Beylik of Aydin|Beylicat d’Aydın|Beylik Aydın|Beilicato di Aydın|Beylicato de Aydın|Beilhique de Aydın|Beylik Aydın|Beylik Aydın
+Tibetan Empire|Empire tibétain|Tibetisches Reich|Impero tibetano|Imperio tibetano|Império Tibetano|Tibetaanse Rijk|Tibetescht Räich
+Ming Empire|Empire Ming|Ming-Reich|Impero Ming|Imperio Ming|Império Ming|Ming-rijk|Ming-Räich
+Tang Empire|Empire Tang|Tang-Reich|Impero Tang|Imperio Tang|Império Tang|Tang-rijk|Tang-Räich
+Song Empire|Empire Song|Song-Reich|Impero Song|Imperio Song|Império Song|Song-rijk|Song-Räich
+Khmer Empire|Empire khmer|Khmer-Reich|Impero Khmer|Imperio jemer|Império Khmer|Khmer-rijk|Khmer-Räich
+Chola Empire|Empire Chola|Chola-Reich|Impero Chola|Imperio Chola|Império Chola|Chola-rijk|Chola-Räich
+Chalukya Empire|Empire Chalukya|Chalukya-Reich|Impero Chalukya|Imperio Chalukya|Império Chalukya|Chalukya-rijk|Chalukya-Räich
+Srivijaya Empire|Empire de Srivijaya|Srivijaya-Reich|Impero di Srivijaya|Imperio Srivijaya|Império Serivijaia|Srivijaya-rijk|Srivijaya-Räich
+Kingdom of Pagan|Royaume de Pagan|Königreich Pagan|Regno di Pagan|Reino de Pagan|Reino de Pagã|Koninkrijk Pagan|Kinnekräich Pagan
+Kingdom of Sukhotai|Royaume de Sukhothaï|Königreich Sukhothai|Regno di Sukhothai|Reino de Sukhothai|Reino de Sucotai|Koninkrijk Sukhothai|Kinnekräich Sukhothai
+Lopburi Kingdom|Royaume de Lopburi|Königreich Lopburi|Regno di Lopburi|Reino de Lopburi|Reino de Lopburi|Koninkrijk Lopburi|Kinnekräich Lopburi
+Tiahuanaco Empire|Empire de Tiwanaku|Tiwanaku-Reich|Impero di Tiwanaku|Imperio tiahuanaco|Império Tiwanaku|Tiwanaku-rijk|Tiwanaku-Räich
+Huari Empire|Empire huari|Wari-Reich|Impero Huari|Imperio huari|Império Huari|Huari-rijk|Wari-Räich
+Chimú Empire|Empire chimú|Chimú-Reich|Impero Chimú|Imperio chimú|Império Chimu|Chimú-rijk|Chimú-Räich
+Toltec Empire|Empire toltèque|Toltekenreich|Impero tolteco|Imperio tolteca|Império Tolteca|Tolteekse Rijk|Tolteekeräich
+Zapotec Empire|Empire zapotèque|Zapotekenreich|Impero zapoteco|Imperio zapoteca|Império Zapoteca|Zapoteekse Rijk|Zapotekeräich
+Mesoamerican city-states and chiefdoms|cités-États et chefferies mésoaméricaines|mesoamerikanische Stadtstaaten und Häuptlingstümer|città-stato e chiefdom mesoamericani|ciudades-Estado y cacicazgos mesoamericanos|cidades-Estado e chefaturas mesoamericanas|Meso-Amerikaanse stadstaten en stamhoofdijen|mesoamerikanesch Stadstaaten an Häuptlingsdeemer
+Andean states and chiefdoms|États et chefferies des Andes|Staaten und Häuptlingstümer der Anden|stati e chiefdom andini|estados y cacicazgos andinos|estados e chefaturas andinos|Andesstaten en stamhoofdijen|Staaten an Häuptlingsdeemer vun den Anden
+Aymara kingdoms|royaumes aymaras|Aymara-Königreiche|regni aymara|reinos aimaras|reinos aimarás|Aymara-koninkrijken|Aymara-Kinnekräicher
+Rajput kingdoms|royaumes rajputs|Rajputen-Königreiche|regni rajput|reinos rajputs|reinos rajputes|Rajput-koninkrijken|Rajputen-Kinnekräicher
+Rajput Clans and Small States|clans et petits États rajputs|Rajputen-Clans und Kleinstaaten|clan e piccoli stati rajput|clanes y pequeños estados rajputs|clãs e pequenos estados rajputes|Rajput-clans en kleine staten|Rajputen-Clanen a Klengstaaten
+Rajputana|Rajputana|Radschputana|Rajputana|Rajputana|Rajputana|Rajputana|Radschputana
+Rajastan|Rajasthan|Rajasthan|Rajasthan|Rajastán|Rajastão|Rajasthan|Rajasthan
+Hindu states|États hindous|hinduistische Staaten|stati indù|estados hindúes|estados hindus|hindoestaten|hinduistesch Staaten
+minor Hindu kingdoms|petits royaumes hindous|kleine hinduistische Königreiche|piccoli regni indù|pequeños reinos hindúes|pequenos reinos hindus|kleine hindoekoninkrijken|kleng hinduistesch Kinnekräicher
+minor Hindu and Buddhist states|petits États hindous et bouddhistes|kleine hinduistische und buddhistische Staaten|piccoli stati indù e buddhisti|pequeños estados hindúes y budistas|pequenos estados hindus e budistas|kleine hindoeïstische en boeddhistische staten|kleng hinduistesch a buddhistesch Staaten
+minor Hindu and Buddhist kingdoms|petits royaumes hindous et bouddhistes|kleine hinduistische und buddhistische Königreiche|piccoli regni indù e buddhisti|pequeños reinos hindúes y budistas|pequenos reinos hindus e budistas|kleine hindoeïstische en boeddhistische koninkrijken|kleng hinduistesch a buddhistesch Kinnekräicher
+Soomra Emirate|Émirat soomra|Soomra-Emirat|Emirato Soomra|Emirato soomra|Emirado Soomra|Soomra-emiraat|Soomra-Emirat
+Champa City States|cités-États du Champa|Stadtstaaten von Champa|città-stato del Champa|ciudades-Estado de Champa|cidades-Estado de Champa|stadstaten van Champa|Stadstaate vu Champa
+Mon States|États môns|Mon-Staaten|stati mon|estados mon|estados mon|Mon-staten|Mon-Staaten
