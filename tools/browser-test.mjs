@@ -5,7 +5,7 @@
 import {createServer} from 'node:http';
 import {readFileSync, existsSync, statSync} from 'node:fs';
 import {createRequire} from 'node:module';
-import {deflateRawSync} from 'node:zlib';
+import {deflateRawSync, gzipSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {join, extname, normalize} from 'node:path';
@@ -47,6 +47,41 @@ const ODS = zip({'content.xml': '<?xml version="1.0"?><office:document-content x
   + '<table:table-cell office:value-type="date" office:date-value="1931-04-02"><text:p>02/04/1931</text:p></table:table-cell>' + oc('Mende, Lozère, France') + oc('B2') + '</table:table-row><table:table-row>' + oc('B2') + oc('Jean') + oc('Odsart') + oc('M') + oc('vers 1900') + '</table:table-row></table:table></office:spreadsheet></office:body></office:document-content>'});
 const GDZ = zip({'gedcom.ged': SAMPLE.replace('1 CHAR UTF-8', '1 GEDC\n2 VERS 7.0')});
 const CSV = readFileSync(join(root, 'template.csv'));
+const GRAMPS_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<database xmlns="http://gramps-project.org/xml/1.7.1/">
+<events>
+<event handle="_e1" id="E1"><type>Birth</type><dateval val="1871-01-20"/><place hlink="_p1"/></event>
+<event handle="_e2" id="E2"><type>Death</type><dateval val="1940"/><place hlink="_p2"/></event>
+<event handle="_e3" id="E3"><type>Birth</type><dateval val="1876" quality="estimated"/><place hlink="_p2"/></event>
+<event handle="_e4" id="E4"><type>Marriage</type><dateval val="1898"/><place hlink="_p2"/></event>
+<event handle="_e5" id="E5"><type>Birth</type><dateval val="1902-10-11"/><place hlink="_p2"/></event>
+</events>
+<people>
+<person handle="_i1" id="I1"><gender>M</gender><name type="Birth Name"><first>Firmin</first><surname>Vernhet</surname></name><eventref hlink="_e1" role="Primary"/><eventref hlink="_e2" role="Primary"/><parentin hlink="_f1"/></person>
+<person handle="_i2" id="I2"><gender>F</gender><name type="Birth Name"><first>Léonie</first><surname>Pagès</surname></name><eventref hlink="_e3" role="Primary"/><parentin hlink="_f1"/></person>
+<person handle="_i3" id="I3"><gender>M</gender><name type="Birth Name"><first>Augustin</first><surname>Vernhet</surname></name><eventref hlink="_e5" role="Primary"/><childof hlink="_f1"/></person>
+</people>
+<families>
+<family handle="_f1" id="F1"><rel type="Married"/><father hlink="_i1"/><mother hlink="_i2"/><eventref hlink="_e4" role="Family"/><childref hlink="_i3"/></family>
+</families>
+<places>
+<placeobj handle="_p1" id="P1" type="City"><pname value="Florac"/><coord long="3.594" lat="44.326"/><placeref hlink="_p3"/></placeobj>
+<placeobj handle="_p2" id="P2" type="City"><pname value="Alès"/><coord long="E4°4'52&quot;" lat="N44°7'30&quot;"/><placeref hlink="_p4"/></placeobj>
+<placeobj handle="_p3" id="P3" type="Department"><pname value="Lozère"/><placeref hlink="_p5"/></placeobj>
+<placeobj handle="_p4" id="P4" type="Department"><pname value="Gard"/><placeref hlink="_p5"/></placeobj>
+<placeobj handle="_p5" id="P5" type="Country"><pname value="France"/></placeobj>
+</places>
+</database>`;
+const tar = (name, data) => { const h = Buffer.alloc(512); h.write(name, 0); h.write('0000644\0', 100); h.write(data.length.toString(8).padStart(11, '0') + '\0', 124); h.write('ustar', 257); return Buffer.concat([h, data, Buffer.alloc((512 - data.length % 512) % 512), Buffer.alloc(1024)]); };
+const GRAMPS = gzipSync(Buffer.from(GRAMPS_XML)), GPKG = gzipSync(tar('data.gramps', GRAMPS));
+const GW = Buffer.from(`encoding: utf-8
+gwplus
+
+fam VERNHET Baptiste 1838 #bp Florac,_Lozère,_France 1904 +1867 #mp Florac,_Lozère,_France AGULHON Victoire 1845 1899
+beg
+- h Firmin 20/1/1871 #bp Florac,_Lozère,_France 1940 #dp Alès,_Gard,_France
+end
+`);
 const BIG = execFileSync(process.execPath, [join(root, 'tools/make-big-tree.mjs'), '20000'], {maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore']});
 
 // --- a small static server for this folder; /test-tree.ged is a published fictional tree
@@ -133,12 +168,13 @@ await step('tree view: charts, moving up and down', async () => {
   await done(p, 'tree');
 });
 
-await step('files: CSV, Excel, OpenDocument, GEDCOM 7 package', async () => {
+await step('files: CSV, Excel, OpenDocument, GEDCOM 7 package, Gramps, GeneWeb', async () => {
   const p = await page('?lang=fr');
-  for (const [name, buf, n] of [['t.csv', CSV, 6], ['t.xlsx', XLSX, 2], ['t.ods', ODS, 2], ['t.gdz', GDZ, 14]]) {
+  for (const [name, buf, n] of [['t.csv', CSV, 6], ['t.xlsx', XLSX, 2], ['t.ods', ODS, 2], ['t.gdz', GDZ, 14], ['t.gramps', GRAMPS, 3], ['t.gpkg', GPKG, 3], ['t.xml', Buffer.from(GRAMPS_XML), 3], ['t.gw', GW, 3]]) {
     await p.setInputFiles('#file', {name, mimeType: 'application/octet-stream', buffer: buf});
     await p.waitForFunction(f => S.fileName === f, name);
     check(await p.evaluate(() => S.persons.size) === n, name + ': wrong number of people');
+    if (/gramps|gpkg|xml/.test(name)) check(await p.evaluate(() => { const Q = S.places.get('Alès, Gard, France'); return Q && Q.q === 'gedcom' && Math.abs(Q.lat - 44.125) < 1e-3 && [...S.persons.values()].some(p => p.name === 'Augustin VERNHET' && p.b === 1902); }), name + ': places, coordinates or dates not read');
   }
   await done(p, 'files');
 });
