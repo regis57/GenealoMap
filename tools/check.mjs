@@ -68,5 +68,17 @@ try {
   for (const cc of idx) if (!data.includes(`gaz/${cc}.json`)) errors.push(`gaz/index.json lists ${cc} but gaz/${cc}.json is missing`);
 } catch (e) { errors.push('gaz/index.json is missing or invalid'); }
 
+// 5. Offline copy (optional files): sw.js stays within this folder, knows the same snapshot years, and the manifest and icons exist.
+if (existsSync(new URL('../sw.js', import.meta.url))) {
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  if (/https?:\/\//.test(sw)) errors.push('sw.js must not name any address: it only serves files of this folder');
+  if (/importScripts|eval\s*\(|new Function/.test(sw)) errors.push('sw.js must not load or build code');
+  const swYears = (/const HIST = \[([\d, ]+)\]/.exec(sw) || [])[1], pageYears = (/const HIST=\[([\d,]+)\]/.exec(html) || [])[1];
+  if (!swYears || swYears.replace(/ /g, '') !== pageYears) errors.push('HIST in sw.js differs from HIST in index.html');
+  if (!csp || !/worker-src 'self'(;|$)/.test(csp[1]) || !/manifest-src 'self'(;|$)/.test(csp[1])) errors.push("policy must allow worker-src 'self' and manifest-src 'self', and nothing more");
+  try { const m = JSON.parse(readFileSync(new URL('../app/manifest.webmanifest', import.meta.url), 'utf8')); for (const i of m.icons) if (!existsSync(new URL('../app/' + i.src, import.meta.url))) errors.push('app/' + i.src + ' is missing'); }
+  catch (e) { errors.push('app/manifest.webmanifest is missing or invalid'); }
+}
+
 if (errors.length) { console.error(errors.map(e => '✗ ' + e).join('\n')); process.exit(1); }
 console.log(`index.html OK (${Math.round(html.length / 1024)} KB, script sha256-${hash})`);

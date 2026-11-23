@@ -22,6 +22,7 @@ Everything runs in the browser. The family file is never uploaded.
 - **Shareable view**: save the map as an image or record the playback as a short video. People presumed living are left out by default (a tick box), and the picture says so.
 - **Keyboard and screen readers**: the map can be moved, zoomed and browsed place by place from the keyboard, and a text version lists what the animation shows.
 - **Light or dark**: follows the device, or choose in the settings.
+- **Works offline, installs like an app**: after a first visit the page and its maps are kept in the browser and open without a connection; Chrome, Edge and Android offer to install it (Settings > Offline > Install the app), iPhone and iPad through Share > Add to Home Screen. Your tree is never part of that copy.
 - **Hamlets and vanished villages**: a finer gazetteer for fifteen countries, fetched country by country only when a tree needs it.
 - **Large trees**: playback stays smooth with tens of thousands of people (measured on fictional trees of 20,000 to 60,000 people). On such trees the year view lists a few people per place, with the rest one click away, and kinship titles appear when playback pauses.
 - **Works from the file alone**: tested on a tree of 12 generations and about 400 people.
@@ -44,9 +45,11 @@ world.json    country outlines
 gaz.json      world gazetteer used to locate places without coordinates
 ```
 
-Two folders are optional; the page works without them and loads from them only what a tree needs:
+Some files are optional; the page works without them and loads from them only what a tree needs:
 
 ```
+sw.js         offline copy: keeps the page and its maps in the browser so it opens without a connection
+app/          manifest and icons, so the page can be installed like an app on a phone or computer
 hist/         borders of the time, one file per reference date, and names.json (GPL-3.0 data, see hist/README.md)
 gaz/          finer gazetteer by country: hamlets and vanished villages (see below)
 ```
@@ -135,12 +138,11 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files, offline use and installation.
 
 Next, for people who use it:
 
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
-- **Use without a connection**: install the page on a phone or computer and keep it working offline.
 
 Next, for quality:
 
