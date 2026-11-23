@@ -23,7 +23,7 @@ Everything runs in the browser. The family file is never uploaded.
 - **Keyboard and screen readers**: the map can be moved, zoomed and browsed place by place from the keyboard, and a text version lists what the animation shows.
 - **Light or dark**: follows the device, or choose in the settings.
 - **Works offline, installs like an app**: after a first visit the page and its maps are kept in the browser and open without a connection; Chrome, Edge and Android offer to install it (Settings > Offline > Install the app), iPhone and iPad through Share > Add to Home Screen. Your tree is never part of that copy.
-- **Hamlets and vanished villages**: a finer gazetteer for fifteen countries, fetched country by country only when a tree needs it.
+- **Hamlets, vanished villages and old names**: a finer gazetteer for 42 countries, with old and revolutionary-era names and a loose match for old spellings, fetched country by country only when a tree needs it.
 - **Large trees**: playback stays smooth with tens of thousands of people (measured on fictional trees of 20,000 to 60,000 people). On such trees the year view lists a few people per place, with the rest one click away, and kinship titles appear when playback pauses.
 - **Works from the file alone**: tested on a tree of 12 generations and about 400 people.
 
@@ -92,13 +92,21 @@ If you change the script, run `node tools/check.mjs --fix` so the security polic
 
 ### Finer gazetteer
 
-`gaz.json` knows towns above about 1,000 inhabitants. Hamlets, small villages and places that no longer exist are in one file per country in `gaz/`. Fifteen countries are provided: Austria, Belgium, Canada, Czechia, France, Germany, Ireland, Italy, Luxembourg, the Netherlands, Poland, Portugal, Spain, Switzerland and the United Kingdom (14 MB in all, 0.02 to 2.6 MB each). To add or refresh a country from GeoNames:
+`gaz.json` knows towns above about 1,000 inhabitants. Hamlets, small villages and places that no longer exist are in one file per country in `gaz/`. 42 countries are provided (47 MB in all, 0.03 to 11 MB each, smaller once compressed by the server):
+
+- Europe: Austria, Belarus, Belgium, Croatia, Czechia, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Ireland, Italy, Latvia, Lithuania, Luxembourg, the Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland, Ukraine, the United Kingdom;
+- countries of emigration: Argentina, Australia, Brazil, Canada, Chile, Mexico, New Zealand, South Africa, the United States, Uruguay;
+- North Africa: Algeria, Morocco, Tunisia.
+
+Each place carries its **old names** when GeoNames knows them: names in the languages of old records (German, Latin, Occitan, Breton, Alsatian, ...), names flagged historic, and the names French communes bore in 1793-1794 ("Yèvre-la-Patriote" for Yèvre-le-Châtel); big towns get their old names too ("Diedenhofen" for Thionville). A place still not found is tried with a loose spelling - doubled letters, y/i, ph/f, silent final letters ("Mallroy" for Malroy, "Mets" for Metz) - inside its country only and near the other places of the same region; such a match is always flagged "approximate".
+
+To add or refresh a country from GeoNames:
 
 ```
-node tools/build-gaz.mjs US AR
+node tools/build-gaz.mjs RU JP
 ```
 
-This writes `gaz/US.json`, ... and updates `gaz/index.json`. A visitor's browser fetches a country file only when the tree has places in that country that the main gazetteer could not find. When several hamlets share a name and nothing in the tree tells them apart, the position stays flagged "approximate".
+This writes `gaz/RU.json`, ... and updates `gaz/index.json`. A visitor's browser fetches a country file only when the tree has places in that country that the main gazetteer could not find. When several hamlets share a name and nothing in the tree tells them apart, the position stays flagged "approximate".
 
 `index.html` currently contains `<meta name="robots" content="noindex,nofollow">` because the project is in test; remove that line when you want search engines to list your copy.
 
@@ -138,7 +146,7 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files, offline use and installation.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files, offline use and installation, finer gazetteer for 42 countries with old names and spellings.
 
 Next, for people who use it:
 
@@ -148,5 +156,5 @@ Next, for quality:
 
 - **Review of the newer languages** by native speakers, Luxembourgish first.
 - **Historical borders**: more reference dates, regions inside states (provinces, Alsace-Lorraine, ...), and the smaller former states still named as the source writes them.
-- **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
+- **Smaller places**: more countries (Russia, Japan, ...) when trees need them.
 - **End of the test phase**: remove `noindex` once the above has settled.

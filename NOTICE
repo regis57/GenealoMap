@@ -17,7 +17,8 @@ Third-party data shipped with this project:
               via the all-the-cities package.
 
   gaz/*.json  Finer gazetteer by country, built with tools/build-gaz.mjs from
-              GeoNames country files, Creative Commons Attribution 4.0.
+              GeoNames country files and alternate names,
+              Creative Commons Attribution 4.0.
 
 Optional data under its own licence, read by the program but not part of it:
 

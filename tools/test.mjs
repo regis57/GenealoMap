@@ -31,7 +31,7 @@ function sandbox(search) {
   ctx.globalThis = ctx;
   el('#anon').checked = false; el('#tint').value = ''; el('#route').value = 'person'; el('#tpl').value = ''; el('#speed').value = '6'; el('#speed').options = [];
   el('#follow').checked = false; el('#lines').checked = false; el('#shLiving').checked = true;
-  vm.runInNewContext(script + '\n;globalThis.T={S,gwToGed,degOf,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
+  vm.runInNewContext(script + '\n;globalThis.T={S,loose,gazAdd,resolvePlaces,gwToGed,degOf,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
   return ctx.T;
 }
 
@@ -317,6 +317,18 @@ eq(T.S.persons.size, 6, 'GeneWeb: six people'); eq(T.S.fams.size, 2, 'GeneWeb: t
 T.setLang('fr'); eq(T.kin(byName('Firmin VERNHET'), byName('Jean VERNHET')).label, 'grand-père', 'GeneWeb: grandfather link read through two families');
 eq(T.kin(byName('Firmin VERNHET'), byName('Zélie VERNHET')).label, 'tante', 'GeneWeb: aunt (child listed between beg and end)');
 ok(Math.abs(T.degOf('N44°7\'30"') - 44.125) < 1e-6 && Math.abs(T.degOf('W73.588') + 73.588) < 1e-9 && Math.abs(T.degOf('-3,5') + 3.5) < 1e-9, 'coordinates in degrees-minutes-seconds and decimals');
+
+// old or faulty spellings of places: matched loosely, inside the country only, and always flagged approximate
+eq(T.loose('Mallroy'), T.loose('Malroy'), 'loose spelling: doubled letters and y/i'); eq(T.loose('Mets'), T.loose('Metz'), 'loose spelling: silent final letters');
+eq(T.loose('Saint-Julien'), T.loose('St Julien'), 'loose spelling: saint / st'); ok(T.loose('Metz') !== T.loose('Nancy'), 'loose spelling keeps different places apart');
+T.S.gaz = [['Malroy', 'FR', 49.17, 6.21, 500, ''], ['Thionville', 'FR', 49.36, 6.16, 40000, 'Diedenhofen'], ['Malroy', 'BE', 50.6, 4.4, 300, '']];
+T.S.gazIndex = new Map(); T.S.gazGrid = new Map(); T.S.gazLoose = new Map(); T.gazAdd(0);
+T.loadGed('0 HEAD\n0 @A@ INDI\n1 NAME Ann /Test/\n1 BIRT\n2 DATE 1850\n2 PLAC Mallroy, Moselle, France\n1 DEAT\n2 DATE 1900\n2 PLAC Diedenhofen, Moselle, France\n0 TRLR', 'loose', false);
+T.resolvePlaces();
+const Qm = T.S.places.get('Mallroy, Moselle, France'), Qd = T.S.places.get('Diedenhofen, Moselle, France');
+ok(Qm && Qm.q === 'approx' && Math.abs(Qm.lat - 49.17) < .01, 'an old spelling is placed, flagged approximate, in its own country');
+ok(Qd && Qd.q === 'exact' && Math.abs(Qd.lat - 49.36) < .01, 'an old name listed in the gazetteer is placed exactly');
+T.S.gaz = null;
 
 // no reference person: no title, neutral colours, and a tree of everybody alive that year
 T.loadGed(T.SAMPLE, 'sample', true); T.S.ref = null;
