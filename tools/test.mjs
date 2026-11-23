@@ -31,7 +31,7 @@ function sandbox(search) {
   ctx.globalThis = ctx;
   el('#anon').checked = false; el('#tint').value = ''; el('#route').value = 'person'; el('#tpl').value = ''; el('#speed').value = '6'; el('#speed').options = [];
   el('#follow').checked = false; el('#lines').checked = false; el('#shLiving').checked = true;
-  vm.runInNewContext(script + '\n;globalThis.T={S,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
+  vm.runInNewContext(script + '\n;globalThis.T={S,gwToGed,degOf,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
   return ctx.T;
 }
 
@@ -285,6 +285,39 @@ ok(P2.P('@I1@').hid === true && !P2.P('@I7@').hid, 'published tree: people presu
 ok(!P2.yearData(2000).living.some(p => p.hid), 'published tree: hidden people are not in the year view');
 ok(![...P2.S.events.values()].flat().some(e => e.p === '@I1@'), 'published tree: no event of a hidden person in the text version');
 ok(!/Camille/.test(P2.titleOf('@I2@').text), 'published tree: the name of a hidden reference person is not used in titles');
+// GeneWeb file (fictional Vernhet family): people, families, places, notes and events read
+const GW = `encoding: utf-8
+gwplus
+
+fam VERNHET Jean ~1802 #bp Florac,_Lozère,_France 1866 #dp Florac,_Lozère,_France +1836 #mp Florac,_Lozère,_France COMBES Marguerite 1809 #bp Mende,_Lozère,_France 1871 #dp Florac,_Lozère,_France
+beg
+- h Baptiste 1838 #bp Florac,_Lozère,_France 1904 #dp Florac,_Lozère,_France
+- f Zélie 1841 #bp Florac,_Lozère,_France 1920 #dp Mende,_Lozère,_France
+end
+
+fam VERNHET Baptiste +1867 #mp Florac,_Lozère,_France AGULHON Victoire 1845 1899
+beg
+- h Firmin 20/1/1871 #bp Florac,_Lozère,_France #occu Mineur 1940 #dp Alès,_Gard,_France
+end
+
+notes VERNHET Firmin
+beg
+Mineur à Alès.
+end notes
+
+pevt VERNHET Firmin
+#resi 1898 #p Alès,_Gard,_France
+end pevt
+`;
+const gw = T.gwToGed(GW);
+ok(/1 NAME Firmin \/VERNHET\//.test(gw) && /2 DATE 20 JAN 1871/.test(gw) && /2 DATE ABT 1802/.test(gw) && /1 RESI\n2 DATE 1898\n2 PLAC Alès, Gard, France/.test(gw) && /1 NOTE Mineur à Alès\./.test(gw) && /1 OCCU Mineur/.test(gw), 'GeneWeb: people, dates, places, notes and events');
+T.loadGed(gw, 'test.gw', false);
+const byName = n => [...T.S.persons.values()].find(p => p.name === n).id;
+eq(T.S.persons.size, 6, 'GeneWeb: six people'); eq(T.S.fams.size, 2, 'GeneWeb: two families');
+T.setLang('fr'); eq(T.kin(byName('Firmin VERNHET'), byName('Jean VERNHET')).label, 'grand-père', 'GeneWeb: grandfather link read through two families');
+eq(T.kin(byName('Firmin VERNHET'), byName('Zélie VERNHET')).label, 'tante', 'GeneWeb: aunt (child listed between beg and end)');
+ok(Math.abs(T.degOf('N44°7\'30"') - 44.125) < 1e-6 && Math.abs(T.degOf('W73.588') + 73.588) < 1e-9 && Math.abs(T.degOf('-3,5') + 3.5) < 1e-9, 'coordinates in degrees-minutes-seconds and decimals');
+
 // no reference person: no title, neutral colours, and a tree of everybody alive that year
 T.loadGed(T.SAMPLE, 'sample', true); T.S.ref = null;
 eq(T.titleOf('@I4@').text, '', 'no reference: no kinship title'); eq(T.titleOf('@I4@').cat, 'ally', 'no reference: neutral category');

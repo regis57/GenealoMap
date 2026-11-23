@@ -28,7 +28,7 @@ Everything runs in the browser. The family file is never uploaded.
 
 ## Use it
 
-1. Export your tree as **GEDCOM** (`.ged`, or the GEDCOM 7 package `.gdz`) from your genealogy software or website (Filae, Geneanet, Ancestry, MyHeritage, Heredis, Gramps, ...).
+1. Export your tree as **GEDCOM** (`.ged`, or the GEDCOM 7 package `.gdz`) from your genealogy software or website (Filae, Geneanet, Ancestry, MyHeritage, Heredis, Gramps, ...). Gramps files (`.gramps`, `.gpkg`, Gramps XML) and GeneWeb files (`.gw`) are also read directly.
 2. Open the page and click **Open a file** (or drop the file on the page).
 3. Pick a reference person with the search box, then press play.
 
@@ -135,12 +135,11 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change, hourglass and fan charts, printing, Gramps and GeneWeb files.
 
 Next, for people who use it:
 
 - **Per-person links** to online trees (Filae, Geneanet, ...) without editing the file by hand.
-- **More input formats**: Gramps XML and GeneWeb (`.gw`) files.
 - **Use without a connection**: install the page on a phone or computer and keep it working offline.
 
 Next, for quality:

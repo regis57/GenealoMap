@@ -1,6 +1,6 @@
 # Input formats
 
-GenealoMap reads one file, in the browser. Two families of formats are accepted: GEDCOM, and a table of people.
+GenealoMap reads one file, in the browser. Three families of formats are accepted: GEDCOM, the files of Gramps and GeneWeb, and a table of people.
 
 ## 1. GEDCOM (recommended)
 
@@ -52,5 +52,13 @@ Older `.xls` files are not read: save them as `.xlsx`.
 | `notes` | | free text |
 
 French column names are also understood (`prenom`, `nom`, `sexe`, `pere_id`, `mere_id`, ...), and the usual words for given name, surname and sex in German, Italian, Spanish, Dutch and Portuguese. The table is converted to GEDCOM inside the browser; nothing is uploaded.
+
+## 3. Gramps and GeneWeb
+
+Both are converted to GEDCOM inside the browser, then read as above.
+
+**Gramps**: use *Family Trees > Export > Gramps XML* (`.gramps`, compressed), or a *Gramps package* (`.gpkg`, which also holds media: only the tree inside is read), or an uncompressed Gramps XML file (`.xml`). Read: people (first name, main surname, gender), families, events where the person is the main participant (birth, death, baptism, burial, residence, occupation, census, emigration, marriage, divorce and the other usual ones; others become a plain event with their type), dates (exact, about, before, after, estimated or calculated, ranges and spans), places with their enclosing places (`Florac, Lozère, France`) and coordinates (decimal or degrees-minutes-seconds), notes and the first web address of each person.
+
+**GeneWeb**: the `.gw` file made by *gwu* or by the GeneWeb export. Read: `fam` lines (parents, marriage date and place, divorce), children between `beg` and `end`, birth, baptism, death and burial dates and places, occupations, `notes` blocks and the events of `pevt` / `fevt` blocks (residence, census, emigration, ...). Words joined by `_` are read with spaces. Dates `~` (about), `<` (before), `>` (after), `..` (between) are kept; dates of the French republican calendar are converted to the approximate year and marked "about". Sources, witnesses and relations are not used.
 
 A Word document or a link to a genealogy website cannot be read directly: a web page is not allowed to fetch another site on your behalf, and that restriction is what keeps your data on your device. Export a GEDCOM from the site, or fill the CSV template.
