@@ -23,6 +23,7 @@ Everything runs in the browser. The family file is never uploaded.
 - **Keyboard and screen readers**: the map can be moved, zoomed and browsed place by place from the keyboard, and a text version lists what the animation shows.
 - **Light or dark**: follows the device, or choose in the settings.
 - **Hamlets and vanished villages**: a finer gazetteer for fifteen countries, fetched country by country only when a tree needs it.
+- **Large trees**: playback stays smooth with tens of thousands of people (measured on fictional trees of 20,000 to 60,000 people). On such trees the year view lists a few people per place, with the rest one click away, and kinship titles appear when playback pauses.
 - **Works from the file alone**: tested on a tree of 12 generations and about 400 people.
 
 ## Use it
@@ -84,7 +85,7 @@ Visitors then see your tree instead of the fictional example. People presumed li
 
 Two things to know. The file itself can be downloaded by anyone who knows its name, whatever the page displays: **export it without living people** from your genealogy program before publishing. And only a file in that folder can be named - a name with a `/` or an address is ignored. The published file is not stored in the visitor's browser, and a visitor can still open their own file.
 
-If you change the script, run `node tools/check.mjs --fix` so the security policy accepts it, then `node tools/test.mjs`.
+If you change the script, run `node tools/check.mjs --fix` so the security policy accepts it, then `node tools/test.mjs` and `node tools/browser-test.mjs` (needs Playwright and Chromium).
 
 ### Finer gazetteer
 
@@ -134,7 +135,7 @@ Data: Natural Earth (public domain), GeoNames (CC BY 4.0), optional tiles © Ope
 
 Ideas under consideration, in no promised order. Suggestions are welcome in the issues.
 
-Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view.
+Done in November 2026: borders of the time, Spanish / Portuguese / Dutch / Luxembourgish, finer gazetteer by country, shareable image and video, page address options, GEDCOM 7 packages and spreadsheets, keyboard access and text version, light/dark choice, routes of people and lines, colours by line or surname, publishing one's own tree, automatic tests of kinship titles, tree view, smooth playback of large trees, browser tests on every change.
 
 Next, for people who use it:
 
@@ -148,6 +149,4 @@ Next, for quality:
 - **Review of the newer languages** by native speakers, Luxembourgish first.
 - **Historical borders**: more reference dates, regions inside states (provinces, Alsace-Lorraine, ...), and the smaller former states still named as the source writes them.
 - **Smaller places**: more countries in the finer gazetteer, and old spellings of place names.
-- **Larger trees**: keep playback smooth with tens of thousands of people.
-- **Automatic tests**: a browser run of the page on each change (the kinship table, completeness of the languages and the published-tree rules are already checked by `tools/test.mjs`).
 - **End of the test phase**: remove `noindex` once the above has settled.
