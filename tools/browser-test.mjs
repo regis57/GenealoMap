@@ -186,7 +186,8 @@ await step('tree view: whole family, choosing and letting go, charts, moving up 
 });
 
 await step('tree view on a phone and a tablet: the tree has room and opens on the oldest ancestor', async () => {
-  for (const [w, h, minH] of [[390, 664, 200], [900, 700, 300]]) {
+  // measured: 230 px here, 198 px with the fonts of the CI runner; the reported fault was 65 px
+  for (const [w, h, minH] of [[390, 664, 160], [900, 700, 300]]) {
     const p = await page('?lang=fr&view=tree&year=1936', {viewport: {width: w, height: h}, isMobile: w < 500, hasTouch: w < 500, deviceScaleFactor: 1});
     const r = await p.evaluate(() => { const T = $('#tree').getBoundingClientRect(), b = $('#treebar').getBoundingClientRect(), t = $('#time').getBoundingClientRect(), j = document.querySelector('#treebody .nd[data-p="@I12@"]').getBoundingClientRect();
       return {h: T.height, overlap: b.top < t.bottom - 1 && b.right > t.left && b.left < t.right, under: T.top >= b.bottom - 1, seen: j.top >= T.top - 1 && j.bottom <= T.bottom + 1 && j.left >= T.left - 1 && j.right <= T.right + 1}; });
