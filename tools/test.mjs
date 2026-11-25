@@ -31,7 +31,7 @@ function sandbox(search) {
   ctx.globalThis = ctx;
   el('#anon').checked = false; el('#tint').value = ''; el('#route').value = 'person'; el('#tpl').value = ''; el('#speed').value = '6'; el('#speed').options = [];
   el('#follow').checked = false; el('#lines').checked = false; el('#shLiving').checked = true;
-  vm.runInNewContext(script + '\n;globalThis.T={S,loose,gazAdd,resolvePlaces,gwToGed,degOf,treeEra,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
+  vm.runInNewContext(script + '\n;globalThis.T={S,loose,gazAdd,resolvePlaces,gwToGed,degOf,treeEra,wholeTree,treeHtml,fanSvg,tree,L,LANGS,KIN,term,kin,titleOf,blood,loadGed,SAMPLE,parseDate,csvDate,csvToGed,rowsToGed,yearData,routeOf,tint,histYear,pub,P,setLang:l=>{LANG=l;S.kinCache.clear()}};', ctx);
   return ctx.T;
 }
 
@@ -340,6 +340,20 @@ eq(eraAll(1916), '@I12@ @I10@ @I7@ @I9@ @I4@ @I14@', 'no reference, 1916: one tr
 eq(eraAll(1810), '@I12@', 'no reference, 1810: the only person alive');
 ok(eraAll(1700) === '', 'no reference, 1700: nobody, no failure');
 T.S.ref = '@I1@';
+// whole family: every line from its oldest known ancestors, whatever the year; contemporaries ticked keeps only the living and the dead who link them
+const pids = h => [...h.matchAll(/data-p="([^"]+)"/g)].map(m => m[1]).join(' ');
+const whole = (y, hl) => { T.S.year = y; return T.wholeTree(hl || null, {c: 0}); };
+eq(pids(whole(1936)), '@I12@ @I10@ @I7@ @I9@ @I4@ @I6@ @I2@ @I1@ @I14@', 'whole family: six generations from the oldest ancestor, children by birth');
+ok(whole(1700) === whole(1700) && pids(whole(1700)) === pids(whole(2020)), 'whole family is not trimmed by the year');
+{ const h = whole(1936), named = [...h.matchAll(/⚭ ([^<]+)</g)].map(m => m[1]).join(', ').split(', ');
+  eq([...T.S.persons.keys()].filter(id => !h.includes('data-p="' + id + '"') && !named.includes(T.P(id).name)).join(' '), '', 'whole family: everybody is a box or named as a spouse');
+  eq(named.length, 5, 'whole family: the five spouses with no known parents are named in the box of their husband'); }
+eq((whole(1936, '@I4@').match(/class="nd[^"]*root/g) || []).length, 1, 'whole family: the chosen person is framed once');
+ok(/class="nd[^"]*root[^"]*" data-p="@I7@"/.test(whole(1936, '@I8@')), 'whole family: a spouse with no known parents is shown by the box that names her');
+T.S.year = 1936; eq(pids(T.treeHtml('@I7@', 6, true, {c: 0}, true, true)), '@I7@ @I4@ @I6@ @I2@', 'descendants, contemporaries of 1936: Émile (died 1917) and the unborn Camille are left out');
+T.S.year = 1890; eq(pids(T.treeHtml('@I2@', 6, false, {c: 0}, true, true)), '@I2@ @I4@ @I7@ @I10@ @I11@ @I8@', 'ancestors, contemporaries of 1890: the chosen person stays, the unborn father links the living, Jean and Marguerite (dead) go');
+T.S.year = 1936; eq(pids(T.fanSvg(T.P('@I1@'), 5, {c: 0}, true)), '@I1@ @I2@ @I4@ @I5@ @I7@ @I8@', 'fan chart, contemporaries of 1936: only living ancestors and those who lead to them');
+ok(pids(T.fanSvg(T.P('@I1@'), 5, {c: 0}, false)).split(' ').length === 9, 'fan chart without contemporaries: every known ancestor');
 ok(sandbox('?file=../secret.ged').pub.name === '' && sandbox('?file=https://x.org/a.ged').pub.name === '' && sandbox('?file=tree.ged').pub.name === 'tree.ged', 'published file must be a bare name in the same folder');
 const P3 = sandbox('?file=tree.ged&living=1'); P3.pub.on = true; P3.loadGed(P3.SAMPLE, 'tree.ged', false);
 ok(!P3.P('@I1@').hid, 'published tree with living=1 shows everyone');
