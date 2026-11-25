@@ -185,6 +185,18 @@ await step('tree view: whole family, choosing and letting go, charts, moving up 
   await done(p, 'tree');
 });
 
+await step('tree view on a phone and a tablet: the tree has room and opens on the oldest ancestor', async () => {
+  for (const [w, h, minH] of [[390, 664, 200], [900, 700, 300]]) {
+    const p = await page('?lang=fr&view=tree&year=1936', {viewport: {width: w, height: h}, isMobile: w < 500, hasTouch: w < 500, deviceScaleFactor: 1});
+    const r = await p.evaluate(() => { const T = $('#tree').getBoundingClientRect(), b = $('#treebar').getBoundingClientRect(), t = $('#time').getBoundingClientRect(), j = document.querySelector('#treebody .nd[data-p="@I12@"]').getBoundingClientRect();
+      return {h: T.height, overlap: b.top < t.bottom - 1 && b.right > t.left && b.left < t.right, under: T.top >= b.bottom - 1, seen: j.top >= T.top - 1 && j.bottom <= T.bottom + 1 && j.left >= T.left - 1 && j.right <= T.right + 1}; });
+    check(r.h >= minH, w + ' px wide: the tree area is only ' + Math.round(r.h) + ' px high');
+    check(!r.overlap && r.under, w + ' px wide: the tree tools overlap the timeline or the tree');
+    check(r.seen, w + ' px wide: the oldest ancestor is not in view when the tree opens');
+    await done(p, 'tree on ' + w + ' px');
+  }
+});
+
 await step('files: CSV, Excel, OpenDocument, GEDCOM 7 package, Gramps, GeneWeb', async () => {
   const p = await page('?lang=fr');
   for (const [name, buf, n] of [['t.csv', CSV, 6], ['t.xlsx', XLSX, 2], ['t.ods', ODS, 2], ['t.gdz', GDZ, 14], ['t.gramps', GRAMPS, 3], ['t.gpkg', GPKG, 3], ['t.xml', Buffer.from(GRAMPS_XML), 3], ['t.gw', GW, 3]]) {
