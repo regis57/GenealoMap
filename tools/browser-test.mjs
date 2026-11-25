@@ -150,13 +150,30 @@ await step('reference person removed and restored', async () => {
   await done(p, 'reference');
 });
 
-await step('tree view: charts, moving up and down', async () => {
+await step('tree view: whole family, choosing and letting go, charts, moving up and down', async () => {
   const p = await page('?lang=fr&view=tree&year=1936');
+  const ids = () => p.evaluate(() => [...document.querySelectorAll('#treebody [data-p]')].map(e => e.dataset.p).join(' '));
+  const pressed = () => p.evaluate(() => $('#trMode button[aria-pressed=true]').dataset.m);
+  // the whole family by default, over the whole timeline: six generations although a reference person is set
+  check(await pressed() === 'w', 'whole family is not the default chart');
+  check(await ids() === '@I12@ @I10@ @I7@ @I9@ @I4@ @I6@ @I2@ @I1@ @I14@', 'whole family chart does not hold every line');
+  check(await p.locator('#treebody li li li li li li .nd').count() === 1, 'whole family chart does not reach the sixth generation');
+  // a click chooses a person, a second click lets them go
+  await p.click('#treebody .nd[data-p="@I4@"]');
+  check(await p.evaluate(() => S.sel.id === '@I4@' && document.querySelector('#treebody .root b').textContent === 'Augustin VERNHET'), 'a click does not choose the person');
+  await p.click('#treebody .nd[data-p="@I4@"]');
+  check(await p.evaluate(() => S.sel.type === 'year' && tree.rootId === null && !document.querySelector('#treebody .root')), 'a second click does not let the person go');
+  // contemporaries ticked: only the living of the year; unticked: everybody again
+  await p.check('#trNow'); check(await ids() === '@I7@ @I4@ @I6@ @I2@', 'contemporaries of 1936 not trimmed to the living');
+  await p.uncheck('#trNow'); check((await ids()).split(' ').length === 9, 'unticking contemporaries does not bring everybody back');
+  // a chart button pressed twice goes back to the whole family
   await p.click('#trMode button[data-m=d]'); await p.evaluate(() => selectPerson('@I4@', false));
   check(await p.evaluate(() => document.querySelector('#treebody .root b').textContent) === 'Augustin VERNHET', 'descendants chart not on the selected person');
   await p.click('#treebody .trnav button[data-p="@I7@"]');
   check(await p.evaluate(() => document.querySelector('#treebody .root b').textContent) === 'Firmin VERNHET', 'cannot move up to a parent');
-  await p.click('#trMode button[data-m=t]'); check(await p.locator('#treebody .nd').count() > 1, 'contemporaries chart is empty');
+  check(await p.locator('#treebody .tv li li li li .nd').count() === 1, 'descendants of Firmin do not reach Camille');
+  await p.click('#trMode button[data-m=d]'); check(await pressed() === 'w', 'a second click on the chart button does not go back to the whole family');
+  check(await p.evaluate(() => document.querySelector('#treebody .root b').textContent) === 'Firmin VERNHET', 'the chosen person is not framed in the whole family');
   await p.evaluate(() => selectPerson('@I4@', false)); await p.click('#trMode button[data-m=h]');
   check(await p.locator('#treebody .hg .tv.up .root').count() === 1 && await p.locator('#treebody .hgd .nd').count() >= 2, 'hourglass lacks ancestors or descendants');
   await p.selectOption('#trDir', 'h'); check(await p.locator('#treebody .hgh .th.rev .nd').count() >= 2, 'horizontal hourglass lacks descendants');
